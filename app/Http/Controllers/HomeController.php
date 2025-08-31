@@ -130,33 +130,33 @@ class HomeController extends Controller
     }
 
     public function showContactForm()
-{
-    return view('contact');
-}
+    {
+        return view('contact');
+    }
 
-public function submitContactForm(Request $request)
-{
-    $request->validate([
-        'ho_ten' => 'required|string|max:255',
-        'so_dien_thoai' => 'nullable|string|max:20',
-        'noi_dung' => 'required|string|max:255',
-    ]);
+    public function submitContactForm(Request $request)
+    {
+        $request->validate([
+            'ho_ten' => 'required|string|max:255',
+            'so_dien_thoai' => 'nullable|string|max:20',
+            'noi_dung' => 'required|string|max:255',
+        ]);
 
-    // Lưu vào CSDL
-    Contact::create([
-        'ho_ten' => $request->ho_ten,
-        'so_dien_thoai' => $request->so_dien_thoai,
-        'noi_dung' => $request->noi_dung,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
+        // Lưu vào CSDL
+        Contact::create([
+            'ho_ten' => $request->ho_ten,
+            'so_dien_thoai' => $request->so_dien_thoai,
+            'noi_dung' => $request->noi_dung,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-    // Gửi email cảm ơn
-    Mail::raw('Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi sớm nhất có thể!', function ($message) use ($request) {
-        $message->to('admin@example.com') // Thay bằng email admin
+        // Gửi email cảm ơn
+        Mail::raw('Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi sớm nhất có thể!', function ($message) use ($request) {
+            $message->to('admin@example.com') // Thay bằng email admin
                 ->subject('Liên hệ mới từ: ' . $request->ho_ten);
-    });
+        });
 
-    return redirect()->back()->with('success', 'Liên hệ của bạn đã được gửi. Cảm ơn bạn!');
-}
+        return redirect()->back()->with('success', 'Liên hệ của bạn đã được gửi. Cảm ơn bạn!');
+    }
 }
