@@ -4,7 +4,7 @@
 {{-- Thêm màu nền xám nhạt cho toàn bộ trang để tạo cảm giác hiện đại hơn --}}
 <div class="bg-gray-100 min-h-screen py-12">
     <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart="multipart/form-data">
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -59,27 +59,31 @@
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow-xl">
-                        {{-- Thay đổi màu tiêu đề con thành text-indigo-900 --}}
-                        <h2 class="text-xl font-semibold text-indigo-900 mb-5">Hình ảnh sản phẩm</h2>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg @error('hinh_anh') border-red-500 @enderror">
-                            <div class="space-y-1 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <div class="flex text-sm text-gray-600">
-                                    <label for="hinh_anh" class="relative cursor-pointer bg-white rounded-md font-medium text-teal-600 hover:text-teal-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-teal-500">
-                                        <span>Tải ảnh lên</span>
-                                        <input id="hinh_anh" name="hinh_anh" type="file" class="sr-only">
-                                    </label>
-                                    <p class="pl-1">hoặc kéo và thả vào đây</p>
-                                </div>
-                                <p class="text-xs text-gray-500">PNG, JPG, GIF lên đến 10MB</p>
-                            </div>
-                        </div>
-                        @error('hinh_anh')
-                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+    {{-- Thay đổi màu tiêu đề con thành text-indigo-900 --}}
+    <h2 class="text-xl font-semibold text-indigo-900 mb-5">Hình ảnh sản phẩm</h2>
+    
+    {{-- Thêm thẻ img để hiển thị ảnh xem trước --}}
+    <img id="image-preview" class="hidden max-h-48 w-auto mx-auto mb-4 object-contain rounded-lg">
+    
+    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg @error('hinh_anh') border-red-500 @enderror">
+        <div class="space-y-1 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="flex text-sm text-gray-600">
+                <label for="hinh_anh" class="relative cursor-pointer bg-white rounded-md font-medium text-teal-600 hover:text-teal-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-teal-500">
+                    <span>Tải ảnh lên</span>
+                    <input id="hinh_anh" name="hinh_anh" type="file" class="sr-only">
+                </label>
+                <p class="pl-1">hoặc kéo và thả vào đây</p>
+            </div>
+            <p class="text-xs text-gray-500">PNG, JPG, GIF lên đến 10MB</p>
+        </div>
+    </div>
+    @error('hinh_anh')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+    @enderror
+</div>
 
                     <div class="bg-white p-6 rounded-xl shadow-xl">
                         {{-- Thay đổi màu tiêu đề con thành text-indigo-900 --}}
@@ -209,3 +213,25 @@
     </div>
 </div>
 @endsection
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('hinh_anh');
+        const imagePreview = document.getElementById('image-preview');
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = '#';
+                imagePreview.classList.add('hidden');
+            }
+        });
+    });
+</script>
