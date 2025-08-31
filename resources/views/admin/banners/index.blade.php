@@ -100,16 +100,6 @@ class="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transi
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-2 text-sm font-medium">
                                         <div class="flex items-center space-x-2">
-                                            <a href="{{ route('admin.banners.show', $banner->id) }}"
-                                                class="rounded-lg bg-blue-500 p-1.5 text-white transition-colors duration-200 hover:bg-blue-600">
-                                                <!-- Icon mắt (Xem chi tiết) -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M2 12s5-8 10-8 10 8 10 8-5 8-10 8-10-8-10-8z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </a>
                                             <a href="{{ route('admin.banners.edit', $banner->id) }}"
                                                 class="rounded-lg bg-yellow-500 p-1.5 text-white transition-colors duration-200 hover:bg-yellow-600">
                                                 <!-- Icon bút chì (Sửa) -->

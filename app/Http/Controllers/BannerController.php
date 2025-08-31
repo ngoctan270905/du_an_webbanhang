@@ -48,12 +48,6 @@ class BannerController extends Controller
             ->with('success', 'Thêm banner thành công!');
     }
 
-    public function show($id)
-    {
-        $banner = Banner::findOrFail($id);
-        return view('admin.banners.show', compact('banner'));
-    }
-
     public function edit($id)
     {
         $banner = Banner::findOrFail($id);

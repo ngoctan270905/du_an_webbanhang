@@ -94,7 +94,6 @@ Route::prefix('admin')->middleware('auth', 'admin')->name('admin.')->group(funct
     // Route quản lý banner
     Route::prefix('banners')->name('banners.')->group(function () {
         Route::get('/', [BannerController::class, 'index'])->name('index');
-        Route::get('/{id}/show', [BannerController::class, 'show'])->name('show');
         Route::get('/create', [BannerController::class, 'create'])->name('create');
         Route::post('/store', [BannerController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [BannerController::class, 'edit'])->name('edit');
