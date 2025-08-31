@@ -212,15 +212,48 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-
-        // Xóa ảnh nếu có
-        if ($product->hinh_anh) {
-            Storage::disk('public')->delete($product->hinh_anh);
-        }
-
-        // Xóa sản phẩm
+        // Khi SoftDeletes được sử dụng, phương thức delete() sẽ tự động
+        // chỉ cập nhật cột `deleted_at`, chứ không xóa hoàn toàn.
         $product->delete();
 
-        return redirect()->route('admin.products.index')->with('success', 'Xóa sản phẩm thành công');
+        return redirect()->route('admin.products.index')->with('success', 'Xóa sản phẩm thành công!');
+    }
+
+    /**
+     * Hiển thị danh sách sản phẩm đã xóa mềm.
+     */
+   public function trashed()
+    {
+        $trashedProducts = Product::onlyTrashed()->paginate(10);
+        // Lấy tất cả danh mục để hiển thị trong bộ lọc
+        $categories = Category::all();
+        // Truyền cả trashedProducts và categories vào view
+        return view('admin.products.trashed', compact('trashedProducts', 'categories'));
+    }
+
+    /**
+     * Khôi phục sản phẩm đã xóa mềm.
+     */
+    public function restore($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        $product->restore();
+
+        return redirect()->route('admin.products.index')->with('success', 'Khôi phục sản phẩm thành công!');
+    }
+
+    /**
+     * Xóa sản phẩm vĩnh viễn khỏi cơ sở dữ liệu.
+     */
+    public function forceDestroy($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        // Xóa ảnh nếu có
+        if ($product->hinh_anh && Storage::disk('public')->exists($product->hinh_anh)) {
+            Storage::disk('public')->delete($product->hinh_anh);
+        }
+        $product->forceDelete();
+
+        return redirect()->route('admin.products.trashed')->with('success', 'Xóa sản phẩm vĩnh viễn thành công!');
     }
 }

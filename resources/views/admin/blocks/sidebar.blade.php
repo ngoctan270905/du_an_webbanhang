@@ -156,16 +156,6 @@
                     <span>Quản lý đánh giá</span>
                 </a>
             </li>
-            <li>
-                <a href="{{ route('admin.recycle-bin.index') }}"
-                   class="sidebar-item flex items-center space-x-2 p-2 text-sm rounded-lg transition-all duration-300 {{ request()->routeIs('admin.recycle-bin.*') ? 'bg-gray-600' : 'hover:bg-gray-600' }}">
-                    <svg class="w-4 h-4 {{ request()->routeIs('admin.recycle-bin.*') ? 'text-white' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.226-1.531L3.55 6.45a1 1 0 00-.06 1.41l.006.006a1 1 0 001.414-.06l.006-.006 7.42-7.42a1 1 0 001.226 1.53l.004-.004L12.395 2.553z" clip-rule="evenodd"></path>
-                        <path fill-rule="evenodd" d="M15.395 10.553a1 1 0 00-1.226-1.531l-7.42 7.42a1 1 0 00-.06 1.41l.006.006a1 1 0 001.414-.06l.006-.006 7.42-7.42a1 1 0 00-1.226-1.53z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span>Thùng rác</span>
-                </a>
-            </li>
         </ul>
     </nav>
     <div class="mt-auto">

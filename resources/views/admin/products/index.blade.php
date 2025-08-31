@@ -7,10 +7,16 @@
             <div class="rounded-xl bg-white p-6 shadow-md transition-all duration-300 hover:shadow-lg">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-xl font-semibold text-gray-800">Danh sách sản phẩm</h3>
-                    <a href="{{ route('admin.products.create') }}"
-                        class="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                        + Thêm sản phẩm
-                    </a>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('admin.products.trashed') }}"
+                            class="rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            Thùng rác
+                        </a>
+                        <a href="{{ route('admin.products.create') }}"
+                            class="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            + Thêm sản phẩm
+                        </a>
+                    </div>
                 </div>
 
                 <div class="space-y-4">
@@ -157,7 +163,8 @@
                                                         class="rounded-lg bg-red-500 p-1.5 text-white transition-colors duration-200 hover:bg-red-600">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3"
                                                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
                                                             <polyline points="3 6 5 6 21 6"></polyline>
                                                             <path
                                                                 d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
