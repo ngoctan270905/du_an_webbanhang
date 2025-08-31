@@ -91,17 +91,6 @@ Route::prefix('admin')->middleware('auth', 'admin')->name('admin.')->group(funct
         Route::delete('/{id}/forceDelete', [CategoryController::class, 'forceDelete'])->name('forceDelete');
     });
 
-    // Route quản lý khách hàng
-    Route::prefix('customers')->name('customers.')->group(function () {
-        Route::get('/', [CustomerController::class, 'index'])->name('index');
-        Route::get('/{id}/show', [CustomerController::class, 'show'])->name('show');
-        Route::get('/create', [CustomerController::class, 'create'])->name('create');
-        Route::post('/store', [CustomerController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [CustomerController::class, 'edit'])->name('edit');
-        Route::put('/{id}/update', [CustomerController::class, 'update'])->name('update');
-        Route::delete('/{id}/destroy', [CustomerController::class, 'destroy'])->name('destroy');
-    });
-
     // Route quản lý banner
     Route::prefix('banners')->name('banners.')->group(function () {
         Route::get('/', [BannerController::class, 'index'])->name('index');
