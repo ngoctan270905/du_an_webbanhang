@@ -82,19 +82,65 @@ class CategoryController extends Controller
             ->with('success', 'Cập nhật danh mục thành công!');
     }
 
+    /**
+     * Thực hiện xóa mềm một danh mục.
+     */
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-
-        // Kiểm tra xem danh mục có chứa sản phẩm không
-        if ($category->product()->count() > 0) {
-            return redirect()->route('admin.categories.index')
-                ->with('error', 'Không thể xóa danh mục này vì đã có sản phẩm liên quan!');
-        }
-
         $category->delete();
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Xóa danh mục thành công!');
+            ->with('success', 'Danh mục đã được chuyển vào thùng rác!');
+    }
+
+    // app/Http/Controllers/CategoryController.php
+
+    // ... (các phương thức khác không thay đổi)
+
+    /**
+     * Hiển thị danh sách các danh mục đã xóa mềm (thùng rác).
+     */
+    public function trashed(Request $request)
+    {
+        // Bắt đầu một truy vấn chỉ lấy các bản ghi đã bị xóa mềm
+        $query = Category::onlyTrashed();
+
+        // Áp dụng các bộ lọc nếu có
+        if ($request->filled('ten_danh_muc')) {
+            $query->where('ten_danh_muc', 'LIKE', '%' . $request->ten_danh_muc . '%');
+        }
+
+        if ($request->filled('trang_thai')) {
+            $query->where('trang_thai', $request->trang_thai);
+        }
+
+        $trashedCategories = $query->paginate(10);
+
+        return view('admin.categories.trashed', compact('trashedCategories'));
+    }
+
+    /**
+     * Khôi phục một danh mục đã xóa mềm.
+     */
+    public function restore($id)
+    {
+        $category = Category::withTrashed()->findOrFail($id);
+        $category->restore();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Khôi phục danh mục thành công!');
+    }
+
+    /**
+     * Xóa vĩnh viễn một danh mục.
+     */
+    public function forceDelete($id)
+    {
+        $category = Category::withTrashed()->findOrFail($id);
+        $category->forceDelete();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Đã xóa vĩnh viễn danh mục!');
     }
 }

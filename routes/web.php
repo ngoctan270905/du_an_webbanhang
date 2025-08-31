@@ -84,6 +84,11 @@ Route::prefix('admin')->middleware('auth', 'admin')->name('admin.')->group(funct
         Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
         Route::put('/{id}/update', [CategoryController::class, 'update'])->name('update');
         Route::delete('/{id}/destroy', [CategoryController::class, 'destroy'])->name('destroy');
+        // Route mới cho trang thùng rác
+        Route::get('/trashed', [CategoryController::class, 'trashed'])->name('trashed');
+        // Thêm các route cho xóa mềm, khôi phục và xóa vĩnh viễn
+        Route::post('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/forceDelete', [CategoryController::class, 'forceDelete'])->name('forceDelete');
     });
 
     // Route quản lý khách hàng
@@ -141,4 +146,3 @@ Route::prefix('admin')->middleware('auth', 'admin')->name('admin.')->group(funct
         Route::delete('/{id}/destroy', [ReviewController::class, 'destroy'])->name('destroy');
     });
 });
-

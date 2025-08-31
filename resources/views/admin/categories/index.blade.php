@@ -12,6 +12,10 @@
                             class="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                             + Thêm danh mục
                         </a>
+                        <a href="{{ route('admin.categories.trashed') }}"
+                            class="rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            Thùng rác
+                        </a>
                     </div>
                 </div>
 
@@ -118,7 +122,7 @@
                                                     @method('DELETE')
                                                     <button type="submit"
                                                         class="rounded-lg bg-red-500 p-1.5 text-white transition-colors duration-200 hover:bg-red-600"
-                                                        {{-- Thay thế `confirm()` bằng một modal tùy chỉnh --}} {{-- onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')" --}}>
+                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
                                                         <!-- Icon thùng rác (Xóa) -->
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3"
                                                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
