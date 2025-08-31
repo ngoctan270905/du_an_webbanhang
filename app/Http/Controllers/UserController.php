@@ -20,6 +20,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
+        $query->latest();
         $users = $query->paginate(10);
         return view('admin.users.index', compact('users'));
     }
