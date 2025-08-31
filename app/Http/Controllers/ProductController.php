@@ -14,7 +14,7 @@ class ProductController extends Controller
         // Lấy danh sách sản phẩm có phân trang và kèm theo danh mục
         $query = Product::with('category');
         if ($request->filled('ma_san_pham')) {
-            $query->where('ma_san_pham', 'LIKE', '%' . $request->ten_san_pham . '%');
+            $query->where('ma_san_pham', 'LIKE', '%' . $request->ma_san_pham . '%');
         }
         if ($request->filled('ten_san_pham')) {
             $query->where('ten_san_pham', 'LIKE', '%' . $request->ten_san_pham . '%');
