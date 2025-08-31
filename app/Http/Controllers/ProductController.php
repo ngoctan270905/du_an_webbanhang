@@ -137,8 +137,9 @@ class ProductController extends Controller
         // Tìm sản phẩm cần cập nhật
         $product = Product::findOrFail($id);
 
-        // Validate dữ liệu đầu vào
+        // Validate dữ liệu đầu vào với thông báo tiếng Việt
         $dataValidate = $request->validate([
+            // unique rule cần thêm ID của sản phẩm để bỏ qua chính nó
             'ma_san_pham' => 'required|string|max:20|unique:products,ma_san_pham,' . $id,
             'ten_san_pham' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
@@ -149,12 +150,50 @@ class ProductController extends Controller
             'mo_ta' => 'nullable|string',
             'trang_thai' => 'required|boolean',
             'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+        ], [
+            'ma_san_pham.required' => 'Mã sản phẩm không được để trống.',
+            'ma_san_pham.string' => 'Mã sản phẩm phải là chuỗi ký tự.',
+            'ma_san_pham.max' => 'Mã sản phẩm không được vượt quá 20 ký tự.',
+            'ma_san_pham.unique' => 'Mã sản phẩm đã tồn tại.',
+
+            'ten_san_pham.required' => 'Tên sản phẩm không được để trống.',
+            'ten_san_pham.string' => 'Tên sản phẩm phải là chuỗi ký tự.',
+            'ten_san_pham.max' => 'Tên sản phẩm không được vượt quá 255 ký tự.',
+
+            'category_id.required' => 'Bạn phải chọn một danh mục.',
+            'category_id.exists' => 'Danh mục đã chọn không hợp lệ.',
+
+            'gia.required' => 'Giá bán không được để trống.',
+            'gia.numeric' => 'Giá bán phải là một số.',
+            'gia.min' => 'Giá bán không được nhỏ hơn 0.',
+            'gia.max' => 'Giá bán quá lớn.',
+
+            'gia_khuyen_mai.required' => 'Giá khuyến mãi không được để trống.',
+            'gia_khuyen_mai.numeric' => 'Giá khuyến mãi phải là một số.',
+            'gia_khuyen_mai.min' => 'Giá khuyến mãi không được nhỏ hơn 0.',
+            'gia_khuyen_mai.lte' => 'Giá khuyến mãi không được lớn hơn giá bán.',
+
+            'so_luong.required' => 'Số lượng không được để trống.',
+            'so_luong.integer' => 'Số lượng phải là số nguyên.',
+            'so_luong.min' => 'Số lượng không được nhỏ hơn 1.',
+
+            'ngay_nhap.required' => 'Ngày nhập không được để trống.',
+            'ngay_nhap.date' => 'Ngày nhập không đúng định dạng.',
+
+            'mo_ta.string' => 'Mô tả phải là chuỗi ký tự.',
+
+            'trang_thai.required' => 'Trạng thái không được để trống.',
+            'trang_thai.boolean' => 'Trạng thái không hợp lệ.',
+
+            'hinh_anh.image' => 'File tải lên phải là hình ảnh.',
+            'hinh_anh.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp.',
+            'hinh_anh.max' => 'Dung lượng hình ảnh không được vượt quá 2048 KB.'
         ]);
 
         // Xử lý hình ảnh nếu có
         if ($request->hasFile('hinh_anh')) {
             // Xóa ảnh cũ nếu có
-            if ($product->hinh_anh) {
+            if ($product->hinh_anh && Storage::disk('public')->exists($product->hinh_anh)) {
                 Storage::disk('public')->delete($product->hinh_anh);
             }
 
