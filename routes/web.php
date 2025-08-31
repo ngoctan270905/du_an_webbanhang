@@ -116,11 +116,6 @@ Route::prefix('admin')->middleware('auth', 'admin')->name('admin.')->group(funct
     Route::prefix('contacts')->name('contacts.')->group(function () {
         Route::get('/', [ContactController::class, 'index'])->name('index');
         Route::get('/{id}/show', [ContactController::class, 'show'])->name('show');
-        Route::get('/create', [ContactController::class, 'create'])->name('create');
-        Route::post('/store', [ContactController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [ContactController::class, 'edit'])->name('edit');
-        Route::put('/{id}/update', [ContactController::class, 'update'])->name('update');
-        Route::delete('/{id}/destroy', [ContactController::class, 'destroy'])->name('destroy');
     });
 
     // Route quản lý đánh giá
