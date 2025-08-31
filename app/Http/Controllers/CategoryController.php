@@ -10,11 +10,11 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $query = Category::query();
-        
+
         if ($request->filled('ten_danh_muc')) {
             $query->where('ten_danh_muc', 'LIKE', '%' . $request->ten_danh_muc . '%');
         }
-        
+
         if ($request->filled('trang_thai')) {
             $query->where('trang_thai', $request->trang_thai);
         }
@@ -33,6 +33,13 @@ class CategoryController extends Controller
         $dataValidate = $request->validate([
             'ten_danh_muc' => 'required|string|max:20|unique:categories,ten_danh_muc',
             'trang_thai' => 'required|boolean',
+        ], [
+            'ten_danh_muc.required' => 'Tên danh mục không được để trống.',
+            'ten_danh_muc.string' => 'Tên danh mục phải là chuỗi ký tự.',
+            'ten_danh_muc.max' => 'Tên danh mục không được vượt quá 20 ký tự.',
+            'ten_danh_muc.unique' => 'Tên danh mục đã tồn tại. Vui lòng chọn tên khác.',
+            'trang_thai.required' => 'Trạng thái không được để trống.',
+            'trang_thai.boolean' => 'Trạng thái không hợp lệ.',
         ]);
 
         Category::create($dataValidate);
@@ -60,6 +67,13 @@ class CategoryController extends Controller
         $dataValidate = $request->validate([
             'ten_danh_muc' => 'required|string|max:20|unique:categories,ten_danh_muc,' . $id,
             'trang_thai' => 'required|boolean',
+        ], [
+            'ten_danh_muc.required' => 'Tên danh mục không được để trống.',
+            'ten_danh_muc.string' => 'Tên danh mục phải là chuỗi ký tự.',
+            'ten_danh_muc.max' => 'Tên danh mục không được vượt quá 20 ký tự.',
+            'ten_danh_muc.unique' => 'Tên danh mục đã tồn tại. Vui lòng chọn tên khác.',
+            'trang_thai.required' => 'Trạng thái không được để trống.',
+            'trang_thai.boolean' => 'Trạng thái không hợp lệ.',
         ]);
 
         $category->update($dataValidate);
@@ -71,7 +85,7 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-        
+
         // Kiểm tra xem danh mục có chứa sản phẩm không
         if ($category->product()->count() > 0) {
             return redirect()->route('admin.categories.index')
