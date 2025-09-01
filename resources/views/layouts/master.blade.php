@@ -193,7 +193,6 @@
         .featured-books p {
             text-align: center;
             color: #6B7280;
-            margin-bottom: 2.5rem;
         }
 
         .product-card {
@@ -219,7 +218,6 @@
         }
 
         .product-card .card-content {
-            padding: 1rem;
             text-align: center;
         }
 

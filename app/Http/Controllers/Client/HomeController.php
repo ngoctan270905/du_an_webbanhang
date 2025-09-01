@@ -16,19 +16,12 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Lấy 8 sản phẩm mới nhất
-        $newProducts = Product::orderBy('created_at', 'desc')->take(8)->get();
+        $featuredBooks = \App\Models\Product::where('trang_thai', 1)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
 
-        // Lấy 4 bài viết mới nhất
-        $latestPosts = Post::orderBy('created_at', 'desc')->take(4)->get();
-
-        // Lấy 10 đánh giá cao nhất
-        $topReviews = Review::orderBy('rating', 'desc')->take(10)->get();
-
-        // Lấy tất cả banner
-        $banners = Banner::all();
-
-        return view('home', compact('newProducts', 'latestPosts', 'topReviews', 'banners'));
+        return view('clients.home', compact('featuredBooks'));
     }
 
     public function productList(Request $request)
