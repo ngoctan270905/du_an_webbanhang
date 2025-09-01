@@ -177,7 +177,7 @@
 
         /* Featured Books Section */
         .featured-books {
-            padding: 4rem 1rem;
+            padding: 4rem 1rem 2rem;
             background: #F9FAFB;
         }
 
@@ -238,74 +238,6 @@
             font-size: 1rem;
             font-weight: 700;
             color: #8B5CF6;
-        }
-
-        /* New Releases Section */
-        .new-releases {
-            padding: 0rem 1rem;
-            background: #F9FAFB;
-
-        }
-
-        .new-releases h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: #2c3e50;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .new-releases p {
-            text-align: center;
-            color: #6B7280;
-            margin-bottom: 2.5rem;
-        }
-
-        .new-release-card {
-            background: #fff;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
-            border: 1px solid transparent;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .new-release-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            border: 1px solid #FFD700;
-        }
-
-        .new-release-card img {
-            height: 14rem;
-            object-fit: cover;
-            width: 100%;
-        }
-
-        .new-release-card .card-content {
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .new-release-card h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-
-        .new-release-card p.author {
-            color: #6B7280;
-            font-size: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .new-release-card p.price {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #FFD700;
         }
 
         /* News Section */
