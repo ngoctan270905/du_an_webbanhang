@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ten_danh_muc', 20)->unique(); // Quy định độ dài và ko được phép trùng nhau
             $table->boolean('trang_thai')->default(true); // Set giá trị mặc định
+            $table->timestamps();
             
         });
     }
