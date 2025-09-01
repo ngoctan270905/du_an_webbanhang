@@ -329,7 +329,7 @@
         footer {
             background: #1a202c;
             color: #D1D5DB;
-            padding: 3rem 1rem 2rem;
+            padding: 3rem 5.5rem 2rem;
             border-top: 2px solid #8B5CF6;
         }
 
@@ -385,7 +385,7 @@
 
         @media (min-width: 768px) {
             .hero-content h1 {
-                font-size: 5rem;
+                font-size: 4rem;
             }
 
             .news-section .grid {
@@ -396,7 +396,7 @@
 </head>
 
 <body>
-    <header class="fixed top-0 left-0 right-0 z-50 py-4 px-8 flex items-center justify-between">
+    <header class="fixed top-0 left-0 right-0 z-50 py-3 px-8 flex items-center justify-between">
         <a href="{{ route('home') }}" class="logo">BOOKSTORE</a>
         <nav class="hidden md:flex flex-1 justify-center space-x-8">
             <a href="#" class="transition-colors">VĂN HỌC</a>
