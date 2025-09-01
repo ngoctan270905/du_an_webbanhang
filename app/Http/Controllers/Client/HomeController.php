@@ -16,12 +16,17 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $featuredBooks = \App\Models\Product::where('trang_thai', 1)
+        $featuredBooks = Product::where('trang_thai', 1)
             ->inRandomOrder()
             ->take(5)
             ->get();
 
-        return view('clients.home', compact('featuredBooks'));
+        $latestBooks = Product::where('trang_thai', 1)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('clients.home', compact('featuredBooks', 'latestBooks'));
     }
 
     public function productList(Request $request)
