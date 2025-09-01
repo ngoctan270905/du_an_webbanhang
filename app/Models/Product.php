@@ -15,6 +15,9 @@ class Product extends Model
     protected $fillable = [
         'ma_san_pham',
         'ten_san_pham',
+        'author',
+        'publisher',
+        'published_year',
         'category_id',
         'hinh_anh',
         'gia',
@@ -23,11 +26,12 @@ class Product extends Model
         'ngay_nhap',
         'mo_ta',
         'trang_thai',
-
     ];
+    
     protected $dates = ['deleted_at'];
     // Tạo mối liên hệ với danh mục
-    public function category() {
+    public function category()
+    {
         return $this->belongsTo(Category::class, 'category_id');
     }
 }
