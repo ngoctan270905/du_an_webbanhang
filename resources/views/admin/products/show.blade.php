@@ -17,16 +17,14 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Product Image -->
-                <div class="md:col-span-1 flex justify-center">
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/3 flex-shrink-0">
                     <img src="{{ $product->hinh_anh ? asset('storage/' . $product->hinh_anh) : asset('images/no-image.png') }}"
                         alt="{{ $product->ten_san_pham }}"
-                        class="w-max max-w-sm h-64 object-cover rounded-xl shadow-lg border border-gray-200">
+                        class="w-full h-full object-cover rounded-xl shadow-lg border border-gray-200">
                 </div>
 
-                <!-- Product Details -->
-                <div class="md:col-span-2 space-y-6">
+                <div class="flex-grow space-y-6">
                     <div class="border-b border-gray-200 pb-4">
                         <h4 class="text-3xl font-extrabold text-gray-900">{{ $product->ten_san_pham }}</h4>
                         <p class="text-sm text-gray-500 mt-1">Mã sản phẩm: <span
@@ -55,6 +53,18 @@
                             <p class="text-lg text-gray-800">{{ $product->so_luong }}</p>
                         </div>
                         <div>
+                            <span class="text-sm font-medium text-gray-600">Tác giả:</span>
+                            <p class="text-base text-gray-800">{{ $product->author ?? 'Không có' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Nhà xuất bản:</span>
+                            <p class="text-base text-gray-800">{{ $product->publisher ?? 'Không có' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Năm xuất bản:</span>
+                            <p class="text-base text-gray-800">{{ $product->published_year ?? 'Không có' }}</p>
+                        </div>
+                        <div>
                             <span class="text-sm font-medium text-gray-600">Ngày nhập:</span>
                             <p class="text-base text-gray-800">{{ date('d/m/Y', strtotime($product->ngay_nhap)) }}</p>
                         </div>
@@ -62,7 +72,7 @@
                             <span class="text-sm font-medium text-gray-600">Trạng thái:</span>
                             <span
                                 class="inline-flex rounded-full px-2 py-1 text-xs font-semibold
-                        {{ $product->trang_thai ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $product->trang_thai ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                 {{ $product->trang_thai ? 'Còn hàng' : 'Hết hàng' }}
                             </span>
                         </div>
@@ -70,7 +80,6 @@
                 </div>
             </div>
 
-            <!-- Product Description -->
             <div class="mt-8 border-t border-gray-200 pt-6">
                 <h5 class="text-xl font-bold text-gray-800 mb-2">Mô tả sản phẩm</h5>
                 <div class="text-gray-700 leading-relaxed prose max-w-none">
@@ -78,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex items-center space-x-3 mt-8 border-t border-gray-200 pt-6">
                 <a href="{{ route('admin.products.edit', $product->id) }}"
                     class="inline-flex items-center rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">

@@ -67,6 +67,9 @@
                                     Tên SP</th>
                                 <th
                                     class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    Tác giả</th>
+                                <th
+                                    class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     Hình ảnh</th>
                                 <th
                                     class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -94,6 +97,8 @@
                                         {{ $product->ma_san_pham }}</td>
                                     <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">
                                         {{ $product->ten_san_pham }}</td>
+                                    <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">
+                                        {{ $product->author }}</td>
                                     <td class="px-3 py-2">
                                         @if ($product->hinh_anh && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->hinh_anh))
                                             <img src="{{ asset('storage/' . $product->hinh_anh) }}"

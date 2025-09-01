@@ -165,7 +165,11 @@ class ProductController extends Controller
             'ngay_nhap' => 'required|date',
             'mo_ta' => 'nullable|string',
             'trang_thai' => 'required|boolean',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            // Thêm các trường mới
+            'author' => 'required|string|max:255',
+            'publisher' => 'nullable|string|max:255',
+            'published_year' => 'nullable|integer|min:1000|max:' . date('Y'),
         ], [
             'ma_san_pham.required' => 'Mã sản phẩm không được để trống.',
             'ma_san_pham.string' => 'Mã sản phẩm phải là chuỗi ký tự.',
@@ -203,7 +207,19 @@ class ProductController extends Controller
 
             'hinh_anh.image' => 'File tải lên phải là hình ảnh.',
             'hinh_anh.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp.',
-            'hinh_anh.max' => 'Dung lượng hình ảnh không được vượt quá 2048 KB.'
+            'hinh_anh.max' => 'Dung lượng hình ảnh không được vượt quá 2048 KB.',
+
+            // Thêm thông báo lỗi cho các trường mới
+            'author.required' => 'Tên tác giả không được để trống.',
+            'author.string' => 'Tên tác giả phải là chuỗi ký tự.',
+            'author.max' => 'Tên tác giả không được vượt quá 255 ký tự.',
+
+            'publisher.string' => 'Tên nhà xuất bản phải là chuỗi ký tự.',
+            'publisher.max' => 'Tên nhà xuất bản không được vượt quá 255 ký tự.',
+
+            'published_year.integer' => 'Năm xuất bản phải là một số nguyên.',
+            'published_year.min' => 'Năm xuất bản không hợp lệ.',
+            'published_year.max' => 'Năm xuất bản không được lớn hơn năm hiện tại.',
         ]);
 
         // Xử lý hình ảnh nếu có

@@ -33,21 +33,64 @@
                                 <label for="ten_san_pham" class="block text-sm font-medium text-gray-700">Tên sản phẩm</label>
                                 <input type="text" name="ten_san_pham" id="ten_san_pham"
                                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
-                                            bg-gray-50 text-gray-900 placeholder-gray-400
-                                            focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                            sm:text-sm h-12 px-4 @error('ten_san_pham') border-red-500 @enderror"
+                                             bg-gray-50 text-gray-900 placeholder-gray-400
+                                             focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                             sm:text-sm h-12 px-4 @error('ten_san_pham') border-red-500 @enderror"
                                     value="{{ old('ten_san_pham', $product->ten_san_pham) }}">
                                 @error('ten_san_pham')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+
+                            {{-- Thêm trường Tác giả --}}
+                            <div>
+                                <label for="author" class="block text-sm font-medium text-gray-700">Tác giả</label>
+                                <input type="text" name="author" id="author"
+                                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
+                                                 bg-gray-50 text-gray-900 placeholder-gray-400
+                                                 focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                 sm:text-sm h-12 px-4 @error('author') border-red-500 @enderror"
+                                        value="{{ old('author', $product->author) }}" placeholder="Ví dụ: Nguyễn Nhật Ánh">
+                                @error('author')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Thêm trường Nhà xuất bản --}}
+                            <div>
+                                <label for="publisher" class="block text-sm font-medium text-gray-700">Nhà xuất bản</label>
+                                <input type="text" name="publisher" id="publisher"
+                                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
+                                                 bg-gray-50 text-gray-900 placeholder-gray-400
+                                                 focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                 sm:text-sm h-12 px-4 @error('publisher') border-red-500 @enderror"
+                                        value="{{ old('publisher', $product->publisher) }}" placeholder="Ví dụ: NXB Kim Đồng">
+                                @error('publisher')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Thêm trường Năm xuất bản --}}
+                            <div>
+                                <label for="published_year" class="block text-sm font-medium text-gray-700">Năm xuất bản</label>
+                                <input type="number" name="published_year" id="published_year"
+                                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
+                                                 bg-gray-50 text-gray-900 placeholder-gray-400
+                                                 focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                 sm:text-sm h-12 px-4 @error('published_year') border-red-500 @enderror"
+                                        value="{{ old('published_year', $product->published_year) }}" min="1000" max="{{ date('Y') }}" placeholder="{{ date('Y') }}">
+                                @error('published_year')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                             <div>
                                 <label for="mo_ta" class="block text-sm font-medium text-gray-700">Mô tả sản phẩm</label>
                                 <textarea id="mo_ta" name="mo_ta" rows="8"
-                                            class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
-                                                   bg-gray-50 text-gray-900 placeholder-gray-400
-                                                   focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                                   sm:text-sm p-4 @error('mo_ta') border-red-500 @enderror">{{ old('mo_ta', $product->mo_ta) }}</textarea>
+                                                 class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
+                                                                 bg-gray-50 text-gray-900 placeholder-gray-400
+                                                                 focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                                 sm:text-sm p-4 @error('mo_ta') border-red-500 @enderror">{{ old('mo_ta', $product->mo_ta) }}</textarea>
                                 @error('mo_ta')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
@@ -58,7 +101,6 @@
                     <div class="bg-white p-6 rounded-xl shadow-xl">
                         <h2 class="text-xl font-semibold text-indigo-900 mb-5">Hình ảnh sản phẩm</h2>
                         
-                        {{-- Thẻ img để hiển thị ảnh cũ và xem trước ảnh mới --}}
                         <img id="image-preview" src="{{ $product->hinh_anh ? asset('storage/' . $product->hinh_anh) : '' }}" 
                             class="{{ $product->hinh_anh ? '' : 'hidden' }} max-h-48 w-auto mx-auto mb-4 object-contain rounded-lg">
                         
@@ -90,9 +132,9 @@
                                 <div class="mt-1 relative rounded-lg shadow-sm">
                                     <input type="number" name="gia" id="gia"
                                         class="block w-full border-gray-300 rounded-lg
-                                                bg-gray-50 text-gray-900 placeholder-gray-400
-                                                focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                                sm:text-sm h-12 px-4 @error('gia') border-red-500 @enderror"
+                                                     bg-gray-50 text-gray-900 placeholder-gray-400
+                                                     focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                     sm:text-sm h-12 px-4 @error('gia') border-red-500 @enderror"
                                         value="{{ old('gia', $product->gia) }}">
                                 </div>
                                 @error('gia')
@@ -104,9 +146,9 @@
                                 <div class="mt-1 relative rounded-lg shadow-sm">
                                     <input type="number" name="gia_khuyen_mai" id="gia_khuyen_mai"
                                         class="block w-full border-gray-300 rounded-lg
-                                                bg-gray-50 text-gray-900 placeholder-gray-400
-                                                focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                                sm:text-sm h-12 px-4 @error('gia_khuyen_mai') border-red-500 @enderror"
+                                                     bg-gray-50 text-gray-900 placeholder-gray-400
+                                                     focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                     sm:text-sm h-12 px-4 @error('gia_khuyen_mai') border-red-500 @enderror"
                                         value="{{ old('gia_khuyen_mai', $product->gia_khuyen_mai) }}">
                                 </div>
                                 @error('gia_khuyen_mai')
@@ -123,9 +165,9 @@
                                 <label for="ma_san_pham" class="block text-sm font-medium text-gray-700">Mã sản phẩm (SKU)</label>
                                 <input type="text" name="ma_san_pham" id="ma_san_pham"
                                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
-                                            bg-gray-50 text-gray-900 placeholder-gray-400
-                                            focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                            sm:text-sm h-12 px-4 @error('ma_san_pham') border-red-500 @enderror"
+                                             bg-gray-50 text-gray-900 placeholder-gray-400
+                                             focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                             sm:text-sm h-12 px-4 @error('ma_san_pham') border-red-500 @enderror"
                                     value="{{ old('ma_san_pham', $product->ma_san_pham) }}">
                                 @error('ma_san_pham')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -135,9 +177,9 @@
                                 <label for="so_luong" class="block text-sm font-medium text-gray-700">Số lượng</label>
                                 <input type="number" name="so_luong" id="so_luong"
                                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
-                                            bg-gray-50 text-gray-900 placeholder-gray-400
-                                            focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                            sm:text-sm h-12 px-4 @error('so_luong') border-red-500 @enderror"
+                                             bg-gray-50 text-gray-900 placeholder-gray-400
+                                             focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                             sm:text-sm h-12 px-4 @error('so_luong') border-red-500 @enderror"
                                     value="{{ old('so_luong', $product->so_luong) }}">
                                 @error('so_luong')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -153,10 +195,10 @@
                     <div class="bg-white p-6 rounded-xl shadow-xl">
                         <h2 class="text-xl font-semibold text-indigo-900 mb-5">Trạng thái</h2>
                         <select id="trang_thai" name="trang_thai"
-                                class="mt-1 block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm
-                                        bg-gray-50 text-gray-900
-                                        focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                        sm:text-sm @error('trang_thai') border-red-500 @enderror">
+                                 class="mt-1 block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm
+                                         bg-gray-50 text-gray-900
+                                         focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                         sm:text-sm @error('trang_thai') border-red-500 @enderror">
                             <option value="1" {{ old('trang_thai', $product->trang_thai) == 1 ? 'selected' : '' }}>Còn hàng</option>
                             <option value="0" {{ old('trang_thai', $product->trang_thai) == 0 ? 'selected' : '' }}>Hết hàng</option>
                         </select>
@@ -172,9 +214,9 @@
                                 <label for="category_id" class="block text-sm font-medium text-gray-700">Danh mục sản phẩm</label>
                                 <select id="category_id" name="category_id"
                                         class="mt-1 block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm
-                                                bg-gray-50 text-gray-900
-                                                focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                                sm:text-sm @error('category_id') border-red-500 @enderror">
+                                                     bg-gray-50 text-gray-900
+                                                     focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                     sm:text-sm @error('category_id') border-red-500 @enderror">
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
                                             {{ $category->ten_danh_muc }}
@@ -188,18 +230,18 @@
                             <div>
                                 <label for="ngay_nhap" class="block text-sm font-medium text-gray-700">Ngày nhập</label>
                                 <input type="date" name="ngay_nhap" id="ngay_nhap"
-                                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
-                                            bg-gray-50 text-gray-900
-                                            focus:ring-teal-500 focus:border-teal-500 focus:bg-white
-                                            sm:text-sm h-12 px-4 @error('ngay_nhap') border-red-500 @enderror"
-                                    value="{{ old('ngay_nhap', $product->ngay_nhap) }}">
+                                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm
+                                                 bg-gray-50 text-gray-900
+                                                 focus:ring-teal-500 focus:border-teal-500 focus:bg-white
+                                                 sm:text-sm h-12 px-4 @error('ngay_nhap') border-red-500 @enderror"
+                                        value="{{ old('ngay_nhap', \Carbon\Carbon::parse($product->ngay_nhap)->format('Y-m-d')) }}">
                                 @error('ngay_nhap')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </form>
@@ -221,10 +263,11 @@
                     imagePreview.classList.remove('hidden');
                 }
                 reader.readAsDataURL(file);
-            } else if (!imagePreview.src || imagePreview.src.includes('data:image')) {
-                // Ẩn preview nếu không có ảnh mới và ảnh cũ cũng không tồn tại
-                imagePreview.classList.add('hidden');
-                imagePreview.src = '#';
+            } else {
+                // If no new file is selected, show the old image if it exists
+                if (!imagePreview.src.includes('storage')) {
+                    imagePreview.classList.add('hidden');
+                }
             }
         });
     });
