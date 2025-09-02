@@ -63,6 +63,11 @@
     </style>
 
     <div class="container mx-auto py-4 md:py-10 px-8 md:px-36">
+        @if(session('success'))
+    <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        {{ session('success') }}
+    </div>
+@endif
         <div class="md:flex md:space-x-8">
             <!-- Phần hình ảnh và nút hành động -->
             <div class="md:w-2/5 lg:w-1/3">
@@ -72,7 +77,7 @@
                             class="w-full rounded-lg">
                     </div>
                     <div class="flex space-x-4 mb-4">
-                        <form action="" method="POST" class="flex-1">
+                        <form action="{{ route('cart.add') }}" method="POST" class="flex-1">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1">

@@ -1,18 +1,19 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecycleBinController;
+use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\HomeController;
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -38,7 +39,12 @@ Route::post('/san-pham/{id}/danh-gia', [HomeController::class, 'submitReview'])
 Route::get('/posts', [HomeController::class, 'postList'])->name('posts.list');
 Route::get('/lien-he', [HomeController::class, 'showContactForm'])->name('contact.form');
 Route::post('/lien-he', [HomeController::class, 'submitContactForm'])->name('contact.submit');
-
+Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+// ...existing code...
+Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+// ...existing code...
 // =====================
 // Routes admin
 // =====================
