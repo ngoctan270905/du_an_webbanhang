@@ -26,7 +26,6 @@
             overflow: hidden;
             position: relative;
             max-height: calc(1.5em * 4);
-            /* Giả sử line-height là 1.5em, điều chỉnh nếu cần */
         }
 
         .line-clamp-4::after {
@@ -36,7 +35,6 @@
             left: 0;
             right: 0;
             height: 2em;
-            /* Chiều cao vùng làm mờ */
             background: linear-gradient(to bottom, transparent, white);
             pointer-events: none;
         }
@@ -60,14 +58,32 @@
         .toggle-button button:hover {
             color: #1e40af;
         }
+
+        /* Animation cho modal */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
     </style>
 
     <div class="container mx-auto py-4 md:py-10 px-8 md:px-36">
-        @if (session('success'))
-            <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-                {{ session('success') }}
-            </div>
-        @endif
         <div class="md:flex md:space-x-8">
             <!-- Phần hình ảnh và nút hành động -->
             <div class="md:w-2/5 lg:w-1/3">
@@ -80,7 +96,7 @@
                         <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" class="flex-1">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <input type="hidden" name="quantity" value="1">
+                            <input type="hidden" id="form_quantity" name="quantity" value="1">
                             <button type="submit"
                                 class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
                                 Thêm vào giỏ hàng
@@ -247,13 +263,6 @@
         <div class="mt-8 bg-white p-6 rounded-lg shadow-md border border-gray-300">
             <div class="text-xl font-semibold mb-4">Đánh giá sản phẩm</div>
 
-            <!-- Hiển thị thông báo thành công -->
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             <!-- Form gửi đánh giá -->
             <div class="mb-6">
                 <div class="text-lg font-medium mb-3">Gửi đánh giá của bạn</div>
@@ -328,14 +337,48 @@
         </div>
     </div>
 
-    <!-- JavaScript cho chức năng số lượng và mô tả -->
+    <!-- Modal thông báo -->
+    <div id="cartModal" class="fixed top-6 right-6 z-50 hidden animate-slideIn">
+        <div class="relative bg-white rounded-2xl shadow-2xl p-5 w-80 border border-gray-100">
+            <!-- Nút đóng -->
+            <button id="closeModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <!-- Icon + Nội dung -->
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <div id="modalIcon" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+                        <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div id="modalContent" class="flex-1">
+                    <p class="text-base font-semibold text-gray-800">Đã thêm vào giỏ hàng!</p>
+                    <p class="text-sm text-gray-500">Bạn có thể tiếp tục mua sắm hoặc kiểm tra giỏ hàng.</p>
+                    <a href="{{ route('cart.show') }}"
+                        class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">
+                        Xem giỏ hàng →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript cho chức năng số lượng, mô tả và modal -->
     <script>
         // Cập nhật số lượng
         function updateQuantity(change) {
             let input = document.getElementById('quantity');
+            let formInput = document.getElementById('form_quantity');
             let value = parseInt(input.value);
+
             if (value + change >= 1 && value + change <= {{ $product->so_luong }}) {
                 input.value = value + change;
+                formInput.value = value + change;
             }
         }
 
@@ -344,143 +387,78 @@
             let description = document.getElementById('description');
             let toggleButton = document.getElementById('toggleDescription');
 
-            // Kiểm tra chiều cao nội dung để quyết định hiển thị nút
             let lineHeight = parseInt(window.getComputedStyle(description).lineHeight);
-            let maxHeight = lineHeight * 4; // 4 dòng
+            let maxHeight = lineHeight * 4;
             if (description.scrollHeight > maxHeight) {
-                toggleButton.classList.remove('hidden'); // Hiển thị nút nếu nội dung dài
+                toggleButton.classList.remove('hidden');
             }
 
             toggleButton.addEventListener('click', function() {
                 let isTruncated = description.classList.toggle('line-clamp-4');
                 this.textContent = isTruncated ? 'Xem thêm' : 'Rút gọn';
             });
-        });
-    </script>
 
-
-    <!-- Thay thế phần Modal cũ bằng Modal mới -->
-    <!-- Modal thông báo -->
-    <div id="cartModal" 
-     class="fixed top-6 right-6 z-50 hidden animate-slideIn">
-    <div class="relative bg-white rounded-2xl shadow-2xl p-5 w-80 border border-gray-100">
-        <!-- Nút đóng -->
-        <button id="closeModal" 
-                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
-
-        <!-- Icon + Nội dung -->
-        <div class="flex items-start space-x-3">
-            <!-- Icon thành công -->
-            <div class="flex-shrink-0">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
-                    <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Nội dung -->
-            <div class="flex-1">
-                <p class="text-base font-semibold text-gray-800">
-                    Đã thêm vào giỏ hàng!
-                </p>
-                <p class="text-sm text-gray-500">Bạn có thể tiếp tục mua sắm hoặc kiểm tra giỏ hàng.</p>
-
-                <!-- Nút xem giỏ -->
-                <a href="{{ route('cart.show') }}" 
-                   class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">
-                    Xem giỏ hàng →
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-    <!-- Cập nhật JavaScript cho modal -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý modal
             const modal = document.getElementById('cartModal');
             const closeBtn = document.getElementById('closeModal');
             const addToCartForm = document.getElementById('addToCartForm');
             let timeoutId;
 
-            // Hàm hiển thị modal với animation
-            function showModal() {
+            function showModal(message, isSuccess = true) {
+                const modalContent = document.getElementById('modalContent');
+                const modalIcon = document.getElementById('modalIcon');
+                modalContent.innerHTML = `
+                    <p class="text-base font-semibold text-gray-800">${isSuccess ? 'Đã thêm vào giỏ hàng!' : 'Lỗi'}</p>
+                    <p class="text-sm text-gray-500">${message}</p>
+                    <a href="{{ route('cart.show') }}" class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">Xem giỏ hàng →</a>
+                `;
+                modalIcon.classList.remove(isSuccess ? 'bg-red-100' : 'bg-green-100');
+                modalIcon.classList.add(isSuccess ? 'bg-green-100' : 'bg-red-100');
+                modalIcon.querySelector('svg').classList.remove(isSuccess ? 'text-red-500' : 'text-green-500');
+                modalIcon.querySelector('svg').innerHTML = isSuccess 
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+                modalIcon.querySelector('svg').classList.add(isSuccess ? 'text-green-500' : 'text-red-500');
+                
                 modal.classList.remove('hidden');
                 modal.style.animation = 'slideIn 0.3s ease-out';
-
-                // Tự động ẩn sau 3 giây
-                timeoutId = setTimeout(() => {
-                    hideModal();
-                }, 3000);
+                timeoutId = setTimeout(hideModal, 5000);
             }
 
-            // Hàm ẩn modal với animation
             function hideModal() {
                 modal.style.animation = 'slideOut 0.3s ease-out';
                 setTimeout(() => {
                     modal.classList.add('hidden');
                 }, 280);
-
                 if (timeoutId) {
                     clearTimeout(timeoutId);
                 }
             }
 
-            // Xử lý submit form
             if (addToCartForm) {
                 addToCartForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-
                     fetch(this.action, {
-                            method: 'POST',
-                            body: new FormData(this)
-                        })
-                        .then(response => response.text())
-                        .then(() => {
-                            showModal();
-                        });
+                        method: 'POST',
+                        body: new FormData(this)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showModal(data.message, true);
+                        } else {
+                            showModal(data.error, false);
+                        }
+                    })
+                    .catch(() => {
+                        showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+                    });
                 });
             }
 
-            // Xử lý nút đóng
             if (closeBtn) {
                 closeBtn.addEventListener('click', hideModal);
             }
         });
     </script>
-
-    <!-- Thêm CSS cho animation -->
-    <style>
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-    </style>
 @endsection
