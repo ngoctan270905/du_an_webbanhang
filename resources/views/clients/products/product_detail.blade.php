@@ -63,11 +63,11 @@
     </style>
 
     <div class="container mx-auto py-4 md:py-10 px-8 md:px-36">
-        @if(session('success'))
-    <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-        {{ session('success') }}
-    </div>
-@endif
+        @if (session('success'))
+            <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+                {{ session('success') }}
+            </div>
+        @endif
         <div class="md:flex md:space-x-8">
             <!-- Phần hình ảnh và nút hành động -->
             <div class="md:w-2/5 lg:w-1/3">
@@ -77,7 +77,7 @@
                             class="w-full rounded-lg">
                     </div>
                     <div class="flex space-x-4 mb-4">
-                        <form action="{{ route('cart.add') }}" method="POST" class="flex-1">
+                        <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" class="flex-1">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1">
@@ -357,4 +357,130 @@
             });
         });
     </script>
+
+
+    <!-- Thay thế phần Modal cũ bằng Modal mới -->
+    <!-- Modal thông báo -->
+    <div id="cartModal" 
+     class="fixed top-6 right-6 z-50 hidden animate-slideIn">
+    <div class="relative bg-white rounded-2xl shadow-2xl p-5 w-80 border border-gray-100">
+        <!-- Nút đóng -->
+        <button id="closeModal" 
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <!-- Icon + Nội dung -->
+        <div class="flex items-start space-x-3">
+            <!-- Icon thành công -->
+            <div class="flex-shrink-0">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+                    <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Nội dung -->
+            <div class="flex-1">
+                <p class="text-base font-semibold text-gray-800">
+                    Đã thêm vào giỏ hàng!
+                </p>
+                <p class="text-sm text-gray-500">Bạn có thể tiếp tục mua sắm hoặc kiểm tra giỏ hàng.</p>
+
+                <!-- Nút xem giỏ -->
+                <a href="{{ route('cart.show') }}" 
+                   class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">
+                    Xem giỏ hàng →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Cập nhật JavaScript cho modal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('cartModal');
+            const closeBtn = document.getElementById('closeModal');
+            const addToCartForm = document.getElementById('addToCartForm');
+            let timeoutId;
+
+            // Hàm hiển thị modal với animation
+            function showModal() {
+                modal.classList.remove('hidden');
+                modal.style.animation = 'slideIn 0.3s ease-out';
+
+                // Tự động ẩn sau 3 giây
+                timeoutId = setTimeout(() => {
+                    hideModal();
+                }, 3000);
+            }
+
+            // Hàm ẩn modal với animation
+            function hideModal() {
+                modal.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 280);
+
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+            }
+
+            // Xử lý submit form
+            if (addToCartForm) {
+                addToCartForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    fetch(this.action, {
+                            method: 'POST',
+                            body: new FormData(this)
+                        })
+                        .then(response => response.text())
+                        .then(() => {
+                            showModal();
+                        });
+                });
+            }
+
+            // Xử lý nút đóng
+            if (closeBtn) {
+                closeBtn.addEventListener('click', hideModal);
+            }
+        });
+    </script>
+
+    <!-- Thêm CSS cho animation -->
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
 @endsection
