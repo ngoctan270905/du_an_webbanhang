@@ -4,17 +4,14 @@
 
 @section('content')
     <style>
-        /* CSS để ẩn thanh cuộn cho các trình duyệt cụ thể */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
 
-        /* Dành cho Firefox */
         .scrollbar-none {
             scrollbar-width: none;
         }
 
-        /* CSS cho rút gọn mô tả với hiệu ứng làm mờ */
         .description-container {
             position: relative;
         }
@@ -39,7 +36,6 @@
             pointer-events: none;
         }
 
-        /* Centered button */
         .toggle-button {
             display: flex;
             justify-content: center;
@@ -59,12 +55,12 @@
             color: #1e40af;
         }
 
-        /* Animation cho modal */
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -76,16 +72,71 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+
             to {
                 transform: translateX(100%);
                 opacity: 0;
             }
         }
+
+        #authModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            /* Đã xóa display: flex; để JavaScript kiểm soát */
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        #authModal .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        #authModal .modal-content p {
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            color: #333;
+        }
+
+        #authModal .modal-content .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            margin: 0 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        #authModal .modal-content .btn-login {
+            background: #2563eb;
+            color: white;
+        }
+
+        #authModal .modal-content .btn-login:hover {
+            background: #1e40af;
+        }
+
+        #authModal .modal-content .btn-register {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        #authModal .modal-content .btn-register:hover {
+            background: #d1d5db;
+        }
     </style>
 
     <div class="container mx-auto py-4 md:py-10 px-8 md:px-36">
         <div class="md:flex md:space-x-8">
-            <!-- Phần hình ảnh và nút hành động -->
             <div class="md:w-2/5 lg:w-1/3">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300">
                     <div class="mb-4">
@@ -93,24 +144,35 @@
                             class="w-full rounded-lg">
                     </div>
                     <div class="flex space-x-4 mb-4">
-                        <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" class="flex-1">
-                            @csrf
-                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <input type="hidden" id="form_quantity" name="quantity" value="1">
-                            <button type="submit"
-                                class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
+                        @auth
+                            <form id="addToCartForm" action="{{ route('cart.add') }}" method="POST" class="flex-1">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" id="form_quantity" name="quantity" value="1">
+                                <button type="submit"
+                                    class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
+                                    Thêm vào giỏ hàng
+                                </button>
+                            </form>
+                            <form id="buyNowForm" action="{{ route('cart.add') }}" method="POST" class="flex-1">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit"
+                                    class="w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
+                                    Mua ngay
+                                </button>
+                            </form>
+                        @else
+                            <button onclick="showAuthModal()"
+                                class="flex-1 bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
                                 Thêm vào giỏ hàng
                             </button>
-                        </form>
-                        <form action="" method="POST" class="flex-1">
-                            @csrf
-                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit"
-                                class="w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
+                            <button onclick="showAuthModal()"
+                                class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
                                 Mua ngay
                             </button>
-                        </form>
+                        @endauth
                     </div>
 
                     <div class="border-t pt-4">
@@ -145,33 +207,19 @@
                 </div>
             </div>
 
-            <!-- Phần thông tin sản phẩm -->
             <div class="md:w-3/5 lg:w-2/3 mt-8 md:mt-0 md:h-[85vh] md:overflow-y-auto md:sticky md:top-4 scrollbar-hide">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300 mb-5">
                     <p class="text-4xl font-bold">{{ $product->ten_san_pham }}</p>
 
                     <div class="mt-5 text-lg">
-                        <!-- Hàng 1: Nhà cung cấp - Tác giả -->
                         <div class="grid grid-cols-2 gap-4 mt-2">
-                            <p>
-                                Nhà cung cấp: <strong>{{ $product->publisher }}</strong>
-                            </p>
-                            <p>
-                                Tác giả: <strong>{{ $product->author }}</strong>
-                            </p>
+                            <p>Nhà cung cấp: <strong>{{ $product->publisher }}</strong></p>
+                            <p>Tác giả: <strong>{{ $product->author }}</strong></p>
                         </div>
-
-                        <!-- Hàng 2: Nhà xuất bản - Hình thức bìa -->
                         <div class="grid grid-cols-2 gap-4 mt-2">
-                            <p>
-                                Nhà xuất bản: <strong>{{ $product->publisher }}</strong>
-                            </p>
-                            <p>
-                                Hình thức bìa: <strong>Bìa mềm</strong>
-                            </p>
+                            <p>Nhà xuất bản: <strong>{{ $product->publisher }}</strong></p>
+                            <p>Hình thức bìa: <strong>Bìa mềm</strong></p>
                         </div>
-
-                        <!-- Rating + Đã bán -->
                         <div class="flex items-center mt-4">
                             <span class="text-yellow-400">
                                 @for ($i = 0; $i < 5; $i++)
@@ -209,7 +257,6 @@
                     </div>
                 </div>
 
-                <!-- Thông tin chi tiết -->
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300 mb-4">
                     <div class="font-semibold text-lg mb-2">Thông tin chi tiết</div>
                     <div class="divide-y divide-gray-300 text-base">
@@ -244,7 +291,6 @@
                     </div>
                 </div>
 
-                <!-- Mô tả sản phẩm -->
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300 mb-4">
                     <div class="font-semibold text-lg mb-2">Mô tả sản phẩm</div>
                     <div class="description-container">
@@ -259,14 +305,11 @@
             </div>
         </div>
 
-        <!-- Đánh giá sản phẩm -->
         <div class="mt-8 bg-white p-6 rounded-lg shadow-md border border-gray-300">
             <div class="text-xl font-semibold mb-4">Đánh giá sản phẩm</div>
 
-            <!-- Form gửi đánh giá -->
             <div class="mb-6">
                 <div class="text-lg font-medium mb-3">Gửi đánh giá của bạn</div>
-
                 @auth
                     <form action="{{ route('client.reviews.store', ['id' => $product->id]) }}" method="POST"
                         class="space-y-4">
@@ -308,7 +351,6 @@
                 @endauth
             </div>
 
-            <!-- Danh sách đánh giá -->
             <div>
                 <div class="text-lg font-medium mb-3">Các đánh giá từ khách hàng</div>
                 @if ($reviews->isEmpty())
@@ -337,22 +379,20 @@
         </div>
     </div>
 
-    <!-- Modal thông báo -->
     <div id="cartModal" class="fixed top-6 right-6 z-50 hidden animate-slideIn">
         <div class="relative bg-white rounded-2xl shadow-2xl p-5 w-80 border border-gray-100">
-            <!-- Nút đóng -->
             <button id="closeModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
                 </svg>
             </button>
-
-            <!-- Icon + Nội dung -->
             <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0">
                     <div id="modalIcon" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
                         <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
                         </svg>
                     </div>
                 </div>
@@ -368,7 +408,16 @@
         </div>
     </div>
 
-    <!-- JavaScript cho chức năng số lượng, mô tả và modal -->
+    <div id="authModal" style="display: none;">
+        <div class="modal-content">
+            <p>Vui lòng đăng nhập hoặc đăng ký để mua hàng</p>
+            <div>
+                <a href="{{ route('login') }}" class="btn btn-login">Đăng nhập</a>
+                <a href="{{ route('register') }}" class="btn btn-register">Đăng ký</a>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Cập nhật số lượng
         function updateQuantity(change) {
@@ -382,12 +431,30 @@
             }
         }
 
-        // Rút gọn/mở rộng mô tả
+        // Hiển thị modal đăng nhập/đăng ký
+        function showAuthModal() {
+            const authModal = document.getElementById('authModal');
+            authModal.style.display = 'flex';
+        }
+
+        // Ẩn modal đăng nhập/đăng ký
+        function hideAuthModal() {
+            const authModal = document.getElementById('authModal');
+            authModal.style.display = 'none';
+        }
+
+        // Xử lý modal
         document.addEventListener('DOMContentLoaded', function() {
             let description = document.getElementById('description');
             let toggleButton = document.getElementById('toggleDescription');
+            const modal = document.getElementById('cartModal');
+            const closeBtn = document.getElementById('closeModal');
+            const addToCartForm = document.getElementById('addToCartForm');
+            const buyNowForm = document.getElementById('buyNowForm');
+            let timeoutId;
 
-            let lineHeight = parseInt(window.getComputedStyle(description).lineHeight);
+            // Rút gọn/mở rộng mô tả
+            let lineHeight = parseFloat(window.getComputedStyle(description).lineHeight);
             let maxHeight = lineHeight * 4;
             if (description.scrollHeight > maxHeight) {
                 toggleButton.classList.remove('hidden');
@@ -398,15 +465,12 @@
                 this.textContent = isTruncated ? 'Xem thêm' : 'Rút gọn';
             });
 
-            // Xử lý modal
-            const modal = document.getElementById('cartModal');
-            const closeBtn = document.getElementById('closeModal');
-            const addToCartForm = document.getElementById('addToCartForm');
-            let timeoutId;
-
+            // Xử lý modal thông báo
             function showModal(message, isSuccess = true) {
                 const modalContent = document.getElementById('modalContent');
                 const modalIcon = document.getElementById('modalIcon');
+
+                // Cập nhật nội dung và icon
                 modalContent.innerHTML = `
                     <p class="text-base font-semibold text-gray-800">${isSuccess ? 'Đã thêm vào giỏ hàng!' : 'Lỗi'}</p>
                     <p class="text-sm text-gray-500">${message}</p>
@@ -415,11 +479,11 @@
                 modalIcon.classList.remove(isSuccess ? 'bg-red-100' : 'bg-green-100');
                 modalIcon.classList.add(isSuccess ? 'bg-green-100' : 'bg-red-100');
                 modalIcon.querySelector('svg').classList.remove(isSuccess ? 'text-red-500' : 'text-green-500');
-                modalIcon.querySelector('svg').innerHTML = isSuccess 
-                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
-                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+                modalIcon.querySelector('svg').innerHTML = isSuccess ?
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
                 modalIcon.querySelector('svg').classList.add(isSuccess ? 'text-green-500' : 'text-red-500');
-                
+
                 modal.classList.remove('hidden');
                 modal.style.animation = 'slideIn 0.3s ease-out';
                 timeoutId = setTimeout(hideModal, 5000);
@@ -435,30 +499,68 @@
                 }
             }
 
+            // Xử lý submit form thêm vào giỏ hàng
             if (addToCartForm) {
                 addToCartForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     fetch(this.action, {
-                        method: 'POST',
-                        body: new FormData(this)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showModal(data.message, true);
-                        } else {
-                            showModal(data.error, false);
-                        }
-                    })
-                    .catch(() => {
-                        showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
-                    });
+                            method: 'POST',
+                            body: new FormData(this)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showModal(data.message, true);
+                            } else {
+                                if (data.error.includes('đăng nhập hoặc đăng ký')) {
+                                    showAuthModal();
+                                } else {
+                                    showModal(data.error, false);
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+                        });
+                });
+            }
+
+            // Xử lý submit form mua ngay
+            if (buyNowForm) {
+                buyNowForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    fetch(this.action, {
+                            method: 'POST',
+                            body: new FormData(this)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = "{{ route('cart.show') }}";
+                            } else {
+                                if (data.error.includes('đăng nhập hoặc đăng ký')) {
+                                    showAuthModal();
+                                } else {
+                                    showModal(data.error, false);
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+                        });
                 });
             }
 
             if (closeBtn) {
                 closeBtn.addEventListener('click', hideModal);
             }
+
+            // Xử lý click bên ngoài modal đăng nhập/đăng ký để đóng
+            document.getElementById('authModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideAuthModal();
+                }
+            });
         });
     </script>
 @endsection

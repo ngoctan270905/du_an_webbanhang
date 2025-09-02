@@ -4,7 +4,7 @@
 
 @section('content')
     <style>
-        /* Animation cho modal */
+        /* Animation for modal */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -29,7 +29,7 @@
             }
         }
 
-        /* Overlay mờ */
+        /* Faded overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -44,12 +44,12 @@
             transition: opacity 0.3s ease;
         }
 
-        /* Lớp để ẩn modal bằng JavaScript */
+        /* Class to hide modal with JavaScript */
         .modal-overlay.hidden {
             display: none;
         }
 
-        /* Modal xác nhận */
+        /* Confirmation modal */
         .modal-confirm {
             animation: fadeIn 0.3s ease-out;
         }
@@ -126,12 +126,6 @@
     <div class="container mx-auto px-4 py-8 md:px-8 lg:px-16">
         <h1 class="text-3xl font-bold mb-8 text-gray-800">Giỏ hàng của bạn</h1>
 
-        @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
-                {{ session('success') }}
-            </div>
-        @endif
-
         @if (count($cart) > 0)
             <div class="flex flex-col lg:flex-row lg:space-x-8">
                 <div class="lg:w-2/3 bg-white rounded-lg shadow-md p-6 mb-6 lg:mb-0 border border-gray-300">
@@ -151,19 +145,16 @@
                                 $total = 0;
                                 $totalItems = 0;
                             @endphp
-                            @foreach ($cart as $id => $details)
+                            @foreach ($cart as $details)
                                 @php
-                                    $stock = isset($details['stock'])
-                                        ? $details['stock']
-                                        : \App\Models\Product::find($id)->so_luong ?? 0;
                                     $subtotal = $details['price'] * $details['quantity'];
                                     $total += $subtotal;
                                     $totalItems += $details['quantity'];
-                                    if ($details['quantity'] <= 0 || $details['quantity'] > $stock) {
+                                    if ($details['quantity'] <= 0 || $details['quantity'] > $details['stock']) {
                                         $isValidCart = false;
                                     }
                                 @endphp
-                                <tr>
+                                <tr data-id="{{ $details['id'] }}">
                                     <td data-label="Sản phẩm" class="product-col">
                                         <div class="flex items-center">
                                             <img src="{{ Storage::url($details['image']) }}" alt="{{ $details['name'] }}"
@@ -174,29 +165,31 @@
                                     <td data-label="Số lượng" class="text-center">
                                         <div
                                             class="flex items-center justify-center border border-gray-300 rounded-lg w-fit mx-auto">
-                                            <button id="decrement-{{ $id }}"
-                                                class="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg"
-                                                onclick="updateCart('{{ $id }}', -1, {{ $stock }})">-</button>
-                                            <input type="text" id="quantity-{{ $id }}"
-                                                value="{{ $details['quantity'] }}"
-                                                class="w-12 text-center border-x border-gray-300 outline-none text-gray-800"
-                                                readonly>
-                                            <button id="increment-{{ $id }}"
-                                                class="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg"
-                                                onclick="updateCart('{{ $id }}', 1, {{ $stock }})">+</button>
+                                            <button
+                                                class="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg decrement-btn"
+                                                data-product-id="{{ $details['id'] }}"
+                                                data-stock="{{ $details['stock'] }}">-</button>
+                                            <input type="text"
+                                                class="w-12 text-center border-x border-gray-300 outline-none text-gray-800 quantity-input"
+                                                value="{{ $details['quantity'] }}" readonly
+                                                data-product-id="{{ $details['id'] }}">
+                                            <button
+                                                class="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg increment-btn"
+                                                data-product-id="{{ $details['id'] }}"
+                                                data-stock="{{ $details['stock'] }}">+</button>
                                         </div>
                                     </td>
                                     <td data-label="Giá tiền" class="text-right">
                                         <span
-                                            class="text-gray-600">{{ number_format($details['price'], 0, ',', '.') }}đ</span>
+                                            class="text-gray-600 price-col">{{ number_format($details['price'], 0, ',', '.') }}đ</span>
                                     </td>
                                     <td data-label="Tổng tiền" class="text-right">
-                                        <span id="subtotal-{{ $id }}" class="text-gray-800 font-medium">
+                                        <span class="text-gray-800 font-medium subtotal-col">
                                             {{ number_format($subtotal, 0, ',', '.') }}đ
                                         </span>
                                     </td>
                                     <td data-label="Thao tác" class="text-center">
-                                        <button onclick="showConfirmDelete('{{ $id }}')"
+                                        <button onclick="showConfirmDelete('{{ $details['id'] }}')"
                                             class="border border-red-500 text-red-500 px-3 py-1 rounded-lg hover:bg-red-50 transition">
                                             Xóa
                                         </button>
@@ -212,11 +205,12 @@
                     <div class="space-y-3">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Tổng số sản phẩm:</span>
-                            <span class="text-gray-800 font-medium">{{ $totalItems }}</span>
+                            <span class="text-gray-800 font-medium total-items-display">{{ $totalItems }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Tạm tính:</span>
-                            <span class="text-gray-800 font-medium">{{ number_format($total, 0, ',', '.') }}đ</span>
+                            <span
+                                class="text-gray-800 font-medium total-amount-display">{{ number_format($total, 0, ',', '.') }}đ</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Phí vận chuyển:</span>
@@ -260,6 +254,7 @@
             </div>
         @endif
 
+        {{-- Modal for success/error messages --}}
         <div id="cartModal" class="fixed top-6 right-6 z-50 hidden">
             <div class="relative bg-white rounded-2xl shadow-2xl p-5 w-80 border border-gray-100">
                 <button id="closeModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
@@ -270,25 +265,22 @@
                 </button>
                 <div class="flex items-start space-x-3">
                     <div class="flex-shrink-0">
-                        <div id="modalIcon" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
-                            <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div id="modalIcon" class="flex items-center justify-center w-10 h-10 rounded-full">
+                            {{-- Icon will be dynamically updated --}}
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                         </div>
                     </div>
                     <div id="modalContent" class="flex-1">
-                        <p class="text-base font-semibold text-gray-800">Thành công</p>
-                        <p class="text-sm text-gray-500">Thông báo</p>
-                        <a href="{{ route('cart.show') }}"
-                            class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">
-                            Xem giỏ hàng →
-                        </a>
+                        {{-- Content will be dynamically updated --}}
                     </div>
                 </div>
             </div>
         </div>
 
+        {{-- Confirmation modal for single item deletion --}}
         <div id="confirmDeleteModal" class="modal-overlay hidden">
             <div class="modal-confirm bg-white rounded-lg shadow-xl p-6 w-96 max-w-full">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Xác nhận xóa</h3>
@@ -306,6 +298,7 @@
             </div>
         </div>
 
+        {{-- Confirmation modal for clearing all items --}}
         <div id="confirmClearModal" class="modal-overlay hidden">
             <div class="modal-confirm bg-white rounded-lg shadow-xl p-6 w-96 max-w-full">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Xác nhận xóa</h3>
@@ -327,32 +320,44 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('cartModal');
-            const closeBtn = document.getElementById('closeModal');
+            const closeModalBtn = document.getElementById('closeModal');
             const modalContent = document.getElementById('modalContent');
             const modalIcon = document.getElementById('modalIcon');
             const confirmDeleteModal = document.getElementById('confirmDeleteModal');
             const confirmClearModal = document.getElementById('confirmClearModal');
-            const cancelDelete = document.getElementById('cancelDelete');
-            const confirmDelete = document.getElementById('confirmDelete');
-            const cancelClear = document.getElementById('cancelClear');
-            const confirmClear = document.getElementById('confirmClear');
-            let timeoutId;
+            const cancelDeleteBtn = document.getElementById('cancelDelete');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            const cancelClearBtn = document.getElementById('cancelClear');
+            const confirmClearBtn = document.getElementById('confirmClear');
+            const totalItemsDisplay = document.querySelector('.total-items-display');
+            const totalAmountDisplay = document.querySelector('.total-amount-display');
+            const cartTotalElement = document.getElementById('cart-total');
+            const checkoutButton = document.getElementById('checkout-button');
             let productIdToDelete = null;
+            let timeoutId;
 
-            // Hàm hiển thị modal thông báo
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(amount);
+            }
+
             function showModal(message, isSuccess = true) {
+                clearTimeout(timeoutId); // Clear any existing timeout
                 modalContent.innerHTML = `
                     <p class="text-base font-semibold text-gray-800">${isSuccess ? 'Thành công' : 'Lỗi'}</p>
                     <p class="text-sm text-gray-500">${message}</p>
-                    <a href="{{ route('cart.show') }}" class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">Xem giỏ hàng →</a>
+                    ${isSuccess ? '<a href="{{ route('cart.show') }}" class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">Xem giỏ hàng →</a>' : ''}
                 `;
-                modalIcon.classList.remove(isSuccess ? 'bg-red-100' : 'bg-green-100');
-                modalIcon.classList.add(isSuccess ? 'bg-green-100' : 'bg-red-100');
-                modalIcon.querySelector('svg').classList.remove(isSuccess ? 'text-red-500' : 'text-green-500');
-                modalIcon.querySelector('svg').innerHTML = isSuccess ?
+
+                modalIcon.className =
+                    `flex items-center justify-center w-10 h-10 rounded-full ${isSuccess ? 'bg-green-100' : 'bg-red-100'}`;
+                const iconSvg = modalIcon.querySelector('svg');
+                iconSvg.className = `h-6 w-6 ${isSuccess ? 'text-green-500' : 'text-red-500'}`;
+                iconSvg.innerHTML = isSuccess ?
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>' :
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
-                modalIcon.querySelector('svg').classList.add(isSuccess ? 'text-green-500' : 'text-red-500');
 
                 modal.classList.remove('hidden');
                 modal.style.animation = 'fadeIn 0.3s ease-out';
@@ -365,23 +370,21 @@
                     modal.classList.add('hidden');
                     modal.style.animation = '';
                 }, 280);
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                }
             }
 
-            // Hàm hiển thị modal xác nhận xóa sản phẩm
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', hideModal);
+            }
+
             window.showConfirmDelete = function(productId) {
                 productIdToDelete = productId;
                 confirmDeleteModal.classList.remove('hidden');
             };
 
-            // Hàm hiển thị modal xác nhận xóa hết giỏ hàng
             window.showConfirmClear = function() {
                 confirmClearModal.classList.remove('hidden');
             };
 
-            // Hàm đóng modal xác nhận
             function closeConfirmModal(modal) {
                 modal.classList.add('closing');
                 setTimeout(() => {
@@ -390,18 +393,12 @@
                 }, 280);
             }
 
-            // Gán sự kiện cho nút đóng modal thông báo
-            if (closeBtn) {
-                closeBtn.addEventListener('click', hideModal);
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', () => closeConfirmModal(confirmDeleteModal));
             }
 
-            // Gán sự kiện cho nút Hủy và Xác nhận của modal xóa sản phẩm
-            if (cancelDelete) {
-                cancelDelete.addEventListener('click', () => closeConfirmModal(confirmDeleteModal));
-            }
-
-            if (confirmDelete) {
-                confirmDelete.addEventListener('click', () => {
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', () => {
                     if (productIdToDelete) {
                         removeFromCart(productIdToDelete);
                     }
@@ -409,13 +406,12 @@
                 });
             }
 
-            // Gán sự kiện cho nút Hủy và Xác nhận của modal xóa hết
-            if (cancelClear) {
-                cancelClear.addEventListener('click', () => closeConfirmModal(confirmClearModal));
+            if (cancelClearBtn) {
+                cancelClearBtn.addEventListener('click', () => closeConfirmModal(confirmClearModal));
             }
 
-            if (confirmClear) {
-                confirmClear.addEventListener('click', () => {
+            if (confirmClearBtn) {
+                confirmClearBtn.addEventListener('click', () => {
                     fetch('{{ route('cart.clear') }}', {
                             method: 'POST',
                             headers: {
@@ -426,7 +422,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                window.location.reload(); // Tải lại trang nếu xóa hết
+                                window.location.reload();
                             } else {
                                 showModal(data.error, false);
                             }
@@ -438,82 +434,93 @@
                 });
             }
 
-            // Hàm mới để cập nhật trạng thái của các nút tăng/giảm
-            function updateButtonStates(productId, newQuantity, stock) {
-                const incrementBtn = document.getElementById(`increment-${productId}`);
-                const decrementBtn = document.getElementById(`decrement-${productId}`);
+            function updateSummary() {
+                let newTotal = 0;
+                let newTotalItems = 0;
+                let isCartValid = true;
 
-                // Cập nhật nút TĂNG (+)
-                if (newQuantity >= stock) {
-                    incrementBtn.disabled = true;
-                    incrementBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    incrementBtn.disabled = false;
-                    incrementBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+                document.querySelectorAll('.cart-table tbody tr').forEach(row => {
+                    const quantityInput = row.querySelector('.quantity-input');
+                    const priceElement = row.querySelector('.price-col');
+                    const subtotalElement = row.querySelector('.subtotal-col');
 
-                // Cập nhật nút GIẢM (-)
-                if (newQuantity <= 1) {
-                    decrementBtn.disabled = true;
-                    decrementBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    const quantity = parseInt(quantityInput.value);
+                    const priceText = priceElement.textContent.replace(/\D/g, ''); // Remove non-digits
+                    const price = parseInt(priceText);
+                    const stock = parseInt(quantityInput.dataset.stock);
+
+                    if (quantity <= 0 || quantity > stock) {
+                        isCartValid = false;
+                    }
+
+                    const subtotal = quantity * price;
+                    newTotal += subtotal;
+                    newTotalItems += quantity;
+                    subtotalElement.textContent = formatCurrency(subtotal);
+                });
+
+                totalItemsDisplay.textContent = newTotalItems;
+                totalAmountDisplay.textContent = formatCurrency(newTotal);
+                cartTotalElement.textContent = formatCurrency(newTotal);
+
+                // Update checkout button state
+                if (isCartValid) {
+                    checkoutButton.disabled = false;
+                    checkoutButton.classList.remove('opacity-50', 'cursor-not-allowed');
                 } else {
-                    decrementBtn.disabled = false;
-                    decrementBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    checkoutButton.disabled = true;
+                    checkoutButton.classList.add('opacity-50', 'cursor-not-allowed');
                 }
             }
 
-            window.updateCart = function(productId, change, stock) {
-                const quantityInput = document.getElementById(`quantity-${productId}`);
-                const subtotalElement = document.getElementById(`subtotal-${productId}`);
-                const cartTotalElement = document.getElementById('cart-total');
-                let currentQuantity = parseInt(quantityInput.value);
-                let newQuantity = currentQuantity + change;
+            document.querySelectorAll('.increment-btn, .decrement-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    const stock = parseInt(this.dataset.stock);
+                    const quantityInput = document.querySelector(
+                        `.quantity-input[data-product-id="${productId}"]`);
+                    let currentQuantity = parseInt(quantityInput.value);
+                    let newQuantity = this.classList.contains('increment-btn') ? currentQuantity +
+                        1 : currentQuantity - 1;
 
-                // Kiểm tra giới hạn số lượng
-                if (newQuantity < 1) {
-                    showModal('Số lượng phải lớn hơn 0!', false);
-                    return;
-                }
-                if (newQuantity > stock) {
-                    showModal(`Số lượng vượt quá tồn kho. Sản phẩm này chỉ còn ${stock} quyển.`, false);
-                    return;
-                }
+                    if (newQuantity < 1) {
+                        showModal('Số lượng phải lớn hơn 0!', false);
+                        return;
+                    }
+                    if (newQuantity > stock) {
+                        showModal(`Số lượng vượt quá tồn kho. Sản phẩm này chỉ còn ${stock} quyển.`,
+                            false);
+                        return;
+                    }
 
-                // Gửi yêu cầu cập nhật số lượng
-                fetch('{{ route('cart.update') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            product_id: productId,
-                            quantity: newQuantity
+                    fetch('{{ route('cart.update') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                product_id: productId,
+                                quantity: newQuantity
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            quantityInput.value = newQuantity;
-                            subtotalElement.textContent = data.total;
-                            cartTotalElement.textContent = data.cart_total;
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                quantityInput.value = newQuantity;
+                                updateSummary();
+                                showModal(data.message, true);
+                            } else {
+                                showModal(data.error, false);
+                            }
+                        })
+                        .catch(() => {
+                            showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+                        });
+                });
+            });
 
-                            // Cập nhật trạng thái nút sau khi thay đổi số lượng thành công
-                            updateButtonStates(productId, newQuantity, stock);
-                            showModal(data.message, true);
-                        } else {
-                            showModal(data.error, false);
-                        }
-                    })
-                    .catch(() => {
-                        showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
-                    });
-            };
-
-            window.removeFromCart = function(productId) {
-                const cartTotalElement = document.getElementById('cart-total');
-                const checkoutButton = document.getElementById('checkout-button');
-
+            function removeFromCart(productId) {
                 fetch('{{ route('cart.remove') }}', {
                         method: 'POST',
                         headers: {
@@ -527,10 +534,13 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            document.getElementById(`quantity-${productId}`).closest('tr').remove();
-                            cartTotalElement.textContent = data.cart_total;
+                            const rowToRemove = document.querySelector(`tr[data-id="${productId}"]`);
+                            if (rowToRemove) {
+                                rowToRemove.remove();
+                                updateSummary();
+                            }
                             if (!document.querySelector('.cart-table tbody tr')) {
-                                window.location.reload(); // Tải lại trang nếu giỏ hàng trống
+                                window.location.reload();
                             } else {
                                 showModal(data.message, true);
                             }
@@ -541,16 +551,10 @@
                     .catch(() => {
                         showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
                     });
-            };
+            }
 
-            // Gọi hàm này khi trang tải để đảm bảo trạng thái nút ban đầu là chính xác
-            document.querySelectorAll('.cart-table tbody tr').forEach(row => {
-                const productId = row.querySelector('[id^="quantity-"]').id.split('-')[1];
-                const quantity = parseInt(document.getElementById(`quantity-${productId}`).value);
-                const stock = parseInt(row.querySelector('[onclick*="updateCart"]').getAttribute('onclick')
-                    .match(/, (\d+)\)/)[1]);
-                updateButtonStates(productId, quantity, stock);
-            });
+            // Initial summary update
+            updateSummary();
         });
     </script>
 @endsection
