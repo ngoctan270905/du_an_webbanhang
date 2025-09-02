@@ -66,7 +66,7 @@ class HomeController extends Controller
         // Lấy tất cả danh mục (có thể cần cho phần lọc danh mục)
         $categories = Category::all();
 
-        return view('dssanpham', compact('products', 'categories'));
+        return view('products.dssanpham', compact('products', 'categories'));
     }
 
     public function showProductDetail($id)
@@ -83,7 +83,7 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        return view('clients.product_detail', compact('product', 'reviews', 'relatedProducts'));
+        return view('clients.products.product_detail', compact('product', 'reviews', 'relatedProducts'));
     }
 
     public function postList(Request $request)
@@ -108,7 +108,7 @@ class HomeController extends Controller
         // Phân trang bài viết (10 bài mỗi trang)
         $posts = $query->paginate(10);
 
-        return view('post_list', compact('posts'));
+        return view('clients.posts.post_list', compact('posts'));
     }
 
     public function submitReview(Request $request, $id)
@@ -130,7 +130,7 @@ class HomeController extends Controller
 
     public function showContactForm()
     {
-        return view('contact');
+        return view('clients.contacts.contact');
     }
 
     public function submitContactForm(Request $request)
