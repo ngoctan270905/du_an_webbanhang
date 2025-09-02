@@ -508,7 +508,7 @@
         </div>
     </header>
 
-    <main>
+    <main class="pt-14">
         @yield('content')
     </main>
 

@@ -1,388 +1,267 @@
+
 @extends('layouts.master')
 
 @section('title', $product->ten_san_pham)
 
 @section('content')
     <style>
-        .product-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
+        /* CSS để ẩn thanh cuộn cho các trình duyệt cụ thể */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
+        /* Dành cho Firefox */
+        .scrollbar-none {
+            scrollbar-width: none;
         }
 
-        .product-image-wrapper {
+        /* CSS cho rút gọn mô tả với hiệu ứng làm mờ */
+        .description-container {
             position: relative;
+        }
+
+        .line-clamp-4 {
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-        }
-
-        .product-image {
-            width: 100%;
-            height: auto;
-            max-height: 450px;
-            object-fit: contain;
-        }
-
-        .product-details {
-            padding: 1rem;
-        }
-
-        .product-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-
-        .product-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .rating-stars {
-            color: #f1c40f;
-            font-size: 1rem;
-        }
-
-        .rating-count {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #e63946;
-            margin-bottom: 1rem;
-        }
-
-        .product-specs {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 1rem;
-        }
-
-        .spec-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .color-options {
-            margin-bottom: 1.5rem;
-        }
-
-        .color-options label {
-            font-size: 0.9rem;
-            margin-right: 0.5rem;
-            color: #333;
-        }
-
-        .color-options select {
-            padding: 0.5rem;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 0.9rem;
-        }
-
-        .quantity-selector {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .quantity-selector button {
-            width: 35px;
-            height: 35px;
-            border: 1px solid #ddd;
-            background: #f5f5f5;
-            font-size: 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .quantity-selector input {
-            width: 50px;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn-add-to-cart,
-        .btn-buy-now {
-            padding: 0.75rem 2rem;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-add-to-cart {
-            background: #fff;
-            color: #e63946;
-            border: 1px solid #e63946;
-        }
-
-        .btn-add-to-cart:hover {
-            background: #e63946;
-            color: #fff;
-        }
-
-        .btn-buy-now {
-            background: #e63946;
-            color: #fff;
-        }
-
-        .btn-buy-now:hover {
-            background: #d00000;
-        }
-
-        /* Section chung */
-        .section {
-            margin-top: 2rem;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 1.5rem;
             position: relative;
+            max-height: calc(1.5em * 4); /* Giả sử line-height là 1.5em, điều chỉnh nếu cần */
         }
 
-        .section-title::after {
+        .line-clamp-4::after {
             content: '';
-            width: 50px;
-            height: 3px;
-            background: #e63946;
             position: absolute;
-            bottom: -5px;
+            bottom: 0;
             left: 0;
+            right: 0;
+            height: 2em; /* Chiều cao vùng làm mờ */
+            background: linear-gradient(to bottom, transparent, white);
+            pointer-events: none;
         }
 
-        /* Đánh giá sản phẩm */
-        .review-card {
-            background: #f9f9f9;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid #e63946;
-        }
-
-        .review-header {
+        /* Centered button */
+        .toggle-button {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
+            justify-content: center;
+            margin-top: 0.5rem;
         }
 
-        .review-user {
-            font-weight: 600;
-            color: #333;
+        .toggle-button button {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 1.125rem;
+            cursor: pointer;
         }
 
-        .review-date {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        /* Sản phẩm cùng danh mục */
-        .related-products {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1rem;
-        }
-
-        .related-card {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .related-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .related-img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-
-        .related-body {
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .related-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .related-price {
-            font-size: 0.9rem;
-            color: #e63946;
-            font-weight: 500;
+        .toggle-button button:hover {
+            color: #1e40af;
         }
     </style>
 
-    <div class="product-container">
-        <!-- Main Product -->
-        <div class="product-grid">
-            <!-- Product Image -->
-            <div class="product-image-wrapper">
-                <img src="{{ asset('storage/' . $product->hinh_anh) }}" class="product-image"
-                    alt="{{ $product->ten_san_pham }}">
-            </div>
-
-            <!-- Product Details -->
-            <div class="product-details">
-                <h1 class="product-title">{{ $product->ten_san_pham }}</h1>
-
-                <!-- Rating -->
-                <div class="product-rating">
-                    <span class="rating-stars">★★★★★</span>
-                    <span class="rating-count">({{ $reviews->count() }} đánh giá)</span>
+    <div class="container mx-auto py-4 md:py-10 px-8 md:px-36 md:flex md:space-x-8">
+        <!-- Phần hình ảnh và nút hành động -->
+        <div class="md:w-2/5 lg:w-1/3">
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300">
+                <div class="mb-4">
+                    <img src="{{ Storage::url($product->hinh_anh) }}" alt="{{ $product->ten_san_pham }}"
+                        class="w-full rounded-lg">
                 </div>
-
-                <!-- Price -->
-                <p class="product-price">{{ number_format($product->gia, 0, ',', '.') }} VNĐ</p>
-
-                <!-- Specs -->
-                <div class="product-specs">
-                    <p><span class="spec-label">Mô tả:</span> {{ $product->mo_ta }}</p>
-                    <p><span class="spec-label">Số lượng còn lại:</span> {{ $product->so_luong }}</p>
-                </div>
-
-                <!-- Color Options (if applicable) -->
-                <div class="color-options">
-                    <label for="color">Màu sắc:</label>
-                    <select id="color" name="color">
-                        <option value="black">Đen</option>
-                        <option value="brown">Nâu</option>
-                        <option value="cream">Kem</option>
-                    </select>
-                </div>
-
-                <!-- Quantity Selector -->
-                <div class="quantity-selector">
-                    <button type="button" onclick="this.nextElementSibling.value--">-</button>
-                    <input type="number" value="1" min="1" max="{{ $product->so_luong }}">
-                    <button type="button" onclick="this.previousElementSibling.value++">+</button>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <form action="" method="POST">
+                <div class="flex space-x-4 mb-4">
+                    <form action="" method="POST" class="flex-1">
                         @csrf
-                        <button type="submit" class="btn-add-to-cart">Thêm vào giỏ hàng</button>
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit"
+                            class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
+                            Thêm vào giỏ hàng
+                        </button>
                     </form>
-                    <form action="" method="POST">
+                    <form action="" method="POST" class="flex-1">
                         @csrf
-                        <button type="submit" class="btn-buy-now">Mua ngay</button>
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit"
+                            class="w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
+                            Mua ngay
+                        </button>
                     </form>
                 </div>
-            </div>
-        </div>
 
-        <!-- Sản phẩm cùng danh mục -->
-        <div class="mt-5">
-            <h4 class="mb-4 fw-bold text-uppercase text-center">Sản phẩm cùng danh mục</h4>
-            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
-                @foreach ($relatedProducts as $related)
-                    <div class="col">
-                        <div class="card h-100 shadow-sm border-0 text-center related-card">
-                            <div class="ratio ratio-1x1">
-                                <img src="{{ asset('storage/' . $related->hinh_anh) }}" class="card-img-top rounded-top"
-                                    alt="{{ $related->ten_san_pham }}" style="object-fit: contain; padding: 10px;">
-                            </div>
-                            <div class="card-body p-2">
-                                <h6 class="text-truncate fw-semibold">{{ $related->ten_san_pham }}</h6>
-                                <p class="text-success fw-bold small mb-2">{{ number_format($related->gia, 0, ',', '.') }}
-                                    VNĐ</p>
-                                <a href="{{ route('product.detail', $related->id) }}"
-                                    class="btn btn-primary btn-sm w-100 mt-auto rounded-pill">Xem Chi Tiết</a>
-
-                            </div>
-                        </div>
+                <div class="border-t pt-4">
+                    <p class="text-base font-semibold mb-2">Chính sách ưu đãi</p>
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <p class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-10.293a1 1 0 00-1.414-1.414L8 9.586 6.707 8.293a1 1 0 00-1.414 1.414L8 12.414l3.293-3.293z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            Thời gian giao hàng: Giao nhanh và uy tín
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-10.293a1 1 0 00-1.414-1.414L8 9.586 6.707 8.293a1 1 0 00-1.414 1.414L8 12.414l3.293-3.293z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            Chính sách đổi trả: Đổi trả miễn phí toàn quốc
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-10.293a1 1 0 00-1.414-1.414L8 9.586 6.707 8.293a1 1 0 00-1.414 1.414L8 12.414l3.293-3.293z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            Chính sách khách sỉ: Ưu đãi khi mua số lượng lớn
+                        </p>
                     </div>
-                @endforeach
+                </div>
             </div>
         </div>
 
+        <!-- Phần thông tin sản phẩm -->
+        <div class="md:w-1/2 lg:w-3/5 mt-8 md:mt-0 md:h-[85vh] md:overflow-y-auto md:sticky md:top-4 scrollbar-hide">
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300 mb-5">
+                <p class="text-4xl font-bold">{{ $product->ten_san_pham }}</p>
 
-        <!-- Đánh giá sản phẩm -->
-        <div class="section">
-            <h2 class="section-title">Đánh Giá Sản Phẩm</h2>
-            @if ($reviews->count())
-                @foreach ($reviews as $review)
-                    <div class="review-card">
-                        <div class="review-header">
-                            <span class="review-user">{{ $review->user->name ?? 'Khách' }}</span>
-                            <span class="review-date">{{ $review->created_at->format('d/m/Y H:i') }}</span>
-                        </div>
-                        <p class="mb-1">Rating: <span class="rating-stars">★ {{ $review->rating }}/5</span></p>
-                        <p>{{ $review->noi_dung }}</p>
+                <div class="mt-5 text-lg">
+                    <!-- Hàng 1: Nhà cung cấp - Tác giả -->
+                    <div class="grid grid-cols-2 gap-4 mt-2">
+                        <p>
+                            Nhà cung cấp: <strong>{{ $product->publisher }}</strong>
+                        </p>
+                        <p>
+                            Tác giả: <strong>{{ $product->author }}</strong>
+                        </p>
                     </div>
-                @endforeach
-            @else
-                <p class="text-muted">Chưa có đánh giá nào cho sản phẩm này.</p>
-            @endif
-        </div>
-        @auth
-            <form action="{{ route('client.reviews.store', $product->id) }}" method="POST" class="mt-4">
-                @csrf
-                <div class="mb-3">
-                    <label for="rating">Đánh giá (1 đến 5 sao):</label>
-                    <select name="rating" id="rating" class="form-control" required>
-                        <option value="">-- Chọn số sao --</option>
-                        @for ($i = 5; $i >= 1; $i--)
-                            <option value="{{ $i }}">{{ $i }} sao</option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="noi_dung">Nội dung đánh giá:</label>
-                    <textarea name="noi_dung" id="noi_dung" class="form-control" rows="3" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-success">Gửi đánh giá</button>
-            </form>
-        @else
-            <div class="mt-4 alert alert-warning">
-                Vui lòng <a href="{{ route('login') }}">đăng nhập</a> để đánh giá sản phẩm.
-            </div>
-        @endauth
 
+                    <!-- Hàng 2: Nhà xuất bản - Hình thức bìa -->
+                    <div class="grid grid-cols-2 gap-4 mt-2">
+                        <p>
+                            Nhà xuất bản: <strong>{{ $product->publisher }}</strong>
+                        </p>
+                        <p>
+                            Hình thức bìa: <strong>Bìa mềm</strong>
+                        </p>
+                    </div>
+
+                    <!-- Rating + Đã bán -->
+                    <div class="flex items-center mt-4">
+                        <span class="text-yellow-400">
+                            @for ($i = 0; $i < 5; $i++)
+                                ★
+                            @endfor
+                        </span>
+                        <span class="ml-1 text-lg text-gray-500">({{ $reviews->count() }} đánh giá)</span>
+                        <span class="mx-2 text-gray-300">|</span>
+                        <span class="text-lg text-gray-500">Đã bán {{ rand(100, 1500) }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-baseline mt-4">
+                    <span
+                        class="text-4xl font-bold text-red-500">{{ number_format($product->gia_khuyen_mai ?? $product->gia, 0, ',', '.') }}đ</span>
+                    @if ($product->gia_khuyen_mai && $product->gia_khuyen_mai < $product->gia)
+                        <span
+                            class="ml-2 line-through text-gray-500 text-lg">{{ number_format($product->gia, 0, ',', '.') }}đ</span>
+                        <span class="ml-2 text-red-500 font-bold text-lg">
+                            -{{ number_format((($product->gia - $product->gia_khuyen_mai) / $product->gia) * 100, 0) }}%
+                        </span>
+                    @endif
+                </div>
+
+                <div class="mt-6">
+                    <p class="font-semibold text-lg">Số lượng</p>
+                    <div class="flex items-center border border-gray-300 rounded-lg w-fit mt-2">
+                        <button class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg"
+                            onclick="updateQuantity(-1)">-</button>
+                        <input type="text" id="quantity" name="quantity" value="1"
+                            class="w-12 text-lg text-center border-x border-gray-300 outline-none" readonly>
+                        <button class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg"
+                            onclick="updateQuantity(1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin chi tiết -->
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300 mb-4">
+                <div class="font-semibold text-lg mb-2">Thông tin chi tiết</div>
+                <div class="divide-y divide-gray-300 text-base">
+                    <div class="grid grid-cols-2 py-2">
+                        <p>Mã hàng</p>
+                        <p class="font-medium">{{ $product->ma_san_pham }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 py-2">
+                        <p>Tên Nhà Cung Cấp</p>
+                        <p class="font-medium">{{ $product->publisher }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 py-2">
+                        <p>Tác giả</p>
+                        <p class="font-medium">{{ $product->author }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 py-2">
+                        <p>NXB</p>
+                        <p class="font-medium">{{ $product->publisher }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 py-2">
+                        <p>Năm XB</p>
+                        <p class="font-medium">{{ $product->published_year }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 py-2">
+                        <p>Số lượng tồn</p>
+                        <p class="font-medium">{{ $product->so_luong }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 py-2">
+                        <p>Ngày nhập</p>
+                        <p class="font-medium">{{ $product->ngay_nhap }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mô tả sản phẩm -->
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300">
+                <div class="font-semibold text-lg mb-2">Mô tả sản phẩm</div>
+                <div class="description-container">
+                    <p id="description" class="mt-2 text-base text-gray-600 line-clamp-4">
+                        {!! nl2br(e($product->mo_ta)) !!}
+                    </p>
+                </div>
+                <div class="toggle-button">
+                    <button id="toggleDescription" class="hidden">Xem thêm</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- JavaScript cho chức năng số lượng và mô tả -->
+    <script>
+        // Cập nhật số lượng
+        function updateQuantity(change) {
+            let input = document.getElementById('quantity');
+            let value = parseInt(input.value);
+            if (value + change >= 1 && value + change <= {{ $product->so_luong }}) {
+                input.value = value + change;
+            }
+        }
+
+        // Rút gọn/mở rộng mô tả
+        document.addEventListener('DOMContentLoaded', function () {
+            let description = document.getElementById('description');
+            let toggleButton = document.getElementById('toggleDescription');
+            
+            // Kiểm tra chiều cao nội dung để quyết định hiển thị nút
+            let lineHeight = parseInt(window.getComputedStyle(description).lineHeight);
+            let maxHeight = lineHeight * 4; // 4 dòng
+            if (description.scrollHeight > maxHeight) {
+                toggleButton.classList.remove('hidden'); // Hiển thị nút nếu nội dung dài
+            }
+
+            toggleButton.addEventListener('click', function () {
+                let isTruncated = description.classList.toggle('line-clamp-4');
+                this.textContent = isTruncated ? 'Xem thêm' : 'Rút gọn';
+            });
+        });
+    </script>
 @endsection

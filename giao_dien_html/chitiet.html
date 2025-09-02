@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện sản phẩm - Thư Cho Em</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS để ẩn thanh cuộn cho các trình duyệt cụ thể */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Dành cho Firefox */
+        .scrollbar-none {
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto p-4 md:flex md:space-x-8">
+
+        <div class="md:w-1/2 lg:w-2/5">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="mb-4">
+                    <img src="https://images.unsplash.com/photo-1544947953-f72be247ae23?q=80&w=2500&auto=format&fit=crop"
+                        alt="Ảnh bìa sách" class="w-full rounded-lg shadow-md">
+                </div>
+
+                <div class="flex space-x-2 overflow-x-auto mb-4 scrollbar-hide">
+                    <img src="https://images.unsplash.com/photo-1544947953-f72be247ae23?q=80&w=400&auto=format&fit=crop"
+                        alt="Ảnh 1"
+                        class="w-16 h-16 md:w-20 md:h-20 rounded-lg border-2 border-transparent hover:border-red-500 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1521587765099-ef8a69e32057?q=80&w=400&auto=format&fit=crop"
+                        alt="Ảnh 2" class="w-16 h-16 md:w-20 md:h-20 rounded-lg border-2 border-gray-200 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1497633762265-9d179a997755?q=80&w=400&auto=format&fit=crop"
+                        alt="Ảnh 3" class="w-16 h-16 md:w-20 md:h-20 rounded-lg border-2 border-gray-200 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1555244162-803834f70034?q=80&w=400&auto=format&fit=crop"
+                        alt="Ảnh 4" class="w-16 h-16 md:w-20 md:h-20 rounded-lg border-2 border-gray-200 cursor-pointer">
+                    <div
+                        class="relative w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 cursor-pointer">
+                        +2
+                    </div>
+                </div>
+
+                <div class="flex space-x-4 mb-4">
+                    <button
+                        class="flex-1 bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
+                        Thêm vào giỏ hàng
+                    </button>
+                    <button class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
+                        Mua ngay
+                    </button>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h3 class="text-lg font-semibold mb-2">Chính sách ưu đãi của Fahasa</h3>
+                    <div class="space-y-2 text-lg text-gray-700">
+                        <p class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-10.293a1 1 0 00-1.414-1.414L8 9.586 6.707 8.293a1 1 0 00-1.414 1.414L8 12.414l3.293-3.293z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            Thời gian giao hàng: Giao nhanh và uy tín
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-10.293a1 1 0 00-1.414-1.414L8 9.586 6.707 8.293a1 1 0 00-1.414 1.414L8 12.414l3.293-3.293z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            Chính sách đổi trả: Đổi trả miễn phí toàn quốc
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1.707-10.293a1 1 0 00-1.414-1.414L8 9.586 6.707 8.293a1 1 0 00-1.414 1.414L8 12.414l3.293-3.293z"
+                                    clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            Chính sách khách sĩ: Ưu đãi khi mua số lượng lớn
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="md:w-1/2 lg:w-3/5 mt-8 md:mt-0 md:h-[85vh] md:overflow-y-auto md:sticky md:top-4 scrollbar-hide scrollbar-none">
+            <div class="bg-white p-6 rounded-lg shadow-md mb-4">
+                <p class="text-lg text-gray-500">Xu hướng ❤️</p>
+                <h1 class="text-4xl font-bold mt-2">Thư Cho Em</h1>
+                <div class="mt-2 text-lg text-gray-600">
+                    <p>Nhà cung cấp: <a href="#" class="text-blue-600 hover:underline">Nhà Nam</a></p>
+                    <p>Nhà xuất bản: <a href="#" class="text-blue-600 hover:underline">Hội Nhà Văn</a></p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400">★★★★★</span>
+                        <span class="ml-1 text-lg text-gray-500">(2 đánh giá)</span>
+                        <span class="mx-2 text-gray-300">|</span>
+                        <span class="text-lg text-gray-500">Đã bán 1.5K</span>
+                    </div>
+                </div>
+
+                <div class="flex items-baseline mt-4">
+                    <span class="text-4xl font-bold text-red-500">112.000đ</span>
+                    <span class="ml-2 line-through text-gray-500 text-lg">140.000đ</span>
+                    <span class="ml-2 text-red-500 font-bold text-lg">-20%</span>
+                </div>
+
+                <div class="mt-6">
+                    <h3 class="font-semibold text-lg text-gray-700">Số lượng</h3>
+                    <div class="flex items-center border border-gray-300 rounded-lg w-fit mt-2">
+                        <button class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg">-</button>
+                        <input type="text" value="1"
+                            class="w-12 text-lg text-center border-x border-gray-300 outline-none">
+                        <button class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md mb-4">
+                <h3 class="font-semibold text-lg mb-2">Thông tin chi tiết</h3>
+                <div class="grid grid-cols-2 gap-y-2 text-lg text-gray-700">
+                    <p>Mã hàng:</p>
+                    <p class="font-medium">8935235241015</p>
+                    <p>Tên Nhà Cung Cấp:</p>
+                    <p class="font-medium">Nhã Nam</p>
+                    <p>Tác giả:</p>
+                    <p class="font-medium">Hoàng Nam Tiến</p>
+                    <p>NXB:</p>
+                    <p class="font-medium">Hội Nhà Văn</p>
+                    <p>Năm XB:</p>
+                    <p class="font-medium">2024</p>
+                    <p>Trọng lượng (gr):</p>
+                    <p class="font-medium">330</p>
+                    <p>Kích Thước Bao Bì:</p>
+                    <p class="font-medium">20.5 x 14 x 1.5 cm</p>
+                    <p>Số trang:</p>
+                    <p class="font-medium">312</p>
+                    <p>Hình thức:</p>
+                    <p class="font-medium">Bìa Mềm</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="mt-6">
+                    <h3 class="font-semibold text-lg text-gray-700">Mô tả sản phẩm</h3>
+                    <p class="mt-2 text-xl text-gray-600">
+                        **Thư Cho Em** là một tác phẩm văn học đầy xúc động, tái hiện lại một mối tình son sắt, chung thủy, vượt qua mọi thử thách của thời gian và chiến tranh. Cuốn sách là những lá thư, những mảnh ghép ký ức mà thiếu tướng **Hoàng Đan** và người vợ yêu quý của ông, bà **Nguyễn Thị An Vinh**, đã trao nhau trong suốt những năm tháng lịch sử hào hùng của dân tộc.
+                        <br><br>
+                        Bằng giọng văn chân thành và giản dị, tác giả đã khéo léo đan xen câu chuyện tình yêu riêng tư vào dòng chảy lịch sử chung của đất nước. Độc giả sẽ được dõi theo hành trình từ những ngày đầu gặp gỡ tại chiến khu, những lời hẹn ước giản dị nhưng thiêng liêng, cho đến những tháng năm cách xa biền biệt bởi bom đạn, chiến hào. Cuốn sách không chỉ đơn thuần là những lá thư tình, mà còn là một bức tranh sống động về cuộc sống, sự hy sinh và lòng quả cảm của thế hệ đi trước.
+                        <br><br>
+                        Những dòng thư viết vội trên đường hành quân, những lời động viên từ hậu phương, hay những nỗi nhớ khắc khoải chờ tin nhau... tất cả đều được thể hiện một cách tinh tế, khiến người đọc không khỏi bồi hồi và xúc động. Cuốn sách là minh chứng cho tình yêu vĩ đại, không chỉ là tình yêu đôi lứa mà còn là tình yêu quê hương, đất nước. Từng con chữ, từng câu chuyện nhỏ đều khắc họa rõ nét hình ảnh người lính kiên cường, người phụ nữ tần tảo, tất cả cùng chung sức xây dựng và bảo vệ tổ quốc.
+                        <br><br>
+                        Ngoài ra, Thư Cho Em còn chứa đựng nhiều chi tiết lịch sử quý giá về các chiến dịch lớn như chiến dịch Điện Biên Phủ, cuộc kháng chiến chống Mỹ, giải phóng Sài Gòn 1975 và những năm tháng xây dựng đất nước sau chiến tranh. Cuốn sách là một tài liệu tham khảo đáng trân trọng, giúp thế hệ trẻ hiểu thêm về lịch sử, về những hy sinh thầm lặng của ông cha.
+                        <br><br>
+                        Hãy để Thư Cho Em đưa bạn trở về một thời đại đầy biến động, để cảm nhận sâu sắc hơn giá trị của tình yêu, của lòng dũng cảm và tinh thần bất khuất của người Việt Nam. Đây không chỉ là một cuốn sách để đọc, mà còn là một di sản tinh thần để suy ngẫm và trân quý.
+                        <button class="mt-2 text-blue-600 hover:underline text-lg">Rút gọn</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

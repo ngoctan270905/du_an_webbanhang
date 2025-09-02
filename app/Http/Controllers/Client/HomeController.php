@@ -83,7 +83,7 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        return view('product_detail', compact('product', 'reviews', 'relatedProducts'));
+        return view('clients.product_detail', compact('product', 'reviews', 'relatedProducts'));
     }
 
     public function postList(Request $request)
