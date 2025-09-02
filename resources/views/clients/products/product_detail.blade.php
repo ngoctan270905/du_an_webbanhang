@@ -86,7 +86,6 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            /* Đã xóa display: flex; để JavaScript kiểm soát */
             align-items: center;
             justify-content: center;
             z-index: 50;
@@ -133,6 +132,33 @@
         #authModal .modal-content .btn-register:hover {
             background: #d1d5db;
         }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .disabled-button {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 
     <div class="container mx-auto py-4 md:py-10 px-8 md:px-36">
@@ -149,8 +175,8 @@
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" id="form_quantity" name="quantity" value="1">
-                                <button type="submit"
-                                    class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
+                                <button type="submit" id="addToCartButton"
+                                    class="w-full bg-white text-red-500 border-2 border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
                                     Thêm vào giỏ hàng
                                 </button>
                             </form>
@@ -158,18 +184,18 @@
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="quantity" value="1">
-                                <button type="submit"
-                                    class="w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
+                                <button type="submit" id="buyNowButton"
+                                    class="w-full bg-red-500 text-white border-2 border-red-500 py-3 rounded-lg font-semibold hover:bg-red-600">
                                     Mua ngay
                                 </button>
                             </form>
                         @else
                             <button onclick="showAuthModal()"
-                                class="flex-1 bg-white text-red-500 border border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
+                                class="flex-1 bg-white text-red-500 border-2 border-red-500 py-3 rounded-lg font-semibold hover:bg-red-50">
                                 Thêm vào giỏ hàng
                             </button>
                             <button onclick="showAuthModal()"
-                                class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600">
+                                class="flex-1 bg-red-500 text-white border-2 border-red-500 py-3 rounded-lg font-semibold hover:bg-red-600">
                                 Mua ngay
                             </button>
                         @endauth
@@ -247,12 +273,14 @@
                     <div class="mt-6">
                         <p class="font-semibold text-lg">Số lượng</p>
                         <div class="flex items-center border border-gray-300 rounded-lg w-fit mt-2">
-                            <button class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg"
+                            <button id="decreaseButton"
+                                class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg"
                                 onclick="updateQuantity(-1)">-</button>
                             <input type="text" id="quantity" name="quantity" value="1"
                                 class="w-12 text-lg text-center border-x border-gray-300 outline-none" readonly>
-                            <button class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg"
-                                onclick="updateQuantity(1)">+</button>
+                            <button id="increaseButton"
+                                class="px-4 py-2 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg {{ $product->so_luong <= 1 ? 'disabled-button' : '' }}"
+                                onclick="updateQuantity(1)" {{ $product->so_luong <= 1 ? 'disabled' : '' }}>+</button>
                         </div>
                     </div>
                 </div>
@@ -424,10 +452,20 @@
             let input = document.getElementById('quantity');
             let formInput = document.getElementById('form_quantity');
             let value = parseInt(input.value);
+            let maxStock = {{ $product->so_luong }};
+            let increaseButton = document.getElementById('increaseButton');
 
-            if (value + change >= 1 && value + change <= {{ $product->so_luong }}) {
+            if (value + change >= 1 && value + change <= maxStock) {
                 input.value = value + change;
                 formInput.value = value + change;
+                // Cập nhật trạng thái nút tăng
+                if (value + change >= maxStock) {
+                    increaseButton.classList.add('disabled-button');
+                    increaseButton.disabled = true;
+                } else {
+                    increaseButton.classList.remove('disabled-button');
+                    increaseButton.disabled = false;
+                }
             }
         }
 
@@ -451,7 +489,18 @@
             const closeBtn = document.getElementById('closeModal');
             const addToCartForm = document.getElementById('addToCartForm');
             const buyNowForm = document.getElementById('buyNowForm');
+            const addToCartButton = document.getElementById('addToCartButton');
+            const buyNowButton = document.getElementById('buyNowButton');
             let timeoutId;
+
+            // Kiểm tra số lượng tồn kho để vô hiệu hóa nút tăng ban đầu
+            let maxStock = {{ $product->so_luong }};
+            let quantityInput = document.getElementById('quantity');
+            let increaseButton = document.getElementById('increaseButton');
+            if (parseInt(quantityInput.value) >= maxStock) {
+                increaseButton.classList.add('disabled-button');
+                increaseButton.disabled = true;
+            }
 
             // Rút gọn/mở rộng mô tả
             let lineHeight = parseFloat(window.getComputedStyle(description).lineHeight);
@@ -470,7 +519,6 @@
                 const modalContent = document.getElementById('modalContent');
                 const modalIcon = document.getElementById('modalIcon');
 
-                // Cập nhật nội dung và icon
                 modalContent.innerHTML = `
                     <p class="text-base font-semibold text-gray-800">${isSuccess ? 'Đã thêm vào giỏ hàng!' : 'Lỗi'}</p>
                     <p class="text-sm text-gray-500">${message}</p>
@@ -500,15 +548,22 @@
             }
 
             // Xử lý submit form thêm vào giỏ hàng
+            // Xử lý submit form thêm vào giỏ hàng
             if (addToCartForm) {
                 addToCartForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add('loading', 'disabled-button');
+                    addToCartButton.innerHTML = ''; // Xóa nội dung để hiển thị icon xoay tròn
                     fetch(this.action, {
                             method: 'POST',
                             body: new FormData(this)
                         })
                         .then(response => response.json())
                         .then(data => {
+                            addToCartButton.disabled = false;
+                            addToCartButton.classList.remove('loading', 'disabled-button');
+                            addToCartButton.innerHTML = 'Thêm vào giỏ hàng'; // Khôi phục text
                             if (data.success) {
                                 showModal(data.message, true);
                             } else {
@@ -520,6 +575,9 @@
                             }
                         })
                         .catch(() => {
+                            addToCartButton.disabled = false;
+                            addToCartButton.classList.remove('loading', 'disabled-button');
+                            addToCartButton.innerHTML = 'Thêm vào giỏ hàng'; // Khôi phục text
                             showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
                         });
                 });
@@ -529,12 +587,18 @@
             if (buyNowForm) {
                 buyNowForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    buyNowButton.disabled = true;
+                    buyNowButton.classList.add('loading', 'disabled-button');
+                    buyNowButton.innerHTML = '';
                     fetch(this.action, {
                             method: 'POST',
                             body: new FormData(this)
                         })
                         .then(response => response.json())
                         .then(data => {
+                            buyNowButton.disabled = false;
+                            buyNowButton.classList.remove('loading', 'disabled-button');
+                            buyNowButton.innerHTML = 'Mua ngay';
                             if (data.success) {
                                 window.location.href = "{{ route('cart.show') }}";
                             } else {
@@ -546,6 +610,9 @@
                             }
                         })
                         .catch(() => {
+                            buyNowButton.disabled = false;
+                            buyNowButton.classList.remove('loading', 'disabled-button');
+                            buyNowButton.innerHTML = 'Mua ngay';
                             showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
                         });
                 });
@@ -555,7 +622,6 @@
                 closeBtn.addEventListener('click', hideModal);
             }
 
-            // Xử lý click bên ngoài modal đăng nhập/đăng ký để đóng
             document.getElementById('authModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     hideAuthModal();
