@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
@@ -22,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // =====================
 // Routes client / public
@@ -44,6 +45,12 @@ Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add')
 Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+// Route::get('/cart/clear', function () {
+//     session()->forget('cart');
+//     return redirect()->route('cart.show')->with('success', 'Giỏ hàng đã được làm mới!');
+// })->name('cart.clear');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
 // ...existing code...
 // =====================
 // Routes admin
@@ -128,6 +135,4 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
         Route::put('/{id}/update', [ReviewController::class, 'update'])->name('update');
         Route::delete('/{id}/destroy', [ReviewController::class, 'destroy'])->name('destroy');
     });
-
 });
-
