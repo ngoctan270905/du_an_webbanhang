@@ -8,32 +8,51 @@
         body::-webkit-scrollbar {
             width: 8px;
         }
+
         body::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
+
         body::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 4px;
         }
+
         body::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
         /* Animation for the checkmark */
         .checkmark-circle {
             animation: scaleIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
         }
+
         .checkmark-path {
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
             animation: drawLine 0.7s 0.3s forwards cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
+
         @keyframes scaleIn {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
+
         @keyframes drawLine {
-            0% { stroke-dashoffset: 100; }
-            100% { stroke-dashoffset: 0; }
+            0% {
+                stroke-dashoffset: 100;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
         }
     </style>
 
@@ -72,10 +91,20 @@
                         <span class="font-medium">Phương thức thanh toán:</span>
                         <span class="font-bold text-gray-900">
                             @switch($order->phuong_thuc_thanh_toan)
-                                @case('cod') Thanh toán khi nhận hàng (COD) @break
-                                @case('bank') Chuyển khoản ngân hàng @break
-                                @case('momo') Ví điện tử MoMo @break
-                                @default Không xác định
+                                @case('cod')
+                                    Thanh toán khi nhận hàng (COD)
+                                @break
+
+                                @case('bank_transfer')
+                                    Chuyển khoản ngân hàng
+                                @break
+
+                                @case('online_payment')
+                                    Ví điện tử MoMo
+                                @break
+
+                                @default
+                                    Không xác định
                             @endswitch
                         </span>
                     </div>
@@ -83,11 +112,30 @@
                         <span class="font-medium">Trạng thái:</span>
                         <span class="font-bold text-green-600">
                             @switch($order->trang_thai)
-                                @case('pending') Đang xử lý @break
-                                @case('completed') Đã hoàn thành @break
-                                @case('cancelled') Đã hủy @break
-                                @default Không xác định
+                                @case('pending')
+                                    Đang xử lý
+                                @break
+
+                                @case('processing')
+                                    Đang chuẩn bị giao
+                                @break
+
+                                @case('shipped')
+                                    Đang giao hàng
+                                @break
+
+                                @case('delivered')
+                                    Đã giao hàng
+                                @break
+
+                                @case('cancelled')
+                                    Đã hủy
+                                @break
+
+                                @default
+                                    Không xác định
                             @endswitch
+
                         </span>
                     </div>
                 </div>
@@ -98,11 +146,13 @@
             </p>
 
             <div class="flex flex-col sm:flex-row gap-3 w-full">
-                <a href="" class="flex-1 py-3 text-center bg-gray-200 text-gray-800 font-bold rounded-xl shadow-md hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
+                <a href=""
+                    class="flex-1 py-3 text-center bg-gray-200 text-gray-800 font-bold rounded-xl shadow-md hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
                     <i class="fas fa-history text-base mr-2"></i>
                     Xem Lịch Sử Mua Hàng
                 </a>
-                <a href="{{ route('home') }}" class="flex-1 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <a href="{{ route('home') }}"
+                    class="flex-1 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                     <i class="fas fa-shopping-bag text-base mr-2"></i>
                     Tiếp Tục Mua Sắm
                 </a>

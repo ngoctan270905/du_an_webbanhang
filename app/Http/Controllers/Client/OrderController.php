@@ -1,6 +1,5 @@
 <?php
 
-// app/Http/Controllers/Client/OrderController.php
 namespace App\Http\Controllers\Client;
 
 use App\Models\Order;
@@ -26,7 +25,6 @@ class OrderController extends Controller
             return redirect()->route('cart.show')->with('error', 'Giỏ hàng trống!');
         }
 
-        // Tính total (tương tự validate, có thể reuse logic)
         $total = $cartItems->sum(function ($item) {
             $price = $item->product->gia_khuyen_mai ?? $item->product->gia;
             return $price * $item->so_luong;
@@ -35,15 +33,18 @@ class OrderController extends Controller
         return view('clients.order.checkout', [
             'cartItems' => $cartItems,
             'total' => $total,
-            'user' => $user, // Để prefill address/phone nếu có
+            'user' => $user,
         ]);
     }
 
     public function createOrder(Request $request)
     {
         $request->validate([
-            'dia_chi_giao_hang' => 'required|string|max:255', // Bao gồm tên, phone, address trong text
+            'ho_ten' => 'required|string|max:255',
+            'so_dien_thoai' => ['required', 'string', 'regex:#^(03|05|07|08|09)[0-9]{8}$#'],
+            'dia_chi_giao_hang' => 'required|string|max:500',
             'phuong_thuc_thanh_toan' => 'required|in:cod,bank_transfer,online_payment',
+            'phi_van_chuyen' => 'required|integer|min:0',
             'coupon_code' => 'nullable|string',
         ]);
 
@@ -54,14 +55,12 @@ class OrderController extends Controller
             return redirect()->route('cart.show')->with('error', 'Giỏ hàng trống!');
         }
 
-        // Transaction để xử lý race condition
         return DB::transaction(function () use ($request, $user, $cartItems) {
             $total = 0;
             foreach ($cartItems as $item) {
                 $product = $item->product;
-                $currentPrice = $product->gia_khuyen_mai ?? $product->gia;
+                $currentPrice = $product->gia_khuyen_mai ?? $item->product->gia;
 
-                // Recheck stock
                 if ($item->so_luong > $product->so_luong) {
                     throw new \Exception("Sản phẩm {$product->ten_san_pham} chỉ còn {$product->so_luong} quyển!");
                 }
@@ -83,10 +82,16 @@ class OrderController extends Controller
                 }
             }
 
+            // Thêm phí vận chuyển
+            $total += $request->phi_van_chuyen;
+
             // Tạo mã đơn hàng unique
             do {
                 $maDonHang = 'DH' . now()->format('YmdHis') . rand(1000, 9999);
             } while (Order::where('ma_don_hang', $maDonHang)->exists());
+
+            // Tạo địa chỉ đầy đủ
+            $diaChiDayDu = $request->ho_ten . ' - ' . $request->so_dien_thoai . ' - ' . $request->dia_chi_giao_hang;
 
             // Tạo order
             $order = Order::create([
@@ -94,7 +99,7 @@ class OrderController extends Controller
                 'id_nguoi_dung' => $user->id,
                 'tong_tien' => $total,
                 'trang_thai' => 'pending',
-                'dia_chi_giao_hang' => $request->dia_chi_giao_hang,
+                'dia_chi_giao_hang' => $diaChiDayDu,
                 'phuong_thuc_thanh_toan' => $request->phuong_thuc_thanh_toan,
                 'ngay_dat_hang' => now(),
             ]);
@@ -111,7 +116,6 @@ class OrderController extends Controller
                     'gia' => $currentPrice,
                 ]);
 
-                // Trừ stock (an toàn vì trong transaction)
                 $product->so_luong -= $item->so_luong;
                 $product->save();
             }
@@ -123,7 +127,7 @@ class OrderController extends Controller
                     'phuong_thuc_thanh_toan' => $request->phuong_thuc_thanh_toan,
                     'so_tien' => $total,
                     'trang_thai' => 'pending',
-                    'ma_giao_dich' => Str::random(20), // Hoặc integrate gateway
+                    'ma_giao_dich' => Str::random(20),
                 ]);
             }
 

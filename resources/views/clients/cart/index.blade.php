@@ -148,6 +148,29 @@
             -moz-appearance: textfield;
         }
 
+        /* Loading style */
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .cart-table thead {
@@ -387,7 +410,7 @@
         {{-- Modal for cart changes --}}
         <div id="confirmChangesModal" class="modal-overlay hidden">
             <div class="modal-confirm bg-white rounded-lg shadow-xl p-6 w-96 max-w-full">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Có thay đổi trong giỏ hàng</h3>
+                <div class="text-lg font-semibold text-gray-800 mb-4">Có thay đổi trong giỏ hàng</div>
                 <p id="changesMessage" class="text-gray-600 mb-6"></p>
                 <ul id="changesList" class="list-disc pl-5 mb-6"></ul>
                 <div class="flex justify-end space-x-4">
@@ -411,7 +434,6 @@
             const confirmDeleteBtn = document.getElementById('confirmDelete');
             const cancelClearBtn = document.getElementById('cancelClear');
             const confirmClearBtn = document.getElementById('confirmClear');
-            const cancelChangesBtn = document.getElementById('cancelChanges');
             const confirmChangesBtn = document.getElementById('confirmChanges');
             const totalItemsDisplay = document.querySelector('.total-items-display');
             const totalAmountDisplay = document.querySelector('.total-amount-display');
@@ -425,10 +447,9 @@
             if (!totalAmountDisplay) console.error('totalAmountDisplay (.total-amount-display) not found in DOM');
             if (!totalItemsDisplay) console.error('totalItemsDisplay (.total-items-display) not found in DOM');
             if (!confirmChangesModal) console.error('confirmChangesModal (#confirmChangesModal) not found in DOM');
-            if (!cancelChangesBtn) console.error('cancelChangesBtn (#cancelChanges) not found in DOM');
             if (!confirmChangesBtn) console.error('confirmChangesBtn (#confirmChanges) not found in DOM');
 
-            // Debounce function
+            // Hàm debounce
             function debounce(func, wait) {
                 let timeout;
                 return function executedFunction(...args) {
@@ -551,10 +572,6 @@
                 });
             }
 
-            if (cancelChangesBtn) {
-                cancelChangesBtn.addEventListener('click', () => closeConfirmModal(confirmChangesModal));
-            }
-
             if (confirmChangesBtn) {
                 confirmChangesBtn.addEventListener('click', () => {
                     const updatedItems = JSON.parse(confirmChangesBtn.dataset.updatedItems || '[]');
@@ -581,7 +598,7 @@
                             console.log('Apply changes response data:', data);
                             if (data.success) {
                                 window.location
-                                    .reload(); // Reload trang giỏ hàng sau khi áp dụng thay đổi
+                            .reload(); // Reload trang giỏ hàng sau khi áp dụng thay đổi
                             } else {
                                 alert(data.error || 'Có lỗi khi cập nhật giỏ hàng, vui lòng thử lại!');
                             }
@@ -823,52 +840,75 @@
                     });
             }
 
+            // Hàm xử lý sự kiện nhấp nút checkout với debounce
+            const handleCheckout = debounce(function() {
+                // Gọi API validate cart
+                console.log('Sending validate cart request');
+                fetch('{{ route('cart.validate') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => {
+                        console.log('Validate cart response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Bật lại nút và gỡ trạng thái loading
+                        checkoutButton.disabled = false;
+                        checkoutButton.classList.remove('loading');
+                        checkoutButton.innerHTML = 'Tiến hành đặt hàng';
+
+                        console.log('Validate cart response data:', data);
+                        if (!data.success) {
+                            alert(data.error || 'Có lỗi khi kiểm tra giỏ hàng, vui lòng thử lại!');
+                            return;
+                        }
+
+                        if (data.has_changes) {
+                            const changesMessage = document.getElementById('changesMessage');
+                            const changesList = document.getElementById('changesList');
+                            changesMessage.textContent = data.message ||
+                                'Giỏ hàng của bạn có một số thay đổi.';
+                            changesList.innerHTML = data.changes ? data.changes.map(change =>
+                                `<li>${change.message}</li>`).join('') : '';
+                            confirmChangesModal.classList.remove('hidden');
+                            confirmChangesBtn.dataset.updatedItems = JSON.stringify(data
+                                .updated_items || []);
+                        } else {
+                            console.log('No changes in cart, redirecting to checkout');
+                            window.location.href = '{{ route('order.checkout') }}';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validating cart:', error);
+                        alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
+                        // Bật lại nút và gỡ trạng thái loading
+                        checkoutButton.disabled = false;
+                        checkoutButton.classList.remove('loading');
+                        checkoutButton.innerHTML = 'Tiến hành đặt hàng';
+                    });
+            }, 1000); // Debounce 1 giây
+
+            // Gắn sự kiện click cho nút checkout
             if (checkoutButton) {
                 checkoutButton.addEventListener('click', function() {
                     if (this.disabled) return;
 
-                    console.log('Sending validate cart request');
-                    fetch('{{ route('cart.validate') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({})
-                        })
-                        .then(response => {
-                            console.log('Validate cart response status:', response.status);
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Validate cart response data:', data);
-                            if (!data.success) {
-                                alert(data.error || 'Có lỗi khi kiểm tra giỏ hàng, vui lòng thử lại!');
-                                return;
-                            }
+                    // Disable nút và thêm trạng thái loading ngay khi nhấp
+                    this.disabled = true;
+                    this.classList.add('loading');
+                    this.innerHTML =
+                        '<i class="fas fa-spinner text-xl mr-3 align-middle"></i> Đang xử lý...';
 
-                            if (data.has_changes) {
-                                const changesMessage = document.getElementById('changesMessage');
-                                const changesList = document.getElementById('changesList');
-                                changesMessage.textContent = data.message ||
-                                    'Giỏ hàng của bạn có một số thay đổi.';
-                                changesList.innerHTML = data.changes ? data.changes.map(change =>
-                                    `<li>${change.message}</li>`).join('') : '';
-                                confirmChangesModal.classList.remove('hidden');
-                                confirmChangesBtn.dataset.updatedItems = JSON.stringify(data
-                                    .updated_items || []);
-                            } else {
-                                console.log('No changes in cart, redirecting to checkout');
-                                window.location.href = '{{ route('order.checkout') }}';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error validating cart:', error);
-                            alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
-                        });
+                    // Gọi hàm xử lý checkout với debounce
+                    handleCheckout();
                 });
             }
 
