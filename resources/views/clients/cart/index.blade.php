@@ -604,9 +604,12 @@
                         console.log('Response data:', data);
                         if (data.success) {
                             quantityInput.value = newQuantity;
+                            // Kiểm tra trạng thái nút "+" dựa trên số lượng và stock
                             if (newQuantity >= parseInt(quantityInput.dataset.stock)) {
                                 showMaxQuantityModal();
                                 incrementBtn.disabled = true;
+                            } else {
+                                incrementBtn.disabled = false; // Bật lại nút "+" nếu số lượng < stock
                             }
 
                             // Cập nhật subtotal của sản phẩm
@@ -638,36 +641,20 @@
                             cartTotalElement.textContent = formatCurrency(cartTotalValue);
                             console.log('Updated cartTotalElement:', cartTotalElement.textContent);
 
-                            // Kiểm tra tính hợp lệ của giỏ hàng
-                            let isCartValid = true;
-                            rows.forEach(row => {
-                                const quantity = parseInt(row.querySelector('.quantity-input')
-                                    .value) || 0;
-                                const stock = parseInt(row.querySelector('.quantity-input')
-                                    .dataset.stock) || 0;
-                                if (quantity <= 0 || quantity > stock) {
-                                    isCartValid = false;
-                                }
-                            });
-
-                            checkoutButton.disabled = !isCartValid;
-                            if (!isCartValid) {
-                                checkoutButton.classList.add('opacity-50', 'cursor-not-allowed');
-                            } else {
-                                checkoutButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                            }
+                            // Gọi updateSummary để đảm bảo trạng thái nút "+" và giao diện được đồng bộ
+                            updateSummary();
                         } else {
                             console.error('Server error:', data.error);
                             alert(data.error || 'Lỗi từ server, vui lòng thử lại!');
                             quantityInput.value = quantityInput.dataset.previousQuantity || 1;
-                            updateSummary();
+                            updateSummary(); // Gọi updateSummary trong trường hợp lỗi
                         }
                     })
                     .catch(error => {
                         console.error('AJAX error:', error.message);
                         alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
                         quantityInput.value = quantityInput.dataset.previousQuantity || 1;
-                        updateSummary();
+                        updateSummary(); // Gọi updateSummary trong trường hợp lỗi
                     });
             }, 500);
 
