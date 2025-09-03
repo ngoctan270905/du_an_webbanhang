@@ -303,10 +303,11 @@
             </div>
 
             <div class="mt-6 flex space-x-4">
-                <a href="{{ route('product.index') }}"
+                <a href="{{ url()->previous() }}"
                     class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
-                    Tiếp tục mua sắm
+                    Quay lại
                 </a>
+
                 <button onclick="showConfirmClear()"
                     class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition">
                     Xóa hết giỏ hàng
@@ -314,7 +315,7 @@
             </div>
         @else
             <div class="text-center py-8">
-                <p class="text-gray-600 mb-4">Giỏ hàng của bạn đang trống</p>
+                <p class="text-gray-600 mb-10">Giỏ hàng của bạn đang trống</p>
                 <a href="{{ route('product.index') }}" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600">
                     Tiếp tục mua sắm
                 </a>
@@ -580,7 +581,7 @@
                             console.log('Apply changes response data:', data);
                             if (data.success) {
                                 window.location
-                            .reload(); // Reload trang giỏ hàng sau khi áp dụng thay đổi
+                                    .reload(); // Reload trang giỏ hàng sau khi áp dụng thay đổi
                             } else {
                                 alert(data.error || 'Có lỗi khi cập nhật giỏ hàng, vui lòng thử lại!');
                             }
@@ -685,7 +686,7 @@
 
                             const rows = Array.from(document.querySelectorAll('.cart-table tbody tr'));
                             totalItemsDisplay.textContent = rows.length > 0 ? rows.reduce((sum,
-                            row) => {
+                                row) => {
                                 const quantity = parseInt(row.querySelector('.quantity-input')
                                     .value) || 0;
                                 return sum + quantity;
