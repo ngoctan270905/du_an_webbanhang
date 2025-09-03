@@ -15,6 +15,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecycleBinController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\OrderController;
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -50,6 +51,11 @@ Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remov
 //     return redirect()->route('cart.show')->with('success', 'Giỏ hàng đã được làm mới!');
 // })->name('cart.clear');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::post('/cart/validate', [CartController::class, 'validateCart'])->name('cart.validate');
+    Route::post('/cart/apply-changes', [CartController::class, 'applyChanges'])->name('cart.apply_changes');
+    Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('order.checkout');
+    Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
+    Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('order.success');
 
 // ...existing code...
 // =====================

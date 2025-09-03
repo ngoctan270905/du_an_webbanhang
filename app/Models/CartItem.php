@@ -13,6 +13,7 @@ class CartItem extends Model
     'id_nguoi_dung',
     'id_san_pham',
     'so_luong',
+    'gia',
   ];
 
   public function user()

@@ -148,6 +148,7 @@
             -moz-appearance: textfield;
         }
 
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .cart-table thead {
@@ -314,7 +315,7 @@
             </div>
         @else
             <div class="text-center py-8">
-                <p class="text-gray-600 mb-4">Giỏ hàng của bạn đang trống</p>
+                <p class="text-gray-500 mb-4">Giỏ hàng của bạn đang trống</p>
                 <a href="{{ route('product.index') }}" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600">
                     Tiếp tục mua sắm
                 </a>
@@ -382,21 +383,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Modal for cart changes --}}
-        <div id="confirmChangesModal" class="modal-overlay hidden">
-            <div class="modal-confirm bg-white rounded-lg shadow-xl p-6 w-96 max-w-full">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Có thay đổi trong giỏ hàng</h3>
-                <p id="changesMessage" class="text-gray-600 mb-6"></p>
-                <ul id="changesList" class="list-disc pl-5 mb-6"></ul>
-                <div class="flex justify-end space-x-4">
-                    <button id="confirmChanges"
-                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
-                        Xác nhận cập nhật
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -405,13 +391,10 @@
             const closeMaxQuantityBtn = document.getElementById('closeMaxQuantity');
             const confirmDeleteModal = document.getElementById('confirmDeleteModal');
             const confirmClearModal = document.getElementById('confirmClearModal');
-            const confirmChangesModal = document.getElementById('confirmChangesModal');
             const cancelDeleteBtn = document.getElementById('cancelDelete');
             const confirmDeleteBtn = document.getElementById('confirmDelete');
             const cancelClearBtn = document.getElementById('cancelClear');
             const confirmClearBtn = document.getElementById('confirmClear');
-            const cancelChangesBtn = document.getElementById('cancelChanges');
-            const confirmChangesBtn = document.getElementById('confirmChanges');
             const totalItemsDisplay = document.querySelector('.total-items-display');
             const totalAmountDisplay = document.querySelector('.total-amount-display');
             const cartTotalElement = document.getElementById('cart-total');
@@ -423,9 +406,6 @@
             if (!cartTotalElement) console.error('cartTotalElement (#cart-total) not found in DOM');
             if (!totalAmountDisplay) console.error('totalAmountDisplay (.total-amount-display) not found in DOM');
             if (!totalItemsDisplay) console.error('totalItemsDisplay (.total-items-display) not found in DOM');
-            if (!confirmChangesModal) console.error('confirmChangesModal (#confirmChangesModal) not found in DOM');
-            if (!cancelChangesBtn) console.error('cancelChangesBtn (#cancelChanges) not found in DOM');
-            if (!confirmChangesBtn) console.error('confirmChangesBtn (#confirmChanges) not found in DOM');
 
             // Debounce function
             function debounce(func, wait) {
@@ -444,7 +424,7 @@
                 return new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
-                }).format(amount).replace('₫', 'đ');
+                }).format(amount).replace('₫', 'đ'); // Đồng bộ với Blade
             }
 
             function showMaxQuantityModal() {
@@ -474,19 +454,6 @@
                 }
             }
 
-            function closeConfirmModal(modal) {
-                if (modal) {
-                    const modalContent = modal.querySelector('.modal-confirm');
-                    modal.classList.add('closing');
-                    if (modalContent) modalContent.classList.add('closing');
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                        modal.classList.remove('closing');
-                        if (modalContent) modalContent.classList.remove('closing');
-                    }, 280);
-                }
-            }
-
             if (closeMaxQuantityBtn) {
                 closeMaxQuantityBtn.addEventListener('click', closeMaxQuantityModal);
             }
@@ -507,6 +474,19 @@
                     console.error('Cannot show confirm clear modal: confirmClearModal is null');
                 }
             };
+
+            function closeConfirmModal(modal) {
+                if (modal) {
+                    const modalContent = modal.querySelector('.modal-confirm');
+                    modal.classList.add('closing');
+                    if (modalContent) modalContent.classList.add('closing');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('closing');
+                        if (modalContent) modalContent.classList.remove('closing');
+                    }, 280);
+                }
+            }
 
             if (cancelDeleteBtn) {
                 cancelDeleteBtn.addEventListener('click', () => closeConfirmModal(confirmDeleteModal));
@@ -539,57 +519,13 @@
                             if (data.success) {
                                 window.location.reload();
                             } else {
-                                alert(data.error || 'Có lỗi khi xóa giỏ hàng, vui lòng thử lại!');
+                                alert(data.error);
                             }
                         })
-                        .catch(error => {
-                            console.error('Error clearing cart:', error);
+                        .catch(() => {
                             alert('Có lỗi xảy ra, vui lòng thử lại!');
                         });
                     closeConfirmModal(confirmClearModal);
-                });
-            }
-
-            if (cancelChangesBtn) {
-                cancelChangesBtn.addEventListener('click', () => closeConfirmModal(confirmChangesModal));
-            }
-
-            if (confirmChangesBtn) {
-                confirmChangesBtn.addEventListener('click', () => {
-                    const updatedItems = JSON.parse(confirmChangesBtn.dataset.updatedItems || '[]');
-                    console.log('Sending apply changes request with data:', updatedItems);
-
-                    fetch('{{ route('cart.apply_changes') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                updated_items: updatedItems
-                            })
-                        })
-                        .then(response => {
-                            console.log('Apply changes response status:', response.status);
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Apply changes response data:', data);
-                            if (data.success) {
-                                window.location
-                            .reload(); // Reload trang giỏ hàng sau khi áp dụng thay đổi
-                            } else {
-                                alert(data.error || 'Có lỗi khi cập nhật giỏ hàng, vui lòng thử lại!');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error applying changes:', error);
-                            alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
-                        });
-                    closeConfirmModal(confirmChangesModal);
                 });
             }
 
@@ -658,23 +594,25 @@
                         })
                     })
                     .then(response => {
-                        console.log('Update cart response status:', response.status);
+                        console.log('Response status:', response.status);
                         if (!response.ok) {
                             throw new Error(`HTTP error! Status: ${response.status}`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Update cart response data:', data);
+                        console.log('Response data:', data);
                         if (data.success) {
                             quantityInput.value = newQuantity;
+                            // Kiểm tra trạng thái nút "+" dựa trên số lượng và stock
                             if (newQuantity >= parseInt(quantityInput.dataset.stock)) {
                                 showMaxQuantityModal();
                                 incrementBtn.disabled = true;
                             } else {
-                                incrementBtn.disabled = false;
+                                incrementBtn.disabled = false; // Bật lại nút "+" nếu số lượng < stock
                             }
 
+                            // Cập nhật subtotal của sản phẩm
                             const row = quantityInput.closest('tr');
                             const priceElement = row.querySelector('.price-col');
                             const subtotalElement = row.querySelector('.subtotal-col');
@@ -683,6 +621,7 @@
                             const subtotal = price * newQuantity;
                             subtotalElement.textContent = formatCurrency(subtotal);
 
+                            // Cập nhật tổng số sản phẩm
                             const rows = Array.from(document.querySelectorAll('.cart-table tbody tr'));
                             totalItemsDisplay.textContent = rows.length > 0 ? rows.reduce((sum,
                             row) => {
@@ -691,6 +630,7 @@
                                 return sum + quantity;
                             }, 0) : 0;
 
+                            // Cập nhật tổng tiền từ server
                             const cartTotalValue = parseInt(data.cart_total) || 0;
                             console.log('Parsed cart_total:', cartTotalValue);
                             if (isNaN(cartTotalValue)) {
@@ -701,19 +641,20 @@
                             cartTotalElement.textContent = formatCurrency(cartTotalValue);
                             console.log('Updated cartTotalElement:', cartTotalElement.textContent);
 
+                            // Gọi updateSummary để đảm bảo trạng thái nút "+" và giao diện được đồng bộ
                             updateSummary();
                         } else {
                             console.error('Server error:', data.error);
                             alert(data.error || 'Lỗi từ server, vui lòng thử lại!');
                             quantityInput.value = quantityInput.dataset.previousQuantity || 1;
-                            updateSummary();
+                            updateSummary(); // Gọi updateSummary trong trường hợp lỗi
                         }
                     })
                     .catch(error => {
                         console.error('AJAX error:', error.message);
                         alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
                         quantityInput.value = quantityInput.dataset.previousQuantity || 1;
-                        updateSummary();
+                        updateSummary(); // Gọi updateSummary trong trường hợp lỗi
                     });
             }, 500);
 
@@ -789,19 +730,13 @@
                             product_id: productId
                         })
                     })
-                    .then(response => {
-                        console.log('Remove cart response status:', response.status);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        console.log('Remove cart response data:', data);
                         if (data.success) {
                             const rowToRemove = document.querySelector(`tr[data-id="${productId}"]`);
                             if (rowToRemove) {
                                 rowToRemove.remove();
+                                // Cập nhật tổng tiền từ server
                                 const cartTotalValue = parseInt(data.cart_total) || 0;
                                 totalAmountDisplay.textContent = formatCurrency(cartTotalValue);
                                 cartTotalElement.textContent = formatCurrency(cartTotalValue);
@@ -813,62 +748,12 @@
                                 window.location.reload();
                             }
                         } else {
-                            alert(data.error || 'Có lỗi khi xóa sản phẩm, vui lòng thử lại!');
+                            alert(data.error);
                         }
                     })
-                    .catch(error => {
-                        console.error('Error removing from cart:', error);
-                        alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
+                    .catch(() => {
+                        alert('Có lỗi xảy ra, vui lòng thử lại!');
                     });
-            }
-
-            if (checkoutButton) {
-                checkoutButton.addEventListener('click', function() {
-                    if (this.disabled) return;
-
-                    console.log('Sending validate cart request');
-                    fetch('{{ route('cart.validate') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({})
-                        })
-                        .then(response => {
-                            console.log('Validate cart response status:', response.status);
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Validate cart response data:', data);
-                            if (!data.success) {
-                                alert(data.error || 'Có lỗi khi kiểm tra giỏ hàng, vui lòng thử lại!');
-                                return;
-                            }
-
-                            if (data.has_changes) {
-                                const changesMessage = document.getElementById('changesMessage');
-                                const changesList = document.getElementById('changesList');
-                                changesMessage.textContent = data.message ||
-                                    'Giỏ hàng của bạn có một số thay đổi.';
-                                changesList.innerHTML = data.changes ? data.changes.map(change =>
-                                    `<li>${change.message}</li>`).join('') : '';
-                                confirmChangesModal.classList.remove('hidden');
-                                confirmChangesBtn.dataset.updatedItems = JSON.stringify(data
-                                    .updated_items || []);
-                            } else {
-                                console.log('No changes in cart, redirecting to checkout');
-                                window.location.href = '{{ route('order.checkout') }}';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error validating cart:', error);
-                            alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
-                        });
-                });
             }
 
             updateSummary();
