@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -84,23 +82,20 @@
 
         /* Dropdown Menu Styles */
         .user-menu-dropdown,
-        .notification-dropdown,
-        .cart-dropdown {
+        .notification-dropdown {
             transform-origin: top right;
             transition: transform 0.2s ease-out, opacity 0.2s ease-out;
         }
 
         .user-menu-dropdown.hidden,
-        .notification-dropdown.hidden,
-        .cart-dropdown.hidden {
+        .notification-dropdown.hidden {
             transform: scale(0.95);
             opacity: 0;
             display: none;
         }
 
         .user-menu-dropdown.show,
-        .notification-dropdown.show,
-        .cart-dropdown.show {
+        .notification-dropdown.show {
             transform: scale(1);
             opacity: 1;
             display: block;
@@ -503,37 +498,13 @@
                 @endauth
             </div>
 
-            <div class="relative">
-                <button id="cart-button"
-                    class="relative flex items-center justify-center w-10 h-10 transition-colors focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span
-                        class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">3</span>
-                </button>
-                <div id="cart-dropdown"
-                    class="cart-dropdown hidden absolute right-0 mt-2 w-80 bg-gray-700 text-white rounded-md shadow-lg overflow-hidden z-20">
-                    <div class="p-4 border-b border-gray-600">
-                        <h4 class="text-lg font-bold">Giỏ hàng</h4>
-                    </div>
-                    <div class="max-h-80 overflow-y-auto hide-scrollbar">
-                        <!-- Cart items will be populated here -->
-                    </div>
-                    <div class="p-4 border-t border-gray-600">
-                        <div class="flex justify-between text-sm font-medium">
-                            <span>Tổng cộng:</span>
-                            <span id="">0 VNĐ</span>
-                        </div>
-                        <a href=""
-                            class="block mt-2 text-center bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-md hover:bg-yellow-500 transition-colors">
-                            Xem giỏ hàng
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <button class="relative transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -640,10 +611,7 @@
             const notificationDropdown = document.getElementById('notification-dropdown');
             const userMenuBtn = document.getElementById('user-menu-button');
             const userMenuDropdown = document.getElementById('user-menu-dropdown');
-            const cartBtn = document.getElementById('cart-button');
-            const cartDropdown = document.getElementById('cart-dropdown');
             const notificationList = document.querySelector('#notification-dropdown .max-h-80');
-            const cartList = document.querySelector('#cart-dropdown .max-h-80');
             const modal = document.getElementById('notification-modal');
             const closeModalBtn = document.getElementById('close-modal-button');
             const modalTitle = document.getElementById('modal-title');
@@ -682,7 +650,6 @@
                 }
             ];
 
-
             // Function to render notifications
             function renderNotifications() {
                 notificationList.innerHTML = '';
@@ -707,48 +674,6 @@
                     notificationList.appendChild(item);
                 });
             }
-
-            // Function to render cart items
-            function renderCartItems() {
-                cartList.innerHTML = '';
-                if (cartItems.length === 0) {
-                    cartList.innerHTML =
-                        `<p class="p-4 text-center text-gray-400">Giỏ hàng trống.</p>`;
-                    return;
-                }
-                let total = 0;
-                cartItems.forEach(item => {
-                    const itemTotal = item.price * item.quantity;
-                    total += itemTotal;
-                    const cartItem = document.createElement('div');
-                    cartItem.classList.add('flex', 'items-center', 'p-4', 'border-b', 'border-gray-600',
-                        'last:border-b-0');
-                    cartItem.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md mr-4">
-                        <div class="flex-1">
-                            <p class="text-sm font-medium">${item.name}</p>
-                            <p class="text-xs text-gray-300">${item.quantity} x ${item.price.toLocaleString('vi-VN')} VNĐ</p>
-                        </div>
-                        <button class="text-red-400 hover:text-red-300 text-sm" onclick="removeCartItem(${item.id})">
-                            Xóa
-                        </button>
-                    `;
-                    cartList.appendChild(cartItem);
-                });
-                cartTotal.textContent = `${total.toLocaleString('vi-VN')} VNĐ`;
-            }
-
-            // Function to remove cart item (placeholder)
-            function removeCartItem(itemId) {
-                const index = cartItems.findIndex(item => item.id === itemId);
-                if (index !== -1) {
-                    cartItems.splice(index, 1);
-                    renderCartItems();
-                }
-            }
-
-            // Expose removeCartItem to global scope
-            window.removeCartItem = removeCartItem;
 
             // Function to show the modal with content
             function showModal(notifData) {
@@ -783,7 +708,7 @@
 
             // Function to close other dropdowns
             function closeOtherDropdown(currentDropdown) {
-                const dropdowns = [notificationDropdown, userMenuDropdown, cartDropdown];
+                const dropdowns = [notificationDropdown, userMenuDropdown];
                 dropdowns.forEach(dropdown => {
                     if (dropdown && dropdown !== currentDropdown && dropdown.classList.contains('show')) {
                         dropdown.classList.remove('show');
@@ -814,10 +739,8 @@
 
             // Initial function calls
             renderNotifications();
-            renderCartItems();
             setupDropdown(notificationBtn, notificationDropdown);
             setupDropdown(userMenuBtn, userMenuDropdown);
-            setupDropdown(cartBtn, cartDropdown);
         });
     </script>
 </body>
