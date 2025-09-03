@@ -89,97 +89,105 @@ class CartController extends Controller
     return view('clients.cart.index', ['cart' => $cartItems]);
   }
 
-  public function update(Request $request): JsonResponse
-  {
-    // Check if user is authenticated
+ public function update(Request $request): JsonResponse
+{
     if (!Auth::check()) {
-      return response()->json([
-        'success' => false,
-        'error' => 'Vui lòng đăng nhập hoặc đăng ký để cập nhật giỏ hàng!'
-      ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Vui lòng đăng nhập hoặc đăng ký để cập nhật giỏ hàng!'
+        ], 401);
     }
 
-    $product = Product::findOrFail($request->product_id);
-    $quantity = $request->quantity;
-    $user = Auth::user();
+    try {
+        $product = Product::findOrFail($request->product_id);
+        $quantity = $request->quantity;
+        $user = Auth::user();
 
-    // Kiểm tra số lượng hợp lệ
-    if ($quantity <= 0) {
-      return response()->json([
-        'success' => false,
-        'error' => 'Số lượng phải lớn hơn 0!'
-      ]);
+        if ($quantity <= 0) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Số lượng phải lớn hơn 0!'
+            ], 400);
+        }
+
+        if ($quantity > $product->so_luong) {
+            return response()->json([
+                'success' => false,
+                'error' => "Số lượng yêu cầu vượt quá tồn kho. Sản phẩm này chỉ còn {$product->so_luong} quyển."
+            ], 400);
+        }
+
+        $cartItem = CartItem::where('id_nguoi_dung', $user->id)
+            ->where('id_san_pham', $request->product_id)
+            ->first();
+
+        if ($cartItem) {
+            $cartItem->so_luong = $quantity;
+            $cartItem->save();
+
+            $cartTotal = CartItem::where('id_nguoi_dung', $user->id)
+                ->with('product')
+                ->get()
+                ->sum(function ($item) {
+                    return ($item->product->gia_khuyen_mai ?? $item->product->gia) * $item->so_luong;
+                });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Số lượng đã được cập nhật!',
+                'total' => ($product->gia_khuyen_mai ?? $product->gia) * $quantity,
+                'cart_total' => $cartTotal // Trả về số nguyên
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'error' => 'Sản phẩm không tồn tại trong giỏ hàng!'
+        ], 404);
+    } catch (\Exception $e) {
+        \Log::error('Cart update error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'error' => 'Có lỗi xảy ra, vui lòng thử lại!'
+        ], 500);
     }
-
-    // Kiểm tra số lượng tồn kho
-    if ($quantity > $product->so_luong) {
-      return response()->json([
-        'success' => false,
-        'error' => "Số lượng yêu cầu vượt quá tồn kho. Sản phẩm này chỉ còn {$product->so_luong} quyển."
-      ]);
-    }
-
-    // Cập nhật giỏ hàng
-    $cartItem = CartItem::where('id_nguoi_dung', $user->id)
-      ->where('id_san_pham', $request->product_id)
-      ->first();
-
-    if ($cartItem) {
-      $cartItem->so_luong = $quantity;
-      $cartItem->save();
-      return response()->json([
-        'success' => true,
-        'message' => 'Số lượng đã được cập nhật!',
-        'total' => number_format(($product->gia_khuyen_mai ?? $product->gia) * $quantity, 0, ',', '.') . 'đ',
-        'cart_total' => number_format(CartItem::where('id_nguoi_dung', $user->id)
-          ->with('product')
-          ->get()
-          ->sum(function ($item) {
-            return ($item->product->gia_khuyen_mai ?? $item->product->gia) * $item->so_luong;
-          }), 0, ',', '.') . 'đ'
-      ]);
-    }
-
-    return response()->json([
-      'success' => false,
-      'error' => 'Sản phẩm không tồn tại trong giỏ hàng!'
-    ]);
-  }
+}
 
   public function remove(Request $request): JsonResponse
-  {
-    // Check if user is authenticated
+{
     if (!Auth::check()) {
-      return response()->json([
-        'success' => false,
-        'error' => 'Vui lòng đăng nhập hoặc đăng ký để xóa sản phẩm khỏi giỏ hàng!'
-      ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Vui lòng đăng nhập hoặc đăng ký để xóa sản phẩm khỏi giỏ hàng!'
+        ], 401);
     }
 
     $user = Auth::user();
     $cartItem = CartItem::where('id_nguoi_dung', $user->id)
-      ->where('id_san_pham', $request->product_id)
-      ->first();
+        ->where('id_san_pham', $request->product_id)
+        ->first();
 
     if ($cartItem) {
-      $cartItem->delete();
-      return response()->json([
-        'success' => true,
-        'message' => 'Sản phẩm đã được xóa khỏi giỏ hàng!',
-        'cart_total' => number_format(CartItem::where('id_nguoi_dung', $user->id)
-          ->with('product')
-          ->get()
-          ->sum(function ($item) {
-            return ($item->product->gia_khuyen_mai ?? $item->product->gia) * $item->so_luong;
-          }), 0, ',', '.') . 'đ'
-      ]);
+        $cartItem->delete();
+        $cartTotal = CartItem::where('id_nguoi_dung', $user->id)
+            ->with('product')
+            ->get()
+            ->sum(function ($item) {
+                return ($item->product->gia_khuyen_mai ?? $item->product->gia) * $item->so_luong;
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sản phẩm đã được xóa khỏi giỏ hàng!',
+            'cart_total' => $cartTotal // Trả về số nguyên
+        ]);
     }
 
     return response()->json([
-      'success' => false,
-      'error' => 'Sản phẩm không tồn tại trong giỏ hàng!'
-    ]);
-  }
+        'success' => false,
+        'error' => 'Sản phẩm không tồn tại trong giỏ hàng!'
+    ], 404);
+}
 
   public function clear(): JsonResponse
   {

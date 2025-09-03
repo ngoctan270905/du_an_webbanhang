@@ -4,7 +4,32 @@
 
 @section('content')
     <style>
-        /* Animation for modal */
+        /* Animation for max quantity modal */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Animation for confirmation modals */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -29,7 +54,16 @@
             }
         }
 
-        /* Faded overlay */
+        /* Modal styling for max quantity */
+        .modal-slide {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-slide.closing {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        /* Modal styling for confirmation */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -40,16 +74,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 50;
+            z-index: 1000;
             transition: opacity 0.3s ease;
         }
 
-        /* Class to hide modal with JavaScript */
         .modal-overlay.hidden {
             display: none;
         }
 
-        /* Confirmation modal */
+        .modal-overlay.closing {
+            opacity: 0;
+        }
+
         .modal-confirm {
             animation: fadeIn 0.3s ease-out;
         }
@@ -80,6 +116,38 @@
         .cart-table td {
             vertical-align: middle;
         }
+
+        /* Disabled button style */
+        .increment-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Input quantity style */
+        .quantity-input {
+            text-align: center;
+            border: none;
+            outline: none;
+            width: 3rem;
+        }
+
+        .quantity-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* Ẩn mũi tên tăng/giảm trong Chrome, Safari, Edge */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Ẩn trong Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
@@ -124,7 +192,7 @@
     </style>
 
     <div class="container mx-auto px-4 py-8 md:px-8 lg:px-16">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Giỏ hàng của bạn</h1>
+        <div class="text-3xl font-bold mb-4 text-gray-800">Giỏ hàng của bạn</div>
 
         @if (count($cart) > 0)
             <div class="flex flex-col lg:flex-row lg:space-x-8">
@@ -169,14 +237,14 @@
                                                 class="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-lg decrement-btn"
                                                 data-product-id="{{ $details['id'] }}"
                                                 data-stock="{{ $details['stock'] }}">-</button>
-                                            <input type="text"
-                                                class="w-12 text-center border-x border-gray-300 outline-none text-gray-800 quantity-input"
-                                                value="{{ $details['quantity'] }}" readonly
-                                                data-product-id="{{ $details['id'] }}">
+                                            <input type="number"
+                                                class="quantity-input w-12 text-center border-x border-gray-300 text-gray-800"
+                                                value="{{ $details['quantity'] }}" data-product-id="{{ $details['id'] }}"
+                                                data-stock="{{ $details['stock'] }}" min="1">
                                             <button
                                                 class="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-lg increment-btn"
-                                                data-product-id="{{ $details['id'] }}"
-                                                data-stock="{{ $details['stock'] }}">+</button>
+                                                data-product-id="{{ $details['id'] }}" data-stock="{{ $details['stock'] }}"
+                                                {{ $details['quantity'] >= $details['stock'] ? 'disabled' : '' }}>+</button>
                                         </div>
                                     </td>
                                     <td data-label="Giá tiền" class="text-right">
@@ -201,7 +269,7 @@
                 </div>
 
                 <div class="lg:w-1/3 bg-white rounded-lg shadow-md p-6 border border-gray-300">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Thông tin gói sản phẩm</h2>
+                    <div class="text-xl font-semibold mb-4 text-gray-800">Thông tin gói sản phẩm</div>
                     <div class="space-y-3">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Tổng số sản phẩm:</span>
@@ -254,10 +322,10 @@
             </div>
         @endif
 
-        {{-- Modal for success/error messages --}}
-        <div id="cartModal" class="fixed top-6 right-6 z-50 hidden">
+        {{-- Modal for max quantity reached --}}
+        <div id="maxQuantityModal" class="fixed top-6 right-6 z-50 hidden modal-slide">
             <div class="relative bg-white rounded-2xl shadow-2xl p-5 w-80 border border-gray-100">
-                <button id="closeModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
+                <button id="closeMaxQuantity" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -265,16 +333,16 @@
                 </button>
                 <div class="flex items-start space-x-3">
                     <div class="flex-shrink-0">
-                        <div id="modalIcon" class="flex items-center justify-center w-10 h-10 rounded-full">
-                            {{-- Icon will be dynamically updated --}}
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                                </path>
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100">
+                            <svg class="h-6 w-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div id="modalContent" class="flex-1">
-                        {{-- Content will be dynamically updated --}}
+                    <div class="flex-1">
+                        <p class="text-base font-semibold text-gray-800">Thông báo</p>
+                        <p class="text-sm text-gray-500">Bạn đã chọn đến số lượng tối đa có sẵn trong kho.</p>
                     </div>
                 </div>
             </div>
@@ -319,10 +387,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('cartModal');
-            const closeModalBtn = document.getElementById('closeModal');
-            const modalContent = document.getElementById('modalContent');
-            const modalIcon = document.getElementById('modalIcon');
+            const maxQuantityModal = document.getElementById('maxQuantityModal');
+            const closeMaxQuantityBtn = document.getElementById('closeMaxQuantity');
             const confirmDeleteModal = document.getElementById('confirmDeleteModal');
             const confirmClearModal = document.getElementById('confirmClearModal');
             const cancelDeleteBtn = document.getElementById('cancelDelete');
@@ -334,63 +400,92 @@
             const cartTotalElement = document.getElementById('cart-total');
             const checkoutButton = document.getElementById('checkout-button');
             let productIdToDelete = null;
-            let timeoutId;
+            let autoCloseTimeout = null;
+
+            // Kiểm tra DOM elements
+            if (!cartTotalElement) console.error('cartTotalElement (#cart-total) not found in DOM');
+            if (!totalAmountDisplay) console.error('totalAmountDisplay (.total-amount-display) not found in DOM');
+            if (!totalItemsDisplay) console.error('totalItemsDisplay (.total-items-display) not found in DOM');
+
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
 
             function formatCurrency(amount) {
                 return new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
-                }).format(amount);
+                }).format(amount).replace('₫', 'đ'); // Đồng bộ với Blade
             }
 
-            function showModal(message, isSuccess = true) {
-                clearTimeout(timeoutId); // Clear any existing timeout
-                modalContent.innerHTML = `
-                    <p class="text-base font-semibold text-gray-800">${isSuccess ? 'Thành công' : 'Lỗi'}</p>
-                    <p class="text-sm text-gray-500">${message}</p>
-                    ${isSuccess ? '<a href="{{ route('cart.show') }}" class="mt-3 inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">Xem giỏ hàng →</a>' : ''}
-                `;
-
-                modalIcon.className =
-                    `flex items-center justify-center w-10 h-10 rounded-full ${isSuccess ? 'bg-green-100' : 'bg-red-100'}`;
-                const iconSvg = modalIcon.querySelector('svg');
-                iconSvg.className = `h-6 w-6 ${isSuccess ? 'text-green-500' : 'text-red-500'}`;
-                iconSvg.innerHTML = isSuccess ?
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>' :
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
-
-                modal.classList.remove('hidden');
-                modal.style.animation = 'fadeIn 0.3s ease-out';
-                timeoutId = setTimeout(hideModal, 3000);
+            function showMaxQuantityModal() {
+                console.log('Showing max quantity modal');
+                if (maxQuantityModal) {
+                    maxQuantityModal.classList.remove('hidden');
+                    maxQuantityModal.classList.add('modal-slide');
+                    if (autoCloseTimeout) clearTimeout(autoCloseTimeout);
+                    autoCloseTimeout = setTimeout(closeMaxQuantityModal, 2000);
+                } else {
+                    console.error('Cannot show modal: maxQuantityModal is null');
+                }
             }
 
-            function hideModal() {
-                modal.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.style.animation = '';
-                }, 280);
+            function closeMaxQuantityModal() {
+                console.log('Closing max quantity modal');
+                if (maxQuantityModal) {
+                    maxQuantityModal.classList.add('closing');
+                    setTimeout(() => {
+                        maxQuantityModal.classList.add('hidden');
+                        maxQuantityModal.classList.remove('closing', 'modal-slide');
+                    }, 280);
+                    if (autoCloseTimeout) {
+                        clearTimeout(autoCloseTimeout);
+                        autoCloseTimeout = null;
+                    }
+                }
             }
 
-            if (closeModalBtn) {
-                closeModalBtn.addEventListener('click', hideModal);
+            if (closeMaxQuantityBtn) {
+                closeMaxQuantityBtn.addEventListener('click', closeMaxQuantityModal);
             }
 
             window.showConfirmDelete = function(productId) {
                 productIdToDelete = productId;
-                confirmDeleteModal.classList.remove('hidden');
+                if (confirmDeleteModal) {
+                    confirmDeleteModal.classList.remove('hidden');
+                } else {
+                    console.error('Cannot show confirm delete modal: confirmDeleteModal is null');
+                }
             };
 
             window.showConfirmClear = function() {
-                confirmClearModal.classList.remove('hidden');
+                if (confirmClearModal) {
+                    confirmClearModal.classList.remove('hidden');
+                } else {
+                    console.error('Cannot show confirm clear modal: confirmClearModal is null');
+                }
             };
 
             function closeConfirmModal(modal) {
-                modal.classList.add('closing');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('closing');
-                }, 280);
+                if (modal) {
+                    const modalContent = modal.querySelector('.modal-confirm');
+                    modal.classList.add('closing');
+                    if (modalContent) modalContent.classList.add('closing');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('closing');
+                        if (modalContent) modalContent.classList.remove('closing');
+                    }, 280);
+                }
             }
 
             if (cancelDeleteBtn) {
@@ -424,11 +519,11 @@
                             if (data.success) {
                                 window.location.reload();
                             } else {
-                                showModal(data.error, false);
+                                alert(data.error);
                             }
                         })
                         .catch(() => {
-                            showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+                            alert('Có lỗi xảy ra, vui lòng thử lại!');
                         });
                     closeConfirmModal(confirmClearModal);
                 });
@@ -439,18 +534,28 @@
                 let newTotalItems = 0;
                 let isCartValid = true;
 
-                document.querySelectorAll('.cart-table tbody tr').forEach(row => {
+                const rows = Array.from(document.querySelectorAll('.cart-table tbody tr'));
+                rows.forEach(row => {
                     const quantityInput = row.querySelector('.quantity-input');
                     const priceElement = row.querySelector('.price-col');
                     const subtotalElement = row.querySelector('.subtotal-col');
+                    const incrementBtn = row.querySelector('.increment-btn');
 
-                    const quantity = parseInt(quantityInput.value);
-                    const priceText = priceElement.textContent.replace(/\D/g, ''); // Remove non-digits
-                    const price = parseInt(priceText);
-                    const stock = parseInt(quantityInput.dataset.stock);
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    const priceText = priceElement.textContent.replace(/\D/g, '');
+                    const price = parseInt(priceText) || 0;
+                    const stock = parseInt(quantityInput.dataset.stock) || 0;
+
+                    console.log(`Row: ${row.dataset.id}, Quantity: ${quantity}, Stock: ${stock}`);
 
                     if (quantity <= 0 || quantity > stock) {
                         isCartValid = false;
+                    }
+
+                    if (quantity >= stock) {
+                        incrementBtn.disabled = true;
+                    } else {
+                        incrementBtn.disabled = false;
                     }
 
                     const subtotal = quantity * price;
@@ -463,7 +568,9 @@
                 totalAmountDisplay.textContent = formatCurrency(newTotal);
                 cartTotalElement.textContent = formatCurrency(newTotal);
 
-                // Update checkout button state
+                console.log('updateSummary - Total Items:', newTotalItems, 'Total Amount:', formatCurrency(
+                    newTotal));
+
                 if (isCartValid) {
                     checkoutButton.disabled = false;
                     checkoutButton.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -472,6 +579,97 @@
                     checkoutButton.classList.add('opacity-50', 'cursor-not-allowed');
                 }
             }
+
+            const updateCart = debounce(function(productId, newQuantity, incrementBtn, quantityInput) {
+                console.log(`Updating cart: Product ID ${productId}, Quantity ${newQuantity}`);
+                fetch('{{ route('cart.update') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            quantity: newQuantity
+                        })
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Response data:', data);
+                        if (data.success) {
+                            quantityInput.value = newQuantity;
+                            if (newQuantity >= parseInt(quantityInput.dataset.stock)) {
+                                showMaxQuantityModal();
+                                incrementBtn.disabled = true;
+                            }
+
+                            // Cập nhật subtotal của sản phẩm
+                            const row = quantityInput.closest('tr');
+                            const priceElement = row.querySelector('.price-col');
+                            const subtotalElement = row.querySelector('.subtotal-col');
+                            const priceText = priceElement.textContent.replace(/\D/g, '');
+                            const price = parseInt(priceText) || 0;
+                            const subtotal = price * newQuantity;
+                            subtotalElement.textContent = formatCurrency(subtotal);
+
+                            // Cập nhật tổng số sản phẩm
+                            const rows = Array.from(document.querySelectorAll('.cart-table tbody tr'));
+                            totalItemsDisplay.textContent = rows.length > 0 ? rows.reduce((sum,
+                            row) => {
+                                const quantity = parseInt(row.querySelector('.quantity-input')
+                                    .value) || 0;
+                                return sum + quantity;
+                            }, 0) : 0;
+
+                            // Cập nhật tổng tiền từ server
+                            const cartTotalValue = parseInt(data.cart_total) || 0;
+                            console.log('Parsed cart_total:', cartTotalValue);
+                            if (isNaN(cartTotalValue)) {
+                                console.error('Invalid cart_total value:', data.cart_total);
+                                throw new Error('Giá trị cart_total không hợp lệ');
+                            }
+                            totalAmountDisplay.textContent = formatCurrency(cartTotalValue);
+                            cartTotalElement.textContent = formatCurrency(cartTotalValue);
+                            console.log('Updated cartTotalElement:', cartTotalElement.textContent);
+
+                            // Kiểm tra tính hợp lệ của giỏ hàng
+                            let isCartValid = true;
+                            rows.forEach(row => {
+                                const quantity = parseInt(row.querySelector('.quantity-input')
+                                    .value) || 0;
+                                const stock = parseInt(row.querySelector('.quantity-input')
+                                    .dataset.stock) || 0;
+                                if (quantity <= 0 || quantity > stock) {
+                                    isCartValid = false;
+                                }
+                            });
+
+                            checkoutButton.disabled = !isCartValid;
+                            if (!isCartValid) {
+                                checkoutButton.classList.add('opacity-50', 'cursor-not-allowed');
+                            } else {
+                                checkoutButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        } else {
+                            console.error('Server error:', data.error);
+                            alert(data.error || 'Lỗi từ server, vui lòng thử lại!');
+                            quantityInput.value = quantityInput.dataset.previousQuantity || 1;
+                            updateSummary();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('AJAX error:', error.message);
+                        alert('Có lỗi xảy ra: ' + error.message + '. Vui lòng thử lại!');
+                        quantityInput.value = quantityInput.dataset.previousQuantity || 1;
+                        updateSummary();
+                    });
+            }, 500);
 
             document.querySelectorAll('.increment-btn, .decrement-btn').forEach(button => {
                 button.addEventListener('click', function() {
@@ -483,40 +681,54 @@
                     let newQuantity = this.classList.contains('increment-btn') ? currentQuantity +
                         1 : currentQuantity - 1;
 
+                    console.log('Stock:', stock, 'Current Quantity:', currentQuantity,
+                        'New Quantity:', newQuantity);
+
                     if (newQuantity < 1) {
-                        showModal('Số lượng phải lớn hơn 0!', false);
-                        return;
-                    }
-                    if (newQuantity > stock) {
-                        showModal(`Số lượng vượt quá tồn kho. Sản phẩm này chỉ còn ${stock} quyển.`,
-                            false);
+                        alert('Số lượng phải lớn hơn 0!');
                         return;
                     }
 
-                    fetch('{{ route('cart.update') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                product_id: productId,
-                                quantity: newQuantity
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                quantityInput.value = newQuantity;
-                                updateSummary();
-                                showModal(data.message, true);
-                            } else {
-                                showModal(data.error, false);
-                            }
-                        })
-                        .catch(() => {
-                            showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
-                        });
+                    if (newQuantity > stock) {
+                        showMaxQuantityModal();
+                        quantityInput.value = currentQuantity;
+                        return;
+                    }
+
+                    quantityInput.dataset.previousQuantity = currentQuantity;
+                    updateCart(productId, newQuantity, this, quantityInput);
+                });
+            });
+
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.dataset.previousQuantity = this.value;
+                });
+
+                input.addEventListener('change', function() {
+                    const productId = this.dataset.productId;
+                    const stock = parseInt(this.dataset.stock);
+                    const incrementBtn = this.closest('td').querySelector('.increment-btn');
+                    let newQuantity = parseInt(this.value);
+
+                    console.log('Input change: Product ID:', productId, 'New Quantity:',
+                        newQuantity, 'Stock:', stock);
+
+                    if (isNaN(newQuantity) || newQuantity < 1) {
+                        alert('Số lượng phải lớn hơn 0!');
+                        this.value = this.dataset.previousQuantity || 1;
+                        updateSummary();
+                        return;
+                    }
+
+                    if (newQuantity > stock) {
+                        showMaxQuantityModal();
+                        this.value = this.dataset.previousQuantity || 1;
+                        updateSummary();
+                        return;
+                    }
+
+                    updateCart(productId, newQuantity, incrementBtn, this);
                 });
             });
 
@@ -537,23 +749,26 @@
                             const rowToRemove = document.querySelector(`tr[data-id="${productId}"]`);
                             if (rowToRemove) {
                                 rowToRemove.remove();
+                                // Cập nhật tổng tiền từ server
+                                const cartTotalValue = parseInt(data.cart_total) || 0;
+                                totalAmountDisplay.textContent = formatCurrency(cartTotalValue);
+                                cartTotalElement.textContent = formatCurrency(cartTotalValue);
+                                console.log('removeFromCart - Updated cartTotalElement:', cartTotalElement
+                                    .textContent);
                                 updateSummary();
                             }
                             if (!document.querySelector('.cart-table tbody tr')) {
                                 window.location.reload();
-                            } else {
-                                showModal(data.message, true);
                             }
                         } else {
-                            showModal(data.error, false);
+                            alert(data.error);
                         }
                     })
                     .catch(() => {
-                        showModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+                        alert('Có lỗi xảy ra, vui lòng thử lại!');
                     });
             }
 
-            // Initial summary update
             updateSummary();
         });
     </script>

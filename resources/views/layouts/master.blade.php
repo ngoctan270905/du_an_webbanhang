@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     <script src="https://cdn.tailwindcss.com"></script>
-      <!-- CSRF Token -->
+    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -504,13 +504,15 @@
             </div>
 
             <div class="relative">
-                <button id="cart-button" class="relative flex items-center justify-center w-10 h-10 transition-colors focus:outline-none">
+                <button id="cart-button"
+                    class="relative flex items-center justify-center w-10 h-10 transition-colors focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
-                    <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">3</span>
+                    <span
+                        class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">3</span>
                 </button>
                 <div id="cart-dropdown"
                     class="cart-dropdown hidden absolute right-0 mt-2 w-80 bg-gray-700 text-white rounded-md shadow-lg overflow-hidden z-20">
@@ -523,7 +525,7 @@
                     <div class="p-4 border-t border-gray-600">
                         <div class="flex justify-between text-sm font-medium">
                             <span>Tổng cộng:</span>
-                            <span id="cart-total">0 VNĐ</span>
+                            <span id="">0 VNĐ</span>
                         </div>
                         <a href=""
                             class="block mt-2 text-center bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-md hover:bg-yellow-500 transition-colors">
@@ -642,7 +644,6 @@
             const cartDropdown = document.getElementById('cart-dropdown');
             const notificationList = document.querySelector('#notification-dropdown .max-h-80');
             const cartList = document.querySelector('#cart-dropdown .max-h-80');
-            const cartTotal = document.getElementById('cart-total');
             const modal = document.getElementById('notification-modal');
             const closeModalBtn = document.getElementById('close-modal-button');
             const modalTitle = document.getElementById('modal-title');
@@ -681,30 +682,6 @@
                 }
             ];
 
-            // Sample cart data
-            const cartItems = [
-                {
-                    id: 1,
-                    name: 'Nhà giả kim',
-                    price: 120000,
-                    quantity: 1,
-                    image: 'https://via.placeholder.com/50'
-                },
-                {
-                    id: 2,
-                    name: 'Đắc nhân tâm',
-                    price: 150000,
-                    quantity: 2,
-                    image: 'https://via.placeholder.com/50'
-                },
-                {
-                    id: 3,
-                    name: 'Dám bị ghét',
-                    price: 100000,
-                    quantity: 1,
-                    image: 'https://via.placeholder.com/50'
-                }
-            ];
 
             // Function to render notifications
             function renderNotifications() {
@@ -744,7 +721,8 @@
                     const itemTotal = item.price * item.quantity;
                     total += itemTotal;
                     const cartItem = document.createElement('div');
-                    cartItem.classList.add('flex', 'items-center', 'p-4', 'border-b', 'border-gray-600', 'last:border-b-0');
+                    cartItem.classList.add('flex', 'items-center', 'p-4', 'border-b', 'border-gray-600',
+                        'last:border-b-0');
                     cartItem.innerHTML = `
                         <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md mr-4">
                         <div class="flex-1">
