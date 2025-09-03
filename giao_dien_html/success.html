@@ -1,8 +1,11 @@
-@extends('layouts.master')
-
-@section('title', 'Đặt hàng thành công')
-
-@section('content')
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Thành Công</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Custom scrollbar matching the payment page */
         body::-webkit-scrollbar {
@@ -36,59 +39,48 @@
             100% { stroke-dashoffset: 0; }
         }
     </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 font-sans antialiased text-gray-800 flex items-center justify-center min-h-screen">
 
     <div class="container mx-auto p-4 md:p-8 lg:p-12 max-w-3xl text-center">
         <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg border border-blue-100 flex flex-col items-center">
+
             <svg class="w-20 h-20 md:w-24 md:h-24 text-blue-600 mb-5 checkmark-circle" viewBox="0 0 52 52">
                 <circle cx="26" cy="26" r="24" fill="none" class="stroke-blue-500 stroke-[4px]"></circle>
                 <path class="checkmark-path stroke-blue-600 stroke-[4px] fill-none" d="M14.1 27.2l7.1 7.2 16.7-16.8"></path>
             </svg>
-            <div class="text-3xl md:text-4xl font-extrabold text-center mb-3 text-blue-800 tracking-tight">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-center mb-3 text-blue-800 tracking-tight">
                 Thanh Toán Thành Công !
-            </div>
+            </h1>
             <p class="text-base md:text-lg text-gray-600 mb-6 max-w-sm">
                 Đơn hàng của bạn đã được tiếp nhận và đang được xử lý.
             </p>
 
             <div class="w-full text-left bg-blue-50 p-5 rounded-lg border border-blue-200 mb-6">
-                <div class="text-xl font-bold mb-3 text-blue-700 flex items-center">
+                <h2 class="text-xl font-bold mb-3 text-blue-700 flex items-center">
                     <i class="fas fa-receipt text-xl mr-2 text-blue-500"></i>
                     Thông Tin Đơn Hàng
-                </div>
+                </h2>
                 <div class="space-y-2 text-sm text-gray-700">
                     <div class="flex justify-between">
                         <span class="font-medium">Mã đơn hàng:</span>
-                        <span class="font-bold text-gray-900">{{ $order->ma_don_hang }}</span>
+                        <span class="font-bold text-gray-900">#DH20250903-12345</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium">Thời gian đặt hàng:</span>
-                        <span class="font-bold text-gray-900">{{ $order->ngay_dat_hang->format('d/m/Y H:i') }}</span>
+                        <span class="font-bold text-gray-900">03/09/2025 18:30</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium">Tổng số tiền:</span>
-                        <span class="font-bold text-blue-600">{{ number_format($order->tong_tien, 0, ',', '.') }}đ</span>
+                        <span class="font-bold text-blue-600">800.000đ</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium">Phương thức thanh toán:</span>
-                        <span class="font-bold text-gray-900">
-                            @switch($order->phuong_thuc_thanh_toan)
-                                @case('cod') Thanh toán khi nhận hàng (COD) @break
-                                @case('bank') Chuyển khoản ngân hàng @break
-                                @case('momo') Ví điện tử MoMo @break
-                                @default Không xác định
-                            @endswitch
-                        </span>
+                        <span class="font-bold text-gray-900">Thanh toán khi nhận hàng (COD)</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium">Trạng thái:</span>
-                        <span class="font-bold text-green-600">
-                            @switch($order->trang_thai)
-                                @case('pending') Đang xử lý @break
-                                @case('completed') Đã hoàn thành @break
-                                @case('cancelled') Đã hủy @break
-                                @default Không xác định
-                            @endswitch
-                        </span>
+                        <span class="font-bold text-green-600">Đã thanh toán</span>
                     </div>
                 </div>
             </div>
@@ -98,15 +90,17 @@
             </p>
 
             <div class="flex flex-col sm:flex-row gap-3 w-full">
-                <a href="" class="flex-1 py-3 text-center bg-gray-200 text-gray-800 font-bold rounded-xl shadow-md hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
+                <a href="#" class="flex-1 py-3 text-center bg-gray-200 text-gray-800 font-bold rounded-xl shadow-md hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
                     <i class="fas fa-history text-base mr-2"></i>
                     Xem Lịch Sử Mua Hàng
                 </a>
-                <a href="{{ route('home') }}" class="flex-1 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <a href="#" class="flex-1 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                     <i class="fas fa-shopping-bag text-base mr-2"></i>
                     Tiếp Tục Mua Sắm
                 </a>
             </div>
         </div>
     </div>
-@endsection
+
+</body>
+</html>

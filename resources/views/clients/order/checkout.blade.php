@@ -6,18 +6,18 @@
 
     <div
         class="container mx-auto p-4 md:p-8 lg:p-12 bg-gradient-to-br from-blue-50 to-indigo-100 font-sans antialiased text-gray-800">
-        <h1 class="text-4xl font-extrabold text-center mb-10 text-blue-800 tracking-tight">
+        <div class="text-4xl font-extrabold text-center mb-10 text-blue-800 tracking-tight">
             <i class="fas fa-credit-card text-4xl mr-3 text-blue-600 align-middle"></i>
             Thanh Toán Đơn Hàng
-        </h1>
+        </div>
 
         <div class="flex flex-col lg:flex-row gap-8 lg:gap-10">
             <div class="lg:w-2/3 space-y-8">
                 <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center text-blue-700">
+                    <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                         <i class="fas fa-shopping-cart text-2xl mr-3 text-blue-500 align-middle"></i>
                         Đơn Hàng Của Bạn
-                    </h2>
+                    </div>
                     <ul class="divide-y divide-gray-200">
                         @forelse ($cartItems as $item)
                             <li class="py-5 flex items-center gap-4 group">
@@ -43,11 +43,11 @@
                 </div>
 
                 <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center text-blue-700">
+                    <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                         <i class="fas fa-map-marker-alt text-2xl mr-3 text-blue-500 align-middle"></i>
                         Địa Chỉ Giao Hàng & Liên Hệ
-                    </h2>
-                    <form action="{{ route('order.create') }}" method="POST">
+                    </div>
+                    <form id="order-form" action="{{ route('order.create') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -84,10 +84,10 @@
                 </div>
 
                 <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center text-blue-700">
+                    <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                         <i class="fas fa-truck text-2xl mr-3 text-blue-500 align-middle"></i>
                         Chọn Phương Thức Vận Chuyển
-                    </h2>
+                    </div>
                     <div class="flex flex-col gap-4">
                         <label
                             class="radio-option flex items-center justify-between p-5 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 transition duration-200 ease-in-out has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:shadow-md">
@@ -129,10 +129,10 @@
                 </div>
 
                 <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center text-blue-700">
+                    <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                         <i class="fas fa-money-check-alt text-2xl mr-3 text-blue-500 align-middle"></i>
                         Chọn Phương Thức Thanh Toán
-                    </h2>
+                    </div>
                     <div class="flex flex-col gap-4">
                         <label
                             class="radio-option flex items-center gap-4 p-5 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 transition duration-200 ease-in-out has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:shadow-md">
@@ -198,10 +198,10 @@
 
             <div class="lg:w-1/3">
                 <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100 sticky top-12">
-                    <h2 class="text-2xl font-bold mb-6 text-blue-700">
+                    <div class="text-2xl font-bold mb-6 text-blue-700">
                         <i class="fas fa-file-invoice-dollar text-2xl mr-3 text-blue-500 align-middle"></i>
                         Tổng Kết Đơn Hàng
-                    </h2>
+                    </div>
                     <div class="space-y-4 text-gray-700">
                         <div class="flex justify-between items-center text-lg">
                             <span>Tạm tính</span>
