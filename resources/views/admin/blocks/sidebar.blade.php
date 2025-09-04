@@ -103,7 +103,7 @@
                 </a>
             </li>
             <li>
-                <a href=""
+                <a href="{{ route('admin.orders.index')}}"
                    class="sidebar-item flex items-center space-x-2 p-2 text-sm rounded-lg transition-all duration-300 {{ request()->routeIs('admin.orders.*') ? 'bg-gray-600' : 'hover:bg-gray-600' }}">
                     <svg class="w-4 h-4 {{ request()->routeIs('admin.orders.*') ? 'text-white' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 4a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2H4zm10 0a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2h-2zM4 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H4zm10 0a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z"></path>

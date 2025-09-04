@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\RecycleBinController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\HomeController;
@@ -104,6 +105,9 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
         Route::delete('/{id}/forceDelete', [CategoryController::class, 'forceDelete'])->name('forceDelete');
     });
 
+     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
     // Quản lý Banners
     Route::prefix('banners')->name('banners.')->group(function () {
         Route::get('/', [BannerController::class, 'index'])->name('index');
