@@ -11,7 +11,7 @@
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="'Họ và tên'" class="text-lg font-medium text-gray-900 dark:text-gray-100" />
+            <x-input-label for="name" :value="'Họ và tên'" class="text-l font-medium text-gray-900 dark:text-gray-100" />
             <x-text-input 
                 id="name" 
                 name="name" 

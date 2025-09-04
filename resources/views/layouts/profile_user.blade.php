@@ -18,21 +18,30 @@
 
 </head>
 
-<body>
-
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
     @include('partials.header')
 
     <main class="pt-14">
-        @yield('content')
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        @include('profile.partials.profile-sidebar')
+                    </div>
+                    <!-- Main Content -->
+                    <div class="lg:col-span-3 space-y-6">
+                        @yield('main-content')
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     @include('partials.footer')
-
     @include('partials.script')
 
-
-
-
+    @stack('scripts')
 </body>
 
 </html>
