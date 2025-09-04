@@ -3,176 +3,536 @@
 @section('title', 'Thông tin cá nhân')
 
 @section('main-content')
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <div class="flex items-center justify-between border-b pb-4 mb-4">
-            <div class="text-2xl font-bold">Đơn hàng của tôi</div>
-        </div>
-
-        <div class="flex justify-between items-center mb-6 text-sm text-gray-500">
-            <div id="order-tabs" class="flex w-full space-x-2">
-                {{-- Dùng route() để tạo URL với tham số trạng thái --}}
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'all']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'all' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Tất cả
-                </a>
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'pending']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'pending' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Chờ xác nhận
-                </a>
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'processing']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'processing' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Đang xử lý
-                </a>
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'shipped']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'shipped' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Đang giao
-                </a>
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'delivered']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'delivered' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Hoàn tất
-                </a>
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'cancelled']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'cancelled' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Đã hủy
-                </a>
-                <a href="{{ route('my-orders.index', ['trang_thai' => 'returns']) }}"
-                    class="nav-item flex-1 py-2 text-center {{ $selected_status == 'returns' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
-                    Trả hàng
-                </a>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6" id="main-content">
+        <div id="order-list" class="order-list">
+            <div class="flex items-center justify-between border-b pb-4 mb-4">
+                <div class="text-2xl font-bold">Đơn hàng của tôi</div>
             </div>
-        </div>
 
-        <div id="orders-container">
-            @forelse ($orders as $order)
-                <div class="border rounded-lg mb-6 order-item overflow-hidden" data-status="{{ $order->trang_thai }}">
-                    <div class="flex items-center px-4 py-0 bg-gray-50 dark:bg-gray-700 border-b">
-                        <div class="flex-1 flex flex-row items-center space-x-2">
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">
-                                Đơn hàng #{{ $order->ma_don_hang }}
-                            </span>
-                            <span class="text-sm text-gray-500">|</span>
-                            <span class="text-sm text-gray-500">
-                                Ngày đặt: {{ $order->ngay_dat_hang->format('d/m/Y H:i:s') }}
-                            </span>
-                        </div>
-                        {{-- Trạng thái giao hàng --}}
-                        <div class="whitespace-nowrap px-3 py-4 text-sm text-center">
-                            @php
-                                $statusClass = '';
-                                $displayText = '';
-                                $statusIcon = '';
-                                switch ($order->trang_thai) {
-                                    case 'pending':
-                                        $statusClass = 'bg-yellow-200 text-yellow-800';
-                                        $displayText = 'Chờ xác nhận';
-                                        $statusIcon = 'fa-solid fa-file-alt';
-                                        break;
-                                    case 'processing':
-                                        $statusClass = 'bg-blue-200 text-blue-800';
-                                        $displayText = 'Đang xử lý';
-                                        $statusIcon = 'fa-solid fa-cogs';
-                                        break;
-                                    case 'shipped':
-                                        $statusClass = 'bg-indigo-200 text-indigo-800';
-                                        $displayText = 'Đang giao hàng';
-                                        $statusIcon = 'fa-solid fa-truck';
-                                        break;
-                                    case 'delivered':
-                                        $statusClass = 'bg-green-200 text-green-800';
-                                        $displayText = 'Giao thành công';
-                                        $statusIcon = 'fa-solid fa-circle-check';
-                                        break;
-                                    case 'cancelled':
-                                        $statusClass = 'bg-red-200 text-red-800';
-                                        $displayText = 'Đã hủy';
-                                        $statusIcon = 'fa-solid fa-circle-xmark';
-                                        break;
-                                    default:
-                                        $statusClass = 'bg-gray-200 text-gray-800';
-                                        $displayText = 'Không rõ';
-                                        $statusIcon = 'fa-solid fa-question-circle';
-                                        break;
-                                }
-                            @endphp
-                            <span
-                                class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold {{ $statusClass }}">
-                                <i class="{{ $statusIcon }}"></i>
-                                <span>{{ $displayText }}</span>
-                            </span>
-                        </div>
-                    </div>
+            <div class="flex justify-between items-center mb-6 text-sm text-gray-500">
+                <div id="order-tabs" class="flex w-full space-x-2">
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'all']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'all' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Tất cả
+                    </a>
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'pending']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'pending' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Chờ xác nhận
+                    </a>
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'processing']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'processing' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Đang xử lý
+                    </a>
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'shipped']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'shipped' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Đang giao
+                    </a>
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'delivered']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'delivered' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Hoàn tất
+                    </a>
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'cancelled']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'cancelled' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Đã hủy
+                    </a>
+                    <a href="{{ route('my-orders.index', ['trang_thai' => 'returns']) }}"
+                        class="nav-item flex-1 py-2 text-center {{ $selected_status == 'returns' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
+                        Trả hàng
+                    </a>
+                </div>
+            </div>
 
-                    <div class="flex">
-                        <div class="flex-1 p-4">
-                            @foreach ($order->orderDetails as $detail)
-                                <div class="flex items-center space-x-4 mb-2">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                                            @if ($detail->product && $detail->product->hinh_anh)
-                                                <img src="{{ asset('storage/' . $detail->product->hinh_anh) }}"
-                                                    alt="{{ $detail->product->ten_san_pham }}"
-                                                    class="w-full h-full object-cover">
-                                            @else
-                                                <div
-                                                    class="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                                                    No image
-                                                </div>
-                                            @endif
+            <div id="orders-container">
+                @forelse ($orders as $order)
+                    <div class="border rounded-lg mb-6 order-item overflow-hidden" data-status="{{ $order->trang_thai }}">
+                        <div class="flex items-center px-4 py-0 bg-gray-50 dark:bg-gray-700 border-b">
+                            <div class="flex-1 flex flex-row items-center space-x-2">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">
+                                    Đơn hàng #{{ $order->ma_don_hang }}
+                                </span>
+                                <span class="text-sm text-gray-500">|</span>
+                                <span class="text-sm text-gray-500">
+                                    Ngày đặt: {{ $order->ngay_dat_hang->format('d/m/Y H:i:s') }}
+                                </span>
+                            </div>
+                            <div class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                                @php
+                                    $statusClass = '';
+                                    $displayText = '';
+                                    $statusIcon = '';
+                                    switch ($order->trang_thai) {
+                                        case 'pending':
+                                            $statusClass = 'bg-yellow-200 text-yellow-800';
+                                            $displayText = 'Chờ xác nhận';
+                                            $statusIcon = 'fa-solid fa-file-alt';
+                                            break;
+                                        case 'processing':
+                                            $statusClass = 'bg-blue-200 text-blue-800';
+                                            $displayText = 'Đang xử lý';
+                                            $statusIcon = 'fa-solid fa-cogs';
+                                            break;
+                                        case 'shipped':
+                                            $statusClass = 'bg-indigo-200 text-indigo-800';
+                                            $displayText = 'Đang giao hàng';
+                                            $statusIcon = 'fa-solid fa-truck';
+                                            break;
+                                        case 'delivered':
+                                            $statusClass = 'bg-green-200 text-green-800';
+                                            $displayText = 'Giao thành công';
+                                            $statusIcon = 'fa-solid fa-circle-check';
+                                            break;
+                                        case 'cancelled':
+                                            $statusClass = 'bg-red-200 text-red-800';
+                                            $displayText = 'Đã hủy';
+                                            $statusIcon = 'fa-solid fa-circle-xmark';
+                                            break;
+                                        default:
+                                            $statusClass = 'bg-gray-200 text-gray-800';
+                                            $displayText = 'Không rõ';
+                                            $statusIcon = 'fa-solid fa-question-circle';
+                                            break;
+                                    }
+                                @endphp
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold {{ $statusClass }}">
+                                    <i class="{{ $statusIcon }}"></i>
+                                    <span>{{ $displayText }}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex">
+                            <div class="flex-1 p-4">
+                                @foreach ($order->orderDetails as $detail)
+                                    <div class="flex items-center space-x-4 mb-2">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                @if ($detail->product && $detail->product->hinh_anh)
+                                                    <img src="{{ asset('storage/' . $detail->product->hinh_anh) }}"
+                                                        alt="{{ $detail->product->ten_san_pham }}"
+                                                        class="w-full h-full object-cover">
+                                                @else
+                                                    <div
+                                                        class="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                                                        No image
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-lg text-gray-800 dark:text-gray-200">
+                                                {{ $detail->product ? $detail->product->ten_san_pham : 'Sản phẩm không tồn tại' }}
+                                            </div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                Số lượng: {{ $detail->so_luong }}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <div class="font-semibold text-lg text-gray-800 dark:text-gray-200">
-                                            {{ $detail->product ? $detail->product->ten_san_pham : 'Sản phẩm không tồn tại' }}
-                                            (x{{ $detail->so_luong }})
-                                        </div>
-                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="flex items-center justify-end p-4">
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-500">Tổng tiền</p>
+                                    <p class="text-lg font-bold text-red-500">
+                                        {{ number_format($order->tong_tien, 0, ',', '.') }} VNĐ
+                                    </p>
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
 
-                        <div class="flex items-center justify-end p-4">
-                            <div class="text-right">
-                                <p class="text-sm text-gray-500">Tổng tiền</p>
-                                <p class="text-lg font-bold text-red-500">
-                                    {{ number_format($order->tong_tien, 0, ',', '.') }} VNĐ
-                                </p>
+                        <div class="flex justify-end items-center p-4 bg-gray-50 dark:bg-gray-700 border-t">
+                            <div class="flex space-x-2">
+                                @if ($order->trang_thai == 'delivered')
+                                    <button
+                                        class="px-4 py-2 text-sm font-semibold rounded-lg text-red-500 border border-red-500 hover:bg-red-50">
+                                        Mua lại
+                                    </button>
+                                @endif
+                                <button
+                                    class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-red-500 hover:bg-red-600 view-details"
+                                    data-order-id="{{ $order->ma_don_hang }}">
+                                    Xem chi tiết
+                                </button>
                             </div>
                         </div>
                     </div>
+                @empty
+                    <div class="text-center text-gray-500 py-12">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fa-solid fa-box-open text-gray-400 mb-4" style="font-size: 5rem;"></i>
+                            <span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Không có đơn hàng nào trong
+                                trạng thái này</span>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
 
-                    <div class="flex justify-end items-center p-4 bg-gray-50 dark:bg-gray-700 border-t">
-                        <div class="flex space-x-2">
-                            @if ($order->trang_thai == 'delivered')
-                                <button
-                                    class="px-4 py-2 text-sm font-semibold rounded-lg text-red-500 border border-red-500 hover:bg-red-50">
-                                    Mua lại
-                                </button>
-                            @endif
-                            <button
-                                class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-red-500 hover:bg-red-600">
-                                Xem chi tiết
-                            </button>
+            <div class="flex justify-end">
+                {{ $orders->appends(['trang_thai' => $selected_status])->links('vendor.pagination.tailwind') }}
+            </div>
+        </div>
+
+        <!-- Template chi tiết đơn hàng ẩn ban đầu -->
+        <div id="order-detail" class="hidden">
+            <div class="flex justify-between items-center pb-4 border-b dark:border-gray-700">
+                <div>
+                    <div class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                        Chi tiết đơn hàng #<span id="detail-order-id"></span>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Đặt hàng ngày <span id="detail-order-date"></span>
+                    </div>
+                </div>
+                <span id="detail-order-status"
+                    class="bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                    Giao thành công
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 border-b pb-6">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Trạng thái đơn hàng</div>
+                    <div id="order-status-timeline" class="relative flex justify-between items-center mb-6">
+                        <!-- Timeline sẽ được cập nhật động dựa trên trạng thái -->
+                    </div>
+
+                    <div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-8 mb-4">Danh sách sản phẩm</div>
+                    <div id="detail-products" class="space-y-4"></div>
+                </div>
+
+                <div class="col-span-1">
+                    <div class="bg-gray-50 dark:bg-gray-700 border rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Địa chỉ giao hàng</h4>
+                        <p id="detail-address-name" class="text-gray-700 dark:text-gray-200 font-medium"></p>
+                        <p id="detail-address" class="text-sm text-gray-500 dark:text-gray-400"></p>
+                        <p id="detail-phone" class="text-sm text-gray-500 dark:text-gray-400"></p>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700 border rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Thông tin thanh toán</h4>
+                        <p id="detail-payment-method" class="text-sm text-gray-700 dark:text-gray-200"></p>
+                        <p id="detail-payment-status" class="text-sm text-gray-700 dark:text-gray-200"></p>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700 border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Tổng cộng</h4>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm text-gray-700 dark:text-gray-200">
+                                <span>Tạm tính:</span>
+                                <span id="detail-subtotal"></span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-700 dark:text-gray-200">
+                                <span>Phí vận chuyển:</span>
+                                <span id="detail-shipping">Không xác định</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-700 dark:text-gray-200">
+                                <span>Giảm giá:</span>
+                                <span id="detail-discount" class="text-red-500"></span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 mt-4 border-t dark:border-gray-600">
+                            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">Tổng:</span>
+                            <span id="detail-total" class="text-lg font-bold text-red-500"></span>
                         </div>
                     </div>
                 </div>
-            @empty
-                <div class="text-center text-gray-500 py-12">
-                    <div class="flex flex-col items-center justify-center">
-                        {{-- Icon Font Awesome --}}
-                        <i class="fa-solid fa-box-open text-gray-400 mb-4" style="font-size: 5rem;"></i>
+            </div>
 
-                        <span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Không có đơn hàng nào trong
-                            trạng thái này</span>
-                    </div>
+            <div class="flex justify-between items-center mt-6">
+                <a href="#" id="back-to-list"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg text-gray-600 border border-gray-300 hover:bg-gray-300">
+                    Quay lại
+                </a>
+                <div class="flex space-x-4" id="order-actions">
+                    <!-- Các nút sẽ được thêm động bằng JavaScript -->
                 </div>
-            @endforelse
+            </div>
         </div>
 
-        <div class="flex justify-end">
-            {{-- Đảm bảo phân trang giữ lại tham số trạng thái --}}
-            {{ $orders->appends(['trang_thai' => $selected_status])->links('vendor.pagination.tailwind') }}
+        <!-- Loading spinner -->
+        <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
         </div>
     </div>
 
-    {{-- Xóa toàn bộ đoạn JavaScript không cần thiết --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderList = document.getElementById('order-list');
+            const orderDetail = document.getElementById('order-detail');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const backButton = document.getElementById('back-to-list');
+            const orderActions = document.getElementById('order-actions');
+
+            // Xử lý sự kiện khi bấm nút "Xem chi tiết"
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-order-id');
+                    loadingSpinner.classList.remove('hidden');
+
+                    // Gọi AJAX để lấy chi tiết đơn hàng
+                    fetch(`{{ url('/my-orders') }}/${orderId}`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            }
+                        })
+                        .then(response => {
+                            loadingSpinner.classList.add('hidden');
+                            if (!response.ok) {
+                                return response.json().then(error => {
+                                    throw new Error(error.error ||
+                                        'Đơn hàng không tồn tại');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Cập nhật thông tin chi tiết đơn hàng
+                            document.getElementById('detail-order-id').textContent = data
+                                .ma_don_hang;
+                            document.getElementById('detail-order-date').textContent = new Date(
+                                data.ngay_dat_hang).toLocaleDateString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                            document.getElementById('detail-order-status').innerHTML = `
+                        <i class="${getStatusIcon(data.trang_thai)}"></i>
+                        <span>${getStatusText(data.trang_thai)}</span>
+                    `;
+                            document.getElementById('detail-order-status').className =
+                                getStatusClass(data.trang_thai);
+
+                            // Cập nhật timeline trạng thái đơn hàng
+                            updateOrderStatusTimeline(data.trang_thai);
+
+                            // Cập nhật danh sách sản phẩm
+                            const productsContainer = document.getElementById(
+                            'detail-products');
+                            productsContainer.innerHTML = '';
+                            data.orderDetails.forEach(detail => {
+                                const productDiv = document.createElement('div');
+                                productDiv.className =
+                                    'flex items-center justify-between py-2 dark:border-gray-700';
+                                productDiv.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0">
+                                    ${detail.hinh_anh ? `<img src="${detail.hinh_anh}" alt="${detail.ten_san_pham}" class="w-full h-full object-cover">` : 'No image'}
+                                </div>
+                                <div class="ml-4">
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">${detail.ten_san_pham}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Số lượng: ${detail.so_luong}</p>
+                                </div>
+                            </div>
+                            <span class="font-semibold text-gray-900 dark:text-gray-100">${numberFormat(detail.gia)}</span>
+                        `;
+                                productsContainer.appendChild(productDiv);
+                            });
+
+                            // Cập nhật thông tin địa chỉ và thanh toán
+                            document.getElementById('detail-address-name').textContent = data
+                                .ten_nguoi_nhan;
+                            document.getElementById('detail-address').textContent = data
+                            .dia_chi;
+                            document.getElementById('detail-phone').textContent =
+                                `SĐT: ${data.so_dien_thoai}`;
+                            document.getElementById('detail-payment-method').textContent =
+                                `Phương thức: ${getPaymentMethodText(data.phuong_thuc_thanh_toan)}`;
+                            document.getElementById('detail-payment-status').innerHTML =
+                                `Tình trạng: <span class="font-medium ${getPaymentStatusClass(data.tinh_trang_thanh_toan)}">${data.tinh_trang_thanh_toan}</span>`;
+                            document.getElementById('detail-subtotal').textContent =
+                                numberFormat(data.tong_tien);
+                            document.getElementById('detail-shipping').textContent = data
+                                .phi_van_chuyen;
+                            document.getElementById('detail-discount').textContent =
+                                numberFormat(data.giam_gia);
+                            document.getElementById('detail-total').textContent = numberFormat(
+                                data.tong_tien);
+
+                            // Xóa các nút cũ trong #order-actions
+                            orderActions.innerHTML = '';
+
+                            // Thêm nút Hủy đơn hàng nếu trạng thái là pending hoặc processing
+                            if (['pending', 'processing'].includes(data.trang_thai)) {
+                                const cancelButton = document.createElement('button');
+                                cancelButton.className =
+                                    'px-4 py-2 text-sm font-semibold rounded-lg text-red-500 border border-red-500 hover:bg-red-50 cancel-order';
+                                cancelButton.setAttribute('data-order-id', data.ma_don_hang);
+                                cancelButton.textContent = 'Hủy đơn hàng';
+                                orderActions.appendChild(cancelButton);
+                            }
+
+                            // Thêm nút Yêu cầu trả hàng và Viết đánh giá nếu trạng thái là delivered
+                            if (data.trang_thai === 'delivered') {
+                                const returnButton = document.createElement('button');
+                                returnButton.className =
+                                    'px-4 py-2 text-sm font-semibold rounded-lg text-red-500 border border-red-500 hover:bg-red-50 return-request';
+                                returnButton.setAttribute('data-order-id', data.ma_don_hang);
+                                returnButton.textContent = 'Yêu cầu trả hàng';
+                                orderActions.appendChild(returnButton);
+
+                                const reviewButton = document.createElement('button');
+                                reviewButton.className =
+                                    'px-4 py-2 text-sm font-semibold rounded-lg text-white bg-red-500 hover:bg-red-600 write-review';
+                                reviewButton.setAttribute('data-order-id', data.ma_don_hang);
+                                reviewButton.textContent = 'Viết đánh giá';
+                                orderActions.appendChild(reviewButton);
+                            }
+
+                            // Ẩn danh sách đơn hàng và hiển thị chi tiết đơn hàng
+                            orderList.classList.add('hidden');
+                            orderDetail.classList.remove('hidden');
+                        })
+                        .catch(error => {
+                            loadingSpinner.classList.add('hidden');
+                            console.error('Lỗi:', error.message);
+                            alert(
+                                `Không thể tải chi tiết đơn hàng: ${error.message}. Vui lòng thử lại.`
+                            );
+                        });
+                });
+            });
+
+            // Xử lý sự kiện nút "Quay lại"
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                orderDetail.classList.add('hidden');
+                orderList.classList.remove('hidden');
+            });
+
+            // Hàm định dạng trạng thái
+            function getStatusIcon(status) {
+                switch (status) {
+                    case 'pending':
+                        return 'fa-solid fa-file-alt';
+                    case 'processing':
+                        return 'fa-solid fa-cogs';
+                    case 'shipped':
+                        return 'fa-solid fa-truck';
+                    case 'delivered':
+                        return 'fa-solid fa-circle-check';
+                    case 'cancelled':
+                        return 'fa-solid fa-circle-xmark';
+                    default:
+                        return 'fa-solid fa-question-circle';
+                }
+            }
+
+            function getStatusText(status) {
+                switch (status) {
+                    case 'pending':
+                        return 'Chờ xác nhận';
+                    case 'processing':
+                        return 'Đang xử lý';
+                    case 'shipped':
+                        return 'Đang giao hàng';
+                    case 'delivered':
+                        return 'Giao thành công';
+                    case 'cancelled':
+                        return 'Đã hủy';
+                    default:
+                        return 'Không rõ';
+                }
+            }
+
+            function getStatusClass(status) {
+                switch (status) {
+                    case 'pending':
+                        return 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 text-sm font-medium px-2.5 py-0.5 rounded-full';
+                    case 'processing':
+                        return 'bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-300 text-sm font-medium px-2.5 py-0.5 rounded-full';
+                    case 'shipped':
+                        return 'bg-indigo-200 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 text-sm font-medium px-2.5 py-0.5 rounded-full';
+                    case 'delivered':
+                        return 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300 text-sm font-medium px-2.5 py-0.5 rounded-full';
+                    case 'cancelled':
+                        return 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-300 text-sm font-medium px-2.5 py-0.5 rounded-full';
+                    default:
+                        return 'bg-gray-200 text-gray-800 dark:bg-gray-900 dark:text-gray-300 text-sm font-medium px-2.5 py-0.5 rounded-full';
+                }
+            }
+
+            // Hàm định dạng phương thức thanh toán
+            function getPaymentMethodText(method) {
+                switch (method) {
+                    case 'cod':
+                        return 'Thanh toán khi nhận hàng';
+                    case 'bank_transfer':
+                        return 'Chuyển khoản ngân hàng';
+                    case 'online_payment':
+                        return 'Thanh toán trực tuyến';
+                    default:
+                        return 'Không xác định';
+                }
+            }
+
+            // Hàm định dạng trạng thái thanh toán
+            function getPaymentStatusClass(status) {
+                switch (status) {
+                    case 'Chưa thanh toán':
+                        return 'text-yellow-600';
+                    case 'Đã thanh toán':
+                        return 'text-green-600';
+                    case 'Thanh toán thất bại':
+                        return 'text-red-600';
+                    default:
+                        return 'text-gray-600';
+                }
+            }
+
+            // Hàm cập nhật timeline trạng thái đơn hàng
+            function updateOrderStatusTimeline(status) {
+                const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+                const statusLabels = {
+                    pending: 'Chờ xác nhận',
+                    processing: 'Đang xử lý',
+                    shipped: 'Đang giao',
+                    delivered: 'Thành công'
+                };
+                const statusIcons = {
+                    pending: 'fa-solid fa-file-alt',
+                    processing: 'fa-solid fa-cogs',
+                    shipped: 'fa-solid fa-truck',
+                    delivered: 'fa-solid fa-circle-check'
+                };
+                const timelineContainer = document.getElementById('order-status-timeline');
+                timelineContainer.innerHTML = '';
+
+                let currentStatusIndex = statuses.indexOf(status);
+                if (currentStatusIndex === -1) currentStatusIndex = -1; // Nếu trạng thái không hợp lệ (cancelled)
+
+                statuses.forEach((s, index) => {
+                    const isActive = index <= currentStatusIndex && currentStatusIndex !== -1;
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'flex flex-col items-center';
+                    statusDiv.innerHTML = `
+                <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
+                    <i class="${statusIcons[s]}"></i>
+                </div>
+                <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
+            `;
+                    timelineContainer.appendChild(statusDiv);
+
+                    if (index < statuses.length - 1) {
+                        const connector = document.createElement('div');
+                        connector.className =
+                            `flex-1 border-t-2 ${isActive ? 'border-green-500' : 'border-gray-300'} mx-1`;
+                        timelineContainer.appendChild(connector);
+                    }
+                });
+            }
+
+            // Hàm định dạng số tiền
+            function numberFormat(number) {
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(number);
+            }
+        });
+    </script>
 @endsection

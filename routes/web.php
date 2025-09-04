@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/my-orders', [ProfileController::class, 'index'])->name('my-orders.index');
+    Route::get('/my-orders/{id}', [ProfileController::class, 'showOrders'])->name('my-orders.show');
 });
 
 require __DIR__ . '/auth.php';
@@ -54,10 +55,10 @@ Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remov
 // })->name('cart.clear');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::post('/cart/validate', [CartController::class, 'validateCart'])->name('cart.validate');
-    Route::post('/cart/apply-changes', [CartController::class, 'applyChanges'])->name('cart.apply_changes');
-    Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('order.checkout');
-    Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
-    Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('order.success');
+Route::post('/cart/apply-changes', [CartController::class, 'applyChanges'])->name('cart.apply_changes');
+Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('order.checkout');
+Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
+Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('order.success');
 
 // ...existing code...
 // =====================
@@ -106,7 +107,7 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
         Route::delete('/{id}/forceDelete', [CategoryController::class, 'forceDelete'])->name('forceDelete');
     });
 
-     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
     // Quản lý Banners
