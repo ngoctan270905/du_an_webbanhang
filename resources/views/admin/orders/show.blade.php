@@ -14,13 +14,14 @@
             </div>
 
             {{-- Stepper Section --}}
+            {{-- Stepper Section --}}
             <div class="mb-8 p-4 rounded-lg border border-gray-200 shadow-sm">
                 @php
                     $statusMap = [
-                        'pending' => 'Chờ xác nhận',
-                        'processing' => 'Đang xử lý',
-                        'shipped' => 'Đang giao hàng',
-                        'delivered' => 'Giao thành công',
+                        'pending' => ['label' => 'Chờ xác nhận', 'icon' => 'fa-solid fa-file-alt'],
+                        'processing' => ['label' => 'Đang xử lý', 'icon' => 'fa-solid fa-cogs'], //fa-solid fa-box-open chờ giao hàng sẽ để sau
+                        'shipped' => ['label' => 'Đang giao hàng', 'icon' => 'fa-solid fa-truck'],
+                        'delivered' => ['label' => 'Giao thành công', 'icon' => 'fa-solid fa-circle-check'],
                     ];
                     $currentStatus = $order->trang_thai;
                     $isCancelled = $currentStatus === 'cancelled';
@@ -36,11 +37,7 @@
                     <div class="flex items-center justify-center">
                         <div class="stepper-item failed">
                             <div class="stepper-icon">
-                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <i class="fa-solid fa-circle-xmark"></i>
                             </div>
                             <span class="stepper-label text-red-600">Đã hủy</span>
                         </div>
@@ -48,24 +45,17 @@
                 @else
                     {{-- Standard Stepper --}}
                     <div class="stepper">
-                        @foreach ($statusMap as $statusKey => $statusText)
+                        @foreach ($statusMap as $statusKey => $status)
                             @php
                                 $isCompleted = in_array($statusKey, $completedSteps);
                                 $isCurrent = $statusKey === $currentStatus;
                             @endphp
                             <div class="stepper-item {{ $isCompleted ? 'completed' : ($isCurrent ? 'current' : '') }}">
                                 <div class="stepper-icon">
-                                    @if ($statusKey === 'delivered' && ($isCompleted || $isCurrent))
-                                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    @else
-                                        {{ $loop->index + 1 }}
-                                    @endif
+                                    {{-- Hiển thị icon riêng cho từng trạng thái --}}
+                                    <i class="{{ $status['icon'] }}"></i>
                                 </div>
-                                <span class="stepper-label">{{ $statusText }}</span>
+                                <span class="stepper-label">{{ $status['label'] }}</span>
                             </div>
                             @if (!$loop->last)
                                 <div class="stepper-connector {{ $isCompleted ? 'completed' : '' }}"></div>
@@ -178,8 +168,8 @@
                                         COD
                                     @elseif ($order->phuong_thuc_thanh_toan == 'bank_transfer')
                                         Chuyển khoản
-                                    @else
-                                        Online
+                                    @elseif ($order->phuong_thuc_thanh_toan == 'online_payment')
+                                        Thanh toán Online
                                     @endif
                                 </span>
                             </div>
@@ -250,19 +240,9 @@
             {{-- Footer Buttons --}}
             <div class="mt-6 flex justify-end space-x-4">
                 <a href="{{ route('admin.orders.index') }}"
-                    class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                    class="rounded-lg bg-gray-200 border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
                     Đóng
                 </a>
-                <button type="button"
-                    class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5 mr-2" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M5 4.5A1.5 1.5 0 016.5 3h7A1.5 1.5 0 0115 4.5v11.75a1.25 1.25 0 01-1.25 1.25H6.25A1.25 1.25 0 015 16.25V4.5zm5.75 3a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    In hóa đơn
-                </button>
             </div>
         </div>
     </div>

@@ -8,12 +8,6 @@
             <div class="rounded-xl bg-white p-6 shadow-md transition-all duration-300 hover:shadow-lg">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-xl font-semibold text-gray-800">Danh sách đơn hàng</h3>
-                    <div class="flex items-center space-x-2">
-                        <a href="{{ route('admin.orders.index') }}"
-                            class="rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                            Làm mới
-                        </a>
-                    </div>
                 </div>
 
                 <div class="space-y-4">
@@ -40,8 +34,7 @@
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chờ xác nhận
                                 </option>
                                 <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Đang xử
-                                    lí
-                                    lý</option>
+                                    lí</option>
                                 <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Đang giao
                                 </option>
                                 <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Giao
@@ -57,7 +50,7 @@
                                 </button>
                                 <button type="button" onclick="window.location='{{ route('admin.orders.index') }}'"
                                     class="w-1/2 rounded-lg bg-gray-600 px-3 py-1.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                    Xóa bộ lọc
+                                    Làm mới
                                 </button>
                             </div>
                         </div>
@@ -68,115 +61,130 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-5 text-left text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Mã đơn</th>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Khách hàng</th>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Tổng tiền</th>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Trạng thái giao hàng</th>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Trạng thái thanh toán</th>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Ngày đặt</th>
                                     <th
-                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                        class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-900">
                                         Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
                                 @forelse ($orders as $order)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-900">
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-indigo-900">
                                             {{ $order->ma_don_hang }}
                                         </td>
-                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                                             {{ $order->user->name }}
                                         </td>
-                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                                             {{ number_format($order->tong_tien, 0, ',', '.') }}đ
                                         </td>
                                         {{-- Trạng thái giao hàng --}}
-                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-center">
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
                                             @php
                                                 $statusClass = '';
                                                 $displayText = '';
+                                                $statusIcon = ''; // Thêm biến này
                                                 switch ($order->trang_thai) {
                                                     case 'pending':
                                                         $statusClass = 'bg-yellow-200 text-yellow-800';
                                                         $displayText = 'Chờ xác nhận';
+                                                        $statusIcon = 'fa-solid fa-file-alt'; // Icon cho "Chờ xác nhận"
                                                         break;
                                                     case 'processing':
                                                         $statusClass = 'bg-blue-200 text-blue-800';
                                                         $displayText = 'Đang xử lý';
+                                                        $statusIcon = 'fa-solid fa-cogs'; // Icon cho "Đang xử lý"
                                                         break;
                                                     case 'shipped':
                                                         $statusClass = 'bg-indigo-200 text-indigo-800';
                                                         $displayText = 'Đang giao hàng';
+                                                        $statusIcon = 'fa-solid fa-truck'; // Icon cho "Đang giao hàng"
                                                         break;
                                                     case 'delivered':
                                                         $statusClass = 'bg-green-200 text-green-800';
                                                         $displayText = 'Giao thành công';
+                                                        $statusIcon = 'fa-solid fa-circle-check'; // Icon cho "Giao thành công"
                                                         break;
                                                     case 'cancelled':
                                                         $statusClass = 'bg-red-200 text-red-800';
                                                         $displayText = 'Đã hủy';
+                                                        $statusIcon = 'fa-solid fa-circle-xmark'; // Icon cho "Đã hủy"
                                                         break;
                                                     default:
                                                         $statusClass = 'bg-gray-200 text-gray-800';
                                                         $displayText = 'Không rõ';
+                                                        $statusIcon = 'fa-solid fa-question-circle'; // Icon mặc định
                                                         break;
                                                 }
                                             @endphp
                                             <span
-                                                class="inline-block rounded-full px-2 py-1 font-semibold {{ $statusClass }}">
-                                                {{ $displayText }}
+                                                class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold {{ $statusClass }}">
+                                                <i class="{{ $statusIcon }}"></i> {{-- Thêm icon vào đây --}}
+                                                <span>{{ $displayText }}</span>
                                             </span>
                                         </td>
                                         {{-- Trạng thái thanh toán --}}
-                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-center">
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
                                             @if ($order->payment)
                                                 @php
                                                     $paymentStatus = $order->payment->trang_thai;
                                                     $paymentClass = '';
                                                     $displayText = '';
+                                                    $paymentIcon = ''; // Thêm biến này để lưu class icon
                                                     switch ($paymentStatus) {
                                                         case 'pending':
                                                             $paymentClass = 'bg-yellow-200 text-yellow-800';
                                                             $displayText = 'Chưa thanh toán';
+                                                            $paymentIcon = 'fa-solid fa-hourglass-half'; // Icon cho "Chưa thanh toán"
                                                             break;
                                                         case 'completed':
                                                             $paymentClass = 'bg-green-200 text-green-800';
                                                             $displayText = 'Đã thanh toán';
+                                                            $paymentIcon = 'fa-solid fa-circle-check'; // Icon cho "Đã thanh toán"
                                                             break;
                                                         case 'failed':
                                                             $paymentClass = 'bg-red-200 text-red-800';
                                                             $displayText = 'Thất bại';
+                                                            $paymentIcon = 'fa-solid fa-circle-xmark'; // Icon cho "Thất bại"
                                                             break;
                                                         default:
                                                             $paymentClass = 'bg-gray-200 text-gray-800';
                                                             $displayText = 'Không rõ';
+                                                            $paymentIcon = 'fa-solid fa-question-circle'; // Icon mặc định
                                                             break;
                                                     }
                                                 @endphp
                                                 <span
-                                                    class="inline-block rounded-full px-2 py-1 font-semibold {{ $paymentClass }}">
-                                                    {{ $displayText }}
+                                                    class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold {{ $paymentClass }}">
+                                                    <i class="{{ $paymentIcon }}"></i> {{-- Thêm icon vào đây --}}
+                                                    <span>{{ $displayText }}</span>
                                                 </span>
                                             @else
                                                 <span
-                                                    class="inline-block rounded-full px-2 py-1 font-semibold bg-gray-200 text-gray-800">
-                                                    Chưa có thông tin
+                                                    class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold bg-gray-200 text-gray-800">
+                                                    <i class="fa-solid fa-info-circle"></i> {{-- Icon cho trạng thái không có thông tin --}}
+                                                    <span>Chưa có thông tin</span>
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">
+                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500 text-center">
                                             {{ $order->ngay_dat_hang->format('d/m/Y H:i') }}
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-2 text-sm font-medium">
@@ -308,7 +316,7 @@
                 }
                 // Logic chính: chỉ cho phép chọn trạng thái tiếp theo hoặc trạng thái "Đã hủy"
                 else if (optionStep && (optionStep === currentStep + 1 || optionValue ===
-                    'cancelled')) {
+                        'cancelled')) {
                     option.disabled = false;
                 } else {
                     option.disabled = true;
