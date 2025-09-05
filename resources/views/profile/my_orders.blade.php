@@ -181,7 +181,10 @@
                         Chi tiết đơn hàng #<span id="detail-order-id"></span>
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Đặt hàng ngày <span id="detail-order-date"></span>
+                        Đặt hàng lúc <span id="detail-order-date"></span>
+                    </div>
+                    <div id="detail-cancel-date" class="hidden text-sm text-red-500 dark:text-red-400 mt-1">
+                        Bạn đã hủy đơn hàng vào lúc <span id="cancel-date"></span>
                     </div>
                 </div>
                 <span id="detail-order-status"
@@ -254,6 +257,61 @@
         <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
         </div>
+
+        <!-- Modal hủy đơn hàng -->
+        <div id="cancel-order-modal"
+            class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                <div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Hủy đơn hàng</div>
+                <form id="cancel-order-form">
+                    <div class="mb-4">
+                        <label for="cancel-reason"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Lý do hủy đơn hàng
+                        </label>
+                        <div class="relative">
+                            <select id="cancel-reason" name="cancel_reason"
+                                class="block w-full px-4 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-200 appearance-none">
+                                <option value="">Chọn lý do</option>
+                                <option value="Đặt nhầm sản phẩm, số lượng">Đặt nhầm sản phẩm, số lượng</option>
+                                <option value="Muốn thay đổi sản phẩm khác">Muốn thay đổi sản phẩm khác</option>
+                                <option value="Sản phẩm không đúng như mô tả">Sản phẩm không đúng như mô tả</option>
+                                <option value="Thay đổi địa chỉ giao hàng">Thay đổi địa chỉ giao hàng</option>
+                                <option value="Không còn nhu cầu mua nữa">Không còn nhu cầu mua nữa</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="cancel-error" class="hidden text-red-500 text-sm mt-2"></div>
+                    </div>
+                    <div id="other-reason-container" class="mb-4 hidden">
+                        <label for="other-reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Vui lòng nhập lý do khác
+                        </label>
+                        <textarea id="other-reason" name="other_reason" rows="4"
+                            class="block w-full px-4 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-200"
+                            placeholder="Nhập lý do cụ thể..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="close-cancel-modal"
+                            class="px-4 py-2 text-sm font-semibold rounded-lg text-gray-600 border border-gray-300 hover:bg-gray-300 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                            Đóng
+                        </button>
+                        <button type="submit" id="submit-cancel-order"
+                            class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-red-500 hover:bg-red-600">
+                            Hủy đơn hàng
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -263,6 +321,19 @@
             const loadingSpinner = document.getElementById('loading-spinner');
             const backButton = document.getElementById('back-to-list');
             const orderActions = document.getElementById('order-actions');
+            const cancelOrderModal = document.getElementById('cancel-order-modal');
+            const closeCancelModal = document.getElementById('close-cancel-modal');
+            const cancelOrderForm = document.getElementById('cancel-order-form');
+            const cancelReasonSelect = document.getElementById('cancel-reason');
+            const otherReasonContainer = document.getElementById('other-reason-container');
+            const errorContainer = document.getElementById('cancel-error') || document.createElement('div');
+
+            // Thêm errorContainer nếu chưa có
+            if (!document.getElementById('cancel-error')) {
+                errorContainer.id = 'cancel-error';
+                errorContainer.className = 'hidden text-red-500 text-sm mt-2';
+                cancelOrderForm.querySelector('.mb-4').appendChild(errorContainer);
+            }
 
             // Xử lý sự kiện khi bấm nút "Xem chi tiết"
             document.querySelectorAll('.view-details').forEach(button => {
@@ -288,7 +359,6 @@
                             return response.json();
                         })
                         .then(data => {
-                            // Cập nhật thông tin chi tiết đơn hàng
                             document.getElementById('detail-order-id').textContent = data
                                 .ma_don_hang;
                             document.getElementById('detail-order-date').textContent = new Date(
@@ -300,10 +370,26 @@
                                 minute: '2-digit',
                                 second: '2-digit'
                             });
+                            if (data.trang_thai === 'cancelled' && data.ngay_huy) {
+                                document.getElementById('cancel-date').textContent = new Date(
+                                    data.ngay_huy).toLocaleDateString('vi-VN', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit'
+                                });
+                                document.getElementById('detail-cancel-date').classList.remove(
+                                    'hidden');
+                            } else {
+                                document.getElementById('detail-cancel-date').classList.add(
+                                    'hidden');
+                            }
                             document.getElementById('detail-order-status').innerHTML = `
-                        <i class="${getStatusIcon(data.trang_thai)}"></i>
-                        <span>${getStatusText(data.trang_thai)}</span>
-                    `;
+    <i class="${getStatusIcon(data.trang_thai)}"></i>
+    <span>${getStatusText(data.trang_thai)}</span>
+`;
                             document.getElementById('detail-order-status').className =
                                 getStatusClass(data.trang_thai);
 
@@ -312,24 +398,24 @@
 
                             // Cập nhật danh sách sản phẩm
                             const productsContainer = document.getElementById(
-                            'detail-products');
+                                'detail-products');
                             productsContainer.innerHTML = '';
                             data.orderDetails.forEach(detail => {
                                 const productDiv = document.createElement('div');
                                 productDiv.className =
                                     'flex items-center justify-between py-2 dark:border-gray-700';
                                 productDiv.innerHTML = `
-                            <div class="flex items-center">
-                                <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0">
-                                    ${detail.hinh_anh ? `<img src="${detail.hinh_anh}" alt="${detail.ten_san_pham}" class="w-full h-full object-cover">` : 'No image'}
+                                <div class="flex items-center">
+                                    <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0">
+                                        ${detail.hinh_anh ? `<img src="${detail.hinh_anh}" alt="${detail.ten_san_pham}" class="w-full h-full object-cover">` : 'No image'}
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="font-medium text-gray-900 dark:text-gray-100">${detail.ten_san_pham}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Số lượng: ${detail.so_luong}</p>
+                                    </div>
                                 </div>
-                                <div class="ml-4">
-                                    <p class="font-medium text-gray-900 dark:text-gray-100">${detail.ten_san_pham}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Số lượng: ${detail.so_luong}</p>
-                                </div>
-                            </div>
-                            <span class="font-semibold text-gray-900 dark:text-gray-100">${numberFormat(detail.gia)}</span>
-                        `;
+                                <span class="font-semibold text-gray-900 dark:text-gray-100">${numberFormat(detail.gia)}</span>
+                            `;
                                 productsContainer.appendChild(productDiv);
                             });
 
@@ -337,7 +423,7 @@
                             document.getElementById('detail-address-name').textContent = data
                                 .ten_nguoi_nhan;
                             document.getElementById('detail-address').textContent = data
-                            .dia_chi;
+                                .dia_chi;
                             document.getElementById('detail-phone').textContent =
                                 `SĐT: ${data.so_dien_thoai}`;
                             document.getElementById('detail-payment-method').textContent =
@@ -402,6 +488,96 @@
                 e.preventDefault();
                 orderDetail.classList.add('hidden');
                 orderList.classList.remove('hidden');
+            });
+
+            // Xử lý sự kiện bấm nút "Hủy đơn hàng"
+            orderActions.addEventListener('click', function(e) {
+                if (e.target.classList.contains('cancel-order')) {
+                    const orderId = e.target.getAttribute('data-order-id');
+                    cancelOrderModal.classList.remove('hidden');
+                    cancelOrderForm.setAttribute('data-order-id', orderId);
+                    errorContainer.classList.add('hidden'); // Ẩn thông báo lỗi khi mở modal
+                }
+            });
+
+            // Xử lý hiển thị textarea khi chọn "Khác" trong dropdown
+            cancelReasonSelect.addEventListener('change', function() {
+                if (this.value === 'Khác') {
+                    otherReasonContainer.classList.remove('hidden');
+                } else {
+                    otherReasonContainer.classList.add('hidden');
+                }
+                errorContainer.classList.add('hidden'); // Ẩn thông báo lỗi khi thay đổi lý do
+            });
+
+            // Xử lý đóng modal
+            closeCancelModal.addEventListener('click', function() {
+                cancelOrderModal.classList.add('hidden');
+                cancelOrderForm.reset();
+                otherReasonContainer.classList.add('hidden');
+                errorContainer.classList.add('hidden');
+            });
+
+            // Xử lý submit form hủy đơn hàng
+            cancelOrderForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const orderId = this.getAttribute('data-order-id');
+                const reason = cancelReasonSelect.value;
+                const otherReason = document.getElementById('other-reason').value;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                // Validation phía client
+                if (!reason) {
+                    errorContainer.textContent = 'Vui lòng chọn lý do hủy đơn hàng.';
+                    errorContainer.classList.remove('hidden');
+                    return;
+                }
+
+                if (reason === 'Khác' && !otherReason.trim()) {
+                    errorContainer.textContent = 'Vui lòng nhập lý do cụ thể.';
+                    errorContainer.classList.remove('hidden');
+                    return;
+                }
+
+                loadingSpinner.classList.remove('hidden');
+
+                // Gửi AJAX đến backend
+                fetch(`{{ url('/my-orders') }}/${orderId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            cancel_reason: reason,
+                            other_reason: reason === 'Khác' ? otherReason : null
+                        })
+                    })
+                    .then(response => {
+                        loadingSpinner.classList.add('hidden');
+                        if (!response.ok) {
+                            return response.json().then(error => {
+                                throw new Error(error.error ||
+                                    'Có lỗi xảy ra khi hủy đơn hàng.');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        cancelOrderModal.classList.add('hidden');
+                        cancelOrderForm.reset();
+                        otherReasonContainer.classList.add('hidden');
+                        errorContainer.classList.add('hidden');
+                        alert(data.message);
+                        // Reload trang để cập nhật danh sách đơn hàng
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        loadingSpinner.classList.add('hidden');
+                        errorContainer.textContent = error.message;
+                        errorContainer.classList.remove('hidden');
+                    });
             });
 
             // Hàm định dạng trạng thái
@@ -510,11 +686,11 @@
                     const statusDiv = document.createElement('div');
                     statusDiv.className = 'flex flex-col items-center';
                     statusDiv.innerHTML = `
-                <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
-                    <i class="${statusIcons[s]}"></i>
-                </div>
-                <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
-            `;
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
+                            <i class="${statusIcons[s]}"></i>
+                        </div>
+                        <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
+                    `;
                     timelineContainer.appendChild(statusDiv);
 
                     if (index < statuses.length - 1) {

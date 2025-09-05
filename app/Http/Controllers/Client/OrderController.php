@@ -143,4 +143,59 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         return view('clients.order.success', ['order' => $order]);
     }
+
+    public function cancel(Request $request, $ma_don_hang)
+    {
+        $user = Auth::user();
+        $order = Order::where('ma_don_hang', $ma_don_hang)
+            ->where('id_nguoi_dung', $user->id)
+            ->with('orderDetails.product')
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'error' => 'Đơn hàng không tồn tại hoặc bạn không có quyền hủy.'
+            ], 403);
+        }
+
+        if (!in_array($order->trang_thai, ['pending', 'processing'])) {
+            return response()->json([
+                'error' => 'Đơn hàng không thể hủy vì đã ở trạng thái ' . $order->trang_thai . '.'
+            ], 400);
+        }
+
+        $request->validate([
+            'cancel_reason' => 'required|string|max:255',
+            'other_reason' => 'required_if:cancel_reason,Khác|string|max:500|nullable',
+        ]);
+
+        $reason = $request->cancel_reason === 'Khác' ? $request->other_reason : $request->cancel_reason;
+
+        return DB::transaction(function () use ($order, $reason) {
+            // Cập nhật trạng thái đơn hàng
+            $order->trang_thai = 'cancelled';
+            $order->ly_do_huy = $reason;
+            $order->ngay_huy = now();
+            $order->save();
+
+            // Trả lại số lượng tồn kho
+            foreach ($order->orderDetails as $detail) {
+                $product = Product::find($detail->id_san_pham);
+                if ($product) {
+                    $product->so_luong += $detail->so_luong;
+                    $product->save();
+                }
+            }
+
+            return response()->json([
+                'message' => 'Đơn hàng đã được hủy thành công.',
+                'order' => [
+                    'ma_don_hang' => $order->ma_don_hang,
+                    'trang_thai' => $order->trang_thai,
+                    'ly_do_huy' => $order->ly_do_huy,
+                    'ngay_huy' => $order->ngay_huy->format('d/m/Y H:i:s'),
+                ]
+            ]);
+        }, 5); // Retry transaction tối đa 5 lần nếu gặp deadlock
+    }
 }

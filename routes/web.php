@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/my-orders', [ProfileController::class, 'index'])->name('my-orders.index');
     Route::get('/my-orders/{id}', [ProfileController::class, 'showOrders'])->name('my-orders.show');
+    Route::post('/my-orders/{ma_don_hang}/cancel', [OrderController::class, 'cancel'])->name('my-orders.cancel');
 });
 
 require __DIR__ . '/auth.php';

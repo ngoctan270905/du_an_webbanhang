@@ -114,6 +114,7 @@ class ProfileController extends Controller
                 'ma_don_hang' => $order->ma_don_hang,
                 'ngay_dat_hang' => $order->ngay_dat_hang,
                 'trang_thai' => $order->trang_thai,
+                'ngay_huy' => $order->ngay_huy,
                 'tong_tien' => $order->tong_tien,
                 'phi_van_chuyen' => 'Không xác định', // Phí vận chuyển không xác định vì đã gộp vào tong_tien
                 'giam_gia' => 0, // Giá trị mặc định vì không có cột trong DB
