@@ -161,7 +161,7 @@
                                                             break;
                                                         case 'failed':
                                                             $paymentClass = 'bg-red-200 text-red-800';
-                                                            $displayText = 'Thất bại';
+                                                            $displayText = 'Thanh toán thất bại';
                                                             $paymentIcon = 'fa-solid fa-circle-xmark'; // Icon cho "Thất bại"
                                                             break;
                                                         default:

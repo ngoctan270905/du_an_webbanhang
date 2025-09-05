@@ -113,11 +113,11 @@
                         <span class="font-bold text-green-600">
                             @switch($order->trang_thai)
                                 @case('pending')
-                                    Đang xử lý
+                                    Chờ xác nhận
                                 @break
 
                                 @case('processing')
-                                    Đang chuẩn bị giao
+                                    Đang xử lý
                                 @break
 
                                 @case('shipped')
@@ -146,10 +146,10 @@
             </p>
 
             <div class="flex flex-col sm:flex-row gap-3 w-full">
-                <a href=""
+                <a href="{{ route('my-orders.index') }}"
                     class="flex-1 py-3 text-center bg-gray-200 text-gray-800 font-bold rounded-xl shadow-md hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
                     <i class="fas fa-history text-base mr-2"></i>
-                    Xem Lịch Sử Mua Hàng
+                    Theo Dõi Đơn Hàng
                 </a>
                 <a href="{{ route('home') }}"
                     class="flex-1 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
