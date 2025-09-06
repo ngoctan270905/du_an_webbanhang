@@ -120,16 +120,15 @@ class OrderController extends Controller
                 $product->save();
             }
 
-            // Tạo payment (nếu không cod)
-            if ($request->phuong_thuc_thanh_toan != 'cod') {
-                Payment::create([
-                    'id_don_hang' => $order->id,
-                    'phuong_thuc_thanh_toan' => $request->phuong_thuc_thanh_toan,
-                    'so_tien' => $total,
-                    'trang_thai' => 'pending',
-                    'ma_giao_dich' => Str::random(20),
-                ]);
-            }
+            // Tạo payment với trạng thái pending
+            Payment::create([
+                'id_don_hang' => $order->id,
+                'phuong_thuc_thanh_toan' => $request->phuong_thuc_thanh_toan,
+                'so_tien' => $total,
+                'trang_thai' => 'pending',
+                'ma_giao_dich' => Str::random(20),
+            ]);
+
 
             // Xóa giỏ hàng
             CartItem::where('id_nguoi_dung', $user->id)->delete();
