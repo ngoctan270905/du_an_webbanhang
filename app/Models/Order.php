@@ -18,6 +18,8 @@ class Order extends Model
         'tong_tien',
         'da_nhan_hang',
         'trang_thai',
+        'ly_do_huy',
+        'ngay_huy',
         'dia_chi_giao_hang',
         'ho_ten_khach_hang',
         'so_dien_thoai',
@@ -33,6 +35,7 @@ class Order extends Model
 
     protected $casts = [
         'tong_tien' => 'decimal:2',
+        'ngay_huy' => 'datetime',
         'trang_thai' => 'string', // Enum: 'pending', 'processing', 'shipped', 'delivered', 'cancelled'
         'phuong_thuc_thanh_toan' => 'string', // Enum: 'cod', 'bank_transfer', 'online_payment'
         'ngay_dat_hang' => 'datetime',
