@@ -667,39 +667,57 @@
                     pending: 'Chờ xác nhận',
                     processing: 'Đang xử lý',
                     shipped: 'Đang giao',
-                    delivered: 'Thành công'
+                    delivered: 'Thành công',
+                    cancelled: 'Đã hủy'
                 };
                 const statusIcons = {
                     pending: 'fa-solid fa-file-alt',
                     processing: 'fa-solid fa-cogs',
                     shipped: 'fa-solid fa-truck',
-                    delivered: 'fa-solid fa-circle-check'
+                    delivered: 'fa-solid fa-circle-check',
+                    cancelled: 'fa-solid fa-circle-xmark'
                 };
                 const timelineContainer = document.getElementById('order-status-timeline');
                 timelineContainer.innerHTML = '';
 
-                let currentStatusIndex = statuses.indexOf(status);
-                if (currentStatusIndex === -1) currentStatusIndex = -1; // Nếu trạng thái không hợp lệ (cancelled)
-
-                statuses.forEach((s, index) => {
-                    const isActive = index <= currentStatusIndex && currentStatusIndex !== -1;
+                if (status === 'cancelled') {
+                    // Nếu trạng thái là 'cancelled', chỉ hiển thị trạng thái "Đã hủy" màu đỏ
                     const statusDiv = document.createElement('div');
                     statusDiv.className = 'flex flex-col items-center';
                     statusDiv.innerHTML = `
-                        <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
-                            <i class="${statusIcons[s]}"></i>
-                        </div>
-                        <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
-                    `;
+                <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white">
+                    <i class="${statusIcons['cancelled']}"></i>
+                </div>
+                <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels['cancelled']}</span>
+            `;
                     timelineContainer.appendChild(statusDiv);
+                } else {
+                    // Hiển thị các trạng thái bình thường
+                    const currentStatusIndex = statuses.indexOf(status);
+                    const displayStatuses = currentStatusIndex === -1 ? ['pending'] : statuses.slice(0,
+                        currentStatusIndex + 1);
 
-                    if (index < statuses.length - 1) {
-                        const connector = document.createElement('div');
-                        connector.className =
-                            `flex-1 border-t-2 ${isActive ? 'border-green-500' : 'border-gray-300'} mx-1`;
-                        timelineContainer.appendChild(connector);
-                    }
-                });
+                    displayStatuses.forEach((s, index) => {
+                        const isActive = index <= currentStatusIndex;
+                        const statusDiv = document.createElement('div');
+                        statusDiv.className = 'flex flex-col items-center';
+                        statusDiv.innerHTML = `
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
+                        <i class="${statusIcons[s]}"></i>
+                    </div>
+                    <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
+                `;
+                        timelineContainer.appendChild(statusDiv);
+
+                        // Chỉ thêm đường nối nếu không phải trạng thái cuối
+                        if (index < displayStatuses.length - 1) {
+                            const connector = document.createElement('div');
+                            connector.className =
+                                `flex-1 border-t-2 ${isActive ? 'border-green-500' : 'border-gray-300'} mx-1`;
+                            timelineContainer.appendChild(connector);
+                        }
+                    });
+                }
             }
 
             // Hàm định dạng số tiền
