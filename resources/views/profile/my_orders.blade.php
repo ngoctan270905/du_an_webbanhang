@@ -692,13 +692,9 @@
             `;
                     timelineContainer.appendChild(statusDiv);
                 } else {
-                    // Hiển thị các trạng thái bình thường
-                    const currentStatusIndex = statuses.indexOf(status);
-                    const displayStatuses = currentStatusIndex === -1 ? ['pending'] : statuses.slice(0,
-                        currentStatusIndex + 1);
-
-                    displayStatuses.forEach((s, index) => {
-                        const isActive = index <= currentStatusIndex;
+                    // Hiển thị đầy đủ các trạng thái cho các trạng thái khác
+                    statuses.forEach((s, index) => {
+                        const isActive = index <= statuses.indexOf(status);
                         const statusDiv = document.createElement('div');
                         statusDiv.className = 'flex flex-col items-center';
                         statusDiv.innerHTML = `
@@ -710,7 +706,7 @@
                         timelineContainer.appendChild(statusDiv);
 
                         // Chỉ thêm đường nối nếu không phải trạng thái cuối
-                        if (index < displayStatuses.length - 1) {
+                        if (index < statuses.length - 1) {
                             const connector = document.createElement('div');
                             connector.className =
                                 `flex-1 border-t-2 ${isActive ? 'border-green-500' : 'border-gray-300'} mx-1`;
@@ -719,6 +715,7 @@
                     });
                 }
             }
+
 
             // Hàm định dạng số tiền
             function numberFormat(number) {
