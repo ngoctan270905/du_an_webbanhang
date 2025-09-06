@@ -16,6 +16,7 @@ class Order extends Model
         'ma_don_hang',
         'id_nguoi_dung',
         'tong_tien',
+        'da_nhan_hang',
         'trang_thai',
         'dia_chi_giao_hang',
         'ho_ten_khach_hang',
@@ -23,6 +24,9 @@ class Order extends Model
         'province_code',
         'district_code',
         'ward_code',
+        'phi_ship',
+        'hinh_thuc_van_chuyen',
+        'tong_tien_hang',
         'phuong_thuc_thanh_toan',
         'ngay_dat_hang',
     ];

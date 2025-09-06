@@ -380,7 +380,7 @@
             }
         }
     </style>
-    <header class="fixed top-0 left-0 right-0 z-50 py-3 px-8 flex items-center justify-between">
+    <header class="fixed top-0 left-0 right-0 z-50 py-2 px-8 flex items-center justify-between">
         <a href="{{ route('home') }}" class="logo">BOOKSTORE</a>
         <nav class="hidden md:flex flex-1 justify-center space-x-8">
             <a href="#" class="transition-colors">VĂN HỌC</a>

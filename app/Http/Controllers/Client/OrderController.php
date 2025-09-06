@@ -8,6 +8,9 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\CartItem;
 use App\Models\OrderDetail;
+use App\Models\Province;
+use App\Models\District;
+use App\Models\Ward;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,10 +33,13 @@ class OrderController extends Controller
             return $price * $item->so_luong;
         });
 
+        $provinces = Province::all();
+
         return view('clients.order.checkout', [
             'cartItems' => $cartItems,
             'total' => $total,
             'user' => $user,
+            'provinces' => $provinces,
         ]);
     }
 
@@ -42,10 +48,33 @@ class OrderController extends Controller
         $request->validate([
             'ho_ten' => 'required|string|max:255',
             'so_dien_thoai' => ['required', 'string', 'regex:#^(03|05|07|08|09)[0-9]{8}$#'],
+            'province_code' => 'required|string|exists:provinces,code',
+            'district_code' => 'required|string|exists:districts,code',
+            'ward_code' => 'required|string|exists:wards,code',
             'dia_chi_giao_hang' => 'required|string|max:500',
             'phuong_thuc_thanh_toan' => 'required|in:cod,bank_transfer,online_payment',
-            'phi_van_chuyen' => 'required|integer|min:0',
+            'hinh_thuc_van_chuyen' => 'required|in:standard,express',
+            'phi_ship' => 'required|numeric|min:0',
             'coupon_code' => 'nullable|string',
+        ], [
+            'ho_ten.required' => 'Họ tên không được để trống.',
+            'ho_ten.max' => 'Họ tên không được dài quá 255 ký tự.',
+            'so_dien_thoai.required' => 'Số điện thoại không được để trống.',
+            'so_dien_thoai.regex' => 'Số điện thoại không đúng định dạng (VD: 03xxxxxxx).',
+            'province_code.required' => 'Bạn phải chọn tỉnh/thành.',
+            'province_code.exists' => 'Tỉnh/thành không hợp lệ.',
+            'district_code.required' => 'Bạn phải chọn quận/huyện.',
+            'district_code.exists' => 'Quận/huyện không hợp lệ.',
+            'ward_code.required' => 'Bạn phải chọn xã/phường.',
+            'ward_code.exists' => 'Xã/phường không hợp lệ.',
+            'dia_chi_giao_hang.required' => 'Địa chỉ giao hàng không được để trống.',
+            'phuong_thuc_thanh_toan.required' => 'Bạn phải chọn phương thức thanh toán.',
+            'phuong_thuc_thanh_toan.in' => 'Phương thức thanh toán không hợp lệ.',
+            'hinh_thuc_van_chuyen.required' => 'Bạn phải chọn hình thức vận chuyển.',
+            'hinh_thuc_van_chuyen.in' => 'Hình thức vận chuyển không hợp lệ.',
+            'phi_ship.required' => 'Phí vận chuyển không được để trống.',
+            'phi_ship.numeric' => 'Phí vận chuyển phải là số.',
+            'phi_ship.min' => 'Phí vận chuyển phải lớn hơn hoặc bằng 0.',
         ]);
 
         $user = Auth::user();
@@ -56,7 +85,7 @@ class OrderController extends Controller
         }
 
         return DB::transaction(function () use ($request, $user, $cartItems) {
-            $total = 0;
+            $tongTienHang = 0;
             foreach ($cartItems as $item) {
                 $product = $item->product;
                 $currentPrice = $product->gia_khuyen_mai ?? $item->product->gia;
@@ -66,10 +95,11 @@ class OrderController extends Controller
                 }
 
                 $subtotal = $currentPrice * $item->so_luong;
-                $total += $subtotal;
+                $tongTienHang += $subtotal;
             }
 
             // Áp coupon nếu có
+            $total = $tongTienHang;
             $coupon = null;
             if ($request->coupon_code) {
                 $coupon = Coupon::where('ma_giam_gia', $request->coupon_code)->where('trang_thai', 1)->first();
@@ -82,24 +112,44 @@ class OrderController extends Controller
                 }
             }
 
-            // Thêm phí vận chuyển
-            $total += $request->phi_van_chuyen;
+            // Thêm phí ship
+            $total += $request->phi_ship;
 
-            // Tạo mã đơn hàng unique
-            do {
-                $maDonHang = 'DH' . now()->format('YmdHis') . rand(1000, 9999);
-            } while (Order::where('ma_don_hang', $maDonHang)->exists());
+            // Tạo mã đơn hàng unique theo ngày
+            $prefix = 'DH';
+            $datePart = now()->format('ymd'); // vd: 250906
 
-            // Tạo địa chỉ đầy đủ
-            $diaChiDayDu = $request->ho_ten . ' - ' . $request->so_dien_thoai . ' - ' . $request->dia_chi_giao_hang;
+            // Lấy đơn hàng gần nhất trong ngày
+            $lastOrder = Order::whereDate('created_at', now()->toDateString())
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Tính số thứ tự, nếu chưa có đơn nào hôm nay thì là 1
+            $sequence = $lastOrder ? (int) substr($lastOrder->ma_don_hang, -3) + 1 : 1;
+
+            // Đệm số thứ tự 3 chữ số
+            $sequence = str_pad($sequence, 3, '0', STR_PAD_LEFT);
+
+            // Ghép thành mã đơn hàng
+            $maDonHang = "$prefix-$datePart-$sequence";
+
 
             // Tạo order
             $order = Order::create([
                 'ma_don_hang' => $maDonHang,
                 'id_nguoi_dung' => $user->id,
+                'ho_ten_khach_hang' => $request->ho_ten,
+                'so_dien_thoai' => $request->so_dien_thoai,
                 'tong_tien' => $total,
+                'tong_tien_hang' => $tongTienHang,
+                'phi_ship' => $request->phi_ship,
+                'hinh_thuc_van_chuyen' => $request->hinh_thuc_van_chuyen,
+                'da_nhan_hang' => false,
                 'trang_thai' => 'pending',
-                'dia_chi_giao_hang' => $diaChiDayDu,
+                'dia_chi_giao_hang' => $request->dia_chi_giao_hang,
+                'province_code' => $request->province_code,
+                'district_code' => $request->district_code,
+                'ward_code' => $request->ward_code,
                 'phuong_thuc_thanh_toan' => $request->phuong_thuc_thanh_toan,
                 'ngay_dat_hang' => now(),
             ]);
@@ -128,7 +178,6 @@ class OrderController extends Controller
                 'trang_thai' => 'pending',
                 'ma_giao_dich' => Str::random(20),
             ]);
-
 
             // Xóa giỏ hàng
             CartItem::where('id_nguoi_dung', $user->id)->delete();

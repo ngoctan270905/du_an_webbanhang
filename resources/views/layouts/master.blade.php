@@ -15,24 +15,28 @@
         integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-   
+
 </head>
 
-<body>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
 
     @include('partials.header')
 
     <main class="pt-14">
-        @yield('content')
+        
+            
+                @yield('content')
+        
+        </div>
     </main>
 
     @include('partials.footer')
 
     @include('partials.script')
 
-    
 
-    
+
+
 </body>
 
 </html>
