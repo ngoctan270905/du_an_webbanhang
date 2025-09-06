@@ -18,6 +18,11 @@ class Order extends Model
         'tong_tien',
         'trang_thai',
         'dia_chi_giao_hang',
+        'ho_ten_khach_hang',
+        'so_dien_thoai',
+        'province_code',
+        'district_code',
+        'ward_code',
         'phuong_thuc_thanh_toan',
         'ngay_dat_hang',
     ];
@@ -48,5 +53,23 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class, 'id_don_hang');
+    }
+
+    // Quan hệ với Province
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_code', 'code');
+    }
+
+    // Quan hệ với District
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_code', 'code');
+    }
+
+    // Quan hệ với Ward
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'ward_code', 'code');
     }
 }
