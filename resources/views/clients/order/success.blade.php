@@ -56,25 +56,27 @@
         }
     </style>
 
-    <div class="container mx-auto p-4 md:p-8 lg:p-12 max-w-3xl text-center">
-        <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg border border-blue-100 flex flex-col items-center">
-            <svg class="w-20 h-20 md:w-24 md:h-24 text-blue-600 mb-5 checkmark-circle" viewBox="0 0 52 52">
-                <circle cx="26" cy="26" r="24" fill="none" class="stroke-blue-500 stroke-[4px]"></circle>
-                <path class="checkmark-path stroke-blue-600 stroke-[4px] fill-none" d="M14.1 27.2l7.1 7.2 16.7-16.8"></path>
+    <div class="container mx-auto p-3 md:p-6 lg:p-8 max-w-2xl text-center">
+        <div class="bg-white p-5 md:p-8 rounded-lg shadow-md border border-blue-100 flex flex-col items-center">
+            <svg class="w-16 h-16 md:w-20 md:h-20 text-blue-600 mb-4 checkmark-circle" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="24" fill="none" class="stroke-blue-500 stroke-[3px]"></circle>
+                <path class="checkmark-path stroke-blue-600 stroke-[3px] fill-none" d="M14.1 27.2l7.1 7.2 16.7-16.8"></path>
             </svg>
-            <div class="text-3xl md:text-4xl font-extrabold text-center mb-3 text-blue-800 tracking-tight">
+
+            <div class="text-2xl md:text-3xl font-extrabold text-center mb-2 text-blue-800 tracking-tight">
                 Thanh Toán Thành Công !
             </div>
-            <p class="text-base md:text-lg text-gray-600 mb-6 max-w-sm">
+
+            <p class="text-sm md:text-base text-gray-600 mb-5 max-w-sm">
                 Đơn hàng của bạn đã được tiếp nhận và đang được xử lý.
             </p>
 
-            <div class="w-full text-left bg-blue-50 p-5 rounded-lg border border-blue-200 mb-6">
-                <div class="text-xl font-bold mb-3 text-blue-700 flex items-center">
-                    <i class="fas fa-receipt text-xl mr-2 text-blue-500"></i>
+            <div class="w-full text-left bg-blue-50 p-4 rounded-md border border-blue-200 mb-5">
+                <div class="text-lg font-bold mb-2 text-blue-700 flex items-center">
+                    <i class="fas fa-receipt text-lg mr-2 text-blue-500"></i>
                     Thông Tin Đơn Hàng
                 </div>
-                <div class="space-y-2 text-sm text-gray-700">
+                <div class="space-y-2 text-xs md:text-sm text-gray-700">
                     <div class="flex justify-between">
                         <span class="font-medium">Mã đơn hàng:</span>
                         <span class="font-bold text-gray-900">{{ $order->ma_don_hang }}</span>
@@ -135,28 +137,28 @@
                                 @default
                                     Không xác định
                             @endswitch
-
                         </span>
                     </div>
                 </div>
             </div>
 
-            <p class="text-xs text-gray-500 mb-5">
+            <p class="text-xs text-gray-500 mb-4">
                 Bạn sẽ nhận được email xác nhận đơn hàng với chi tiết đầy đủ trong vài phút tới.
             </p>
 
-            <div class="flex flex-col sm:flex-row gap-3 w-full">
+            <div class="flex flex-col sm:flex-row gap-2 w-full">
                 <a href="{{ route('my-orders.index') }}"
-                    class="flex-1 py-3 text-center bg-gray-200 text-gray-800 font-bold rounded-xl shadow-md hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
-                    <i class="fas fa-history text-base mr-2"></i>
+                    class="flex-1 py-2.5 text-center bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-sm hover:bg-gray-300 transition duration-200 ease-in-out transform hover:-translate-y-1">
+                    <i class="fas fa-history text-sm mr-2"></i>
                     Theo Dõi Đơn Hàng
                 </a>
                 <a href="{{ route('home') }}"
-                    class="flex-1 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                    <i class="fas fa-shopping-bag text-base mr-2"></i>
+                    class="flex-1 py-2.5 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                    <i class="fas fa-shopping-bag text-sm mr-2"></i>
                     Tiếp Tục Mua Sắm
                 </a>
             </div>
         </div>
     </div>
+
 @endsection

@@ -104,7 +104,7 @@
 
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-10">
                         <div class="lg:w-2/3 space-y-8">
-                            <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+                            <div class="bg-white p-8 rounded-xl shadow-lg">
                                 <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                                     <i class="fas fa-shopping-cart text-2xl mr-3 text-blue-500 align-middle"></i>
                                     Đơn Hàng Của Bạn
@@ -125,8 +125,10 @@
                                                 <p class="text-sm text-gray-500 mt-1">Số lượng: <span
                                                         class="font-medium text-gray-700">{{ $item->so_luong }}</span></p>
                                             </div>
-                                            <span class="font-bold text-lg text-blue-600 price-col">
+                                            <span class="font-bold text-lg text-blue-600 price-col text-right">
                                                 {{ number_format($item->product->gia_khuyen_mai ?? $item->product->gia, 0, ',', '.') }}đ
+                                                <br>
+                                                <span class="text-sm font-bold">x {{ $item->so_luong }}</span>
                                             </span>
                                         </li>
                                     @empty
@@ -135,7 +137,7 @@
                                 </ul>
                             </div>
 
-                            <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+                            <div class="bg-white p-8 rounded-xl shadow-lg">
                                 <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                                     <i class="fas fa-map-marker-alt text-2xl mr-3 text-blue-500 align-middle"></i>
                                     Địa Chỉ Giao Hàng & Liên Hệ
@@ -225,7 +227,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+                            <div class="bg-white p-8 rounded-xl shadow-lg">
                                 <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                                     <i class="fas fa-truck text-2xl mr-3 text-blue-500 align-middle"></i>
                                     Chọn Hình Thức Vận Chuyển
@@ -275,7 +277,7 @@
                                 @enderror
                             </div>
 
-                            <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+                            <div class="bg-white p-8 rounded-xl shadow-lg">
                                 <div class="text-2xl font-bold mb-6 flex items-center text-blue-700">
                                     <i class="fas fa-money-check-alt text-2xl mr-3 text-blue-500 align-middle"></i>
                                     Chọn Phương Thức Thanh Toán
@@ -353,27 +355,27 @@
                         </div>
 
                         <div class="lg:w-1/3">
-                            <div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100 sticky top-12">
+                            <div class="bg-white p-8 rounded-xl shadow-lg sticky top-28">
                                 <div class="text-2xl font-bold mb-6 text-blue-700">
                                     <i class="fas fa-file-invoice-dollar text-2xl mr-3 text-blue-500 align-middle"></i>
                                     Tổng Kết Đơn Hàng
                                 </div>
                                 <div class="space-y-4 text-gray-700">
-                                    <div class="flex justify-between items-center text-lg">
+                                    <div class="flex justify-between items-center text-base">
                                         <span>Tạm tính</span>
                                         <span class="font-bold text-gray-900"
                                             id="subtotal">{{ number_format($total, 0, ',', '.') }}đ</span>
                                     </div>
-                                    <div class="flex justify-between items-center text-lg">
+                                    <div class="flex justify-between items-center text-base">
                                         <span>Phí vận chuyển</span>
                                         <span class="font-bold text-gray-900" id="shipping-cost">30.000đ</span>
                                     </div>
-                                    <div class="flex justify-between items-center text-lg">
+                                    <div class="flex justify-between items-center text-base">
                                         <span>Giảm giá</span>
                                         <span class="font-bold text-gray-900" id="coupon-discount">0đ</span>
                                     </div>
                                     <div
-                                        class="flex justify-between items-center font-extrabold text-2xl border-t border-blue-200 pt-6 mt-6">
+                                        class="flex justify-between items-center font-extrabold text-xl border-t border-blue-200 pt-6 mt-6">
                                         <span>Tổng cộng</span>
                                         <span class="text-blue-600"
                                             id="total-price">{{ number_format($total + 30000, 0, ',', '.') }}đ</span>
@@ -382,10 +384,9 @@
                                 <button type="button" id="submit-order-btn"
                                     class="w-full mt-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-extrabold text-lg rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                                     <i class="fas fa-check-circle text-xl mr-3 align-middle"></i>
-                                    Xác Nhận Thanh Toán Ngay
+                                    Xác Nhận Thanh Toán
                                 </button>
-                                <p class="text-center text-xs text-gray-500 mt-4">Bằng cách nhấp vào "Xác Nhận Thanh Toán
-                                    Ngay",
+                                <p class="text-center text-xs text-gray-500 mt-4">Bằng cách nhấp vào "Xác Nhận Thanh Toán",
                                     bạn đồng ý với các Điều Khoản Dịch Vụ.</p>
                             </div>
                         </div>
