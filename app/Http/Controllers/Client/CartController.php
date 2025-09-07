@@ -122,7 +122,7 @@ class CartController extends Controller
         return view('clients.cart.index', ['cart' => $cartItems]);
     }
 
-    public function update(Request $request): JsonResponse
+   public function update(Request $request): JsonResponse
     {
         if (!Auth::check()) {
             return response()->json([
@@ -155,29 +155,90 @@ class CartController extends Controller
                 ->where('id_san_pham', $request->product_id)
                 ->first();
 
-            if ($cartItem) {
-                $cartItem->so_luong = $quantity;
-                $cartItem->gia = $currentPrice; // Cập nhật giá hiện tại
-                $cartItem->save();
+            if (!$cartItem) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Sản phẩm không tồn tại trong giỏ hàng!'
+                ], 404);
+            }
 
-                $cartTotal = CartItem::where('id_nguoi_dung', $user->id)
-                    ->get()
-                    ->sum(function ($item) {
-                        return $item->gia * $item->so_luong; // Sử dụng giá từ cart_items
-                    });
+            // Kiểm tra thay đổi trước khi cập nhật
+            $changes = [];
+            $updatedItems = [];
 
+            // Kiểm tra trạng thái sản phẩm
+            if (!$product || $product->trang_thai != 1) {
+                $changes[] = [
+                    'id' => $cartItem->id_san_pham,
+                    'message' => 'Sản phẩm không tồn tại hoặc ngừng bán.',
+                    'action' => 'remove'
+                ];
+            } elseif ($product->so_luong == 0) {
+                $changes[] = [
+                    'id' => $cartItem->id_san_pham,
+                    'message' => 'Sản phẩm hết hàng.',
+                    'action' => 'remove'
+                ];
+            } elseif ($quantity > $product->so_luong) {
+                $changes[] = [
+                    'id' => $cartItem->id_san_pham,
+                    'message' => "Sản phẩm này chỉ còn {$product->so_luong} quyển, số lượng trong giỏ đã được cập nhật.",
+                    'action' => 'update_quantity'
+                ];
+            } elseif ($cartItem->gia != $currentPrice) {
+                $changes[] = [
+                    'id' => $cartItem->id_san_pham,
+                    'message' => "Sản phẩm {$product->ten_san_pham} có giá mới: " . number_format($currentPrice, 0, ',', '.') . "đ.",
+                    'action' => 'update_price'
+                ];
+            }
+
+            // Tính toán tổng giỏ hàng và cập nhật mục
+            $updatedQuantity = $quantity > $product->so_luong ? $product->so_luong : $quantity;
+            $updatedItems[] = [
+                'id' => $cartItem->id_san_pham,
+                'quantity' => $updatedQuantity,
+                'gia' => $currentPrice
+            ];
+
+            // Nếu có thay đổi, trả về thông tin thay đổi để frontend hiển thị modal
+            if (!empty($changes)) {
+                \Log::info('Update cart changes detected: ' . json_encode($changes));
                 return response()->json([
                     'success' => true,
-                    'message' => 'Số lượng đã được cập nhật!',
-                    'total' => $currentPrice * $quantity,
-                    'cart_total' => $cartTotal
+                    'has_changes' => true,
+                    'changes' => $changes,
+                    'updated_items' => $updatedItems,
+                    'total' => $currentPrice * $updatedQuantity,
+                    'cart_total' => CartItem::where('id_nguoi_dung', $user->id)
+                        ->get()
+                        ->sum(function ($item) use ($cartItem, $product, $updatedQuantity, $currentPrice) {
+                            if ($item->id_san_pham == $cartItem->id_san_pham) {
+                                return $currentPrice * $updatedQuantity;
+                            }
+                            return $item->gia * $item->so_luong;
+                        }),
+                    'message' => 'Để đảm bảo đơn hàng chính xác, chúng tôi phát hiện sản phẩm trong giỏ hàng đã có thay đổi. Nhấn Xác nhận để cập nhật giỏ hàng.'
                 ]);
             }
 
+            // Nếu không có thay đổi, cập nhật cart item
+            $cartItem->so_luong = $updatedQuantity;
+            $cartItem->gia = $currentPrice;
+            $cartItem->save();
+
+            $cartTotal = CartItem::where('id_nguoi_dung', $user->id)
+                ->get()
+                ->sum(function ($item) {
+                    return $item->gia * $item->so_luong;
+                });
+
             return response()->json([
-                'success' => false,
-                'error' => 'Sản phẩm không tồn tại trong giỏ hàng!'
-            ], 404);
+                'success' => true,
+                'message' => 'Số lượng đã được cập nhật!',
+                'total' => $currentPrice * $updatedQuantity,
+                'cart_total' => $cartTotal
+            ]);
         } catch (\Exception $e) {
             \Log::error('Cart update error: ' . $e->getMessage());
             return response()->json([
