@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -77,9 +78,11 @@ class HomeController extends Controller
         // Lấy toàn bộ đánh giá của sản phẩm
         $reviews = Review::where('id_san_pham', $product->id)->get();
 
-        // Lấy 5 sản phẩm cùng danh mục (trừ chính sản phẩm hiện tại)
+        // Lấy 5 sản phẩm liên quan cùng danh mục (ngẫu nhiên, trừ sản phẩm hiện tại)
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
+            ->where('trang_thai', 1) // Chỉ lấy sản phẩm có trạng thái hoạt động
+            ->inRandomOrder()
             ->take(5)
             ->get();
 
@@ -113,19 +116,62 @@ class HomeController extends Controller
 
     public function submitReview(Request $request, $id)
     {
+        if (!auth()->check()) {
+            Log::warning('Người dùng chưa đăng nhập khi gửi đánh giá cho sản phẩm ID: ' . $id);
+            return response()->json(['success' => false, 'error' => 'Vui lòng đăng nhập để gửi đánh giá!'], 403);
+        }
+
+        // Log toàn bộ request và ID sản phẩm
+        Log::info('Nhận yêu cầu đánh giá cho sản phẩm ID: ' . $id);
+        Log::info('Dữ liệu gửi lên từ form: ', $request->all());
+        Log::info('URL của request: ' . $request->fullUrl());
+
         $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
+            'rating'   => 'required|integer|min:1|max:5',
             'noi_dung' => 'required|string|max:1000',
+            'image'    => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'rating.required' => 'Vui lòng chọn số sao đánh giá.',
+            'rating.integer'  => 'Số sao phải là số nguyên.',
+            'rating.min'      => 'Vui lòng chọn số sao bất kỳ.',
+            'rating.max'      => 'Số sao tối đa là 5.',
+            'noi_dung.required' => 'Vui lòng nhập nội dung đánh giá.',
+            'noi_dung.max'      => 'Nội dung đánh giá không được vượt quá 1000 ký tự.',
+            'image.image' => 'Tệp tải lên phải là hình ảnh.',
+            'image.mimes' => 'Ảnh chỉ chấp nhận định dạng: jpeg, png, jpg, gif.',
+            'image.max'   => 'Ảnh tải lên không được vượt quá 2MB.',
         ]);
 
-        Review::create([
+        // Kiểm tra xem sản phẩm có tồn tại không
+        $product = Product::find($id);
+        if (!$product) {
+            Log::error('Sản phẩm không tồn tại với ID: ' . $id);
+            return response()->json(['success' => false, 'error' => 'Sản phẩm không tồn tại!'], 404);
+        }
+        Log::info('Sản phẩm được tìm thấy: ', ['id' => $product->id, 'ten_san_pham' => $product->ten_san_pham]);
+
+        $data = [
             'id_nguoi_dung' => auth()->id(),
             'id_san_pham' => $id,
             'rating' => $request->rating,
             'noi_dung' => $request->noi_dung,
-        ]);
+        ];
 
-        return redirect()->back()->with('success', 'Đánh giá của bạn đã được gửi!');
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('reviews', 'public');
+            $data['image'] = $path;
+            Log::info('Hình ảnh được tải lên: ' . $path);
+        }
+
+        // Log dữ liệu trước khi lưu vào cơ sở dữ liệu
+        Log::info('Dữ liệu đánh giá sẽ được lưu: ', $data);
+
+        $review = Review::create($data);
+
+        // Log thông tin đánh giá sau khi lưu
+        Log::info('Đánh giá đã được lưu: ', $review->toArray());
+
+        return response()->json(['success' => true, 'message' => 'Đánh giá của bạn đã được gửi thành công!']);
     }
 
     public function showContactForm()

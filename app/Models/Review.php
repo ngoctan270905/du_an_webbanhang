@@ -16,6 +16,7 @@ class Review extends Model
         'id_nguoi_dung',
         'id_san_pham',
         'noi_dung',
+        'image',
         'rating',
         'trang_thai'
     ];
