@@ -207,8 +207,8 @@
                 <div class="col-span-1">
                     <div class="bg-gray-50 dark:bg-gray-700 border rounded-lg p-4 mb-6">
                         <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Địa chỉ giao hàng</h4>
-                        <p id="detail-address-name" class="text-gray-700 dark:text-gray-200 font-medium"></p>
-                        <p id="detail-address" class="text-sm text-gray-500 dark:text-gray-400"></p>
+                        <p id="detail-address-name" class="text-gray-700 dark:text-gray-200 font-bold"></p>
+                        <p id="detail-full-address" class="text-sm text-gray-500 dark:text-gray-400"></p>
                         <p id="detail-phone" class="text-sm text-gray-500 dark:text-gray-400"></p>
                     </div>
 
@@ -227,7 +227,7 @@
                             </div>
                             <div class="flex justify-between text-sm text-gray-700 dark:text-gray-200">
                                 <span>Phí vận chuyển:</span>
-                                <span id="detail-shipping">Không xác định</span>
+                                <span id="detail-shipping"></span>
                             </div>
                             <div class="flex justify-between text-sm text-gray-700 dark:text-gray-200">
                                 <span>Giảm giá:</span>
@@ -399,31 +399,37 @@
                             // Cập nhật danh sách sản phẩm
                             const productsContainer = document.getElementById(
                                 'detail-products');
-                            productsContainer.innerHTML = '';
                             data.orderDetails.forEach(detail => {
                                 const productDiv = document.createElement('div');
                                 productDiv.className =
                                     'flex items-center justify-between py-2 dark:border-gray-700';
                                 productDiv.innerHTML = `
-                                <div class="flex items-center">
-                                    <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0">
-                                        ${detail.hinh_anh ? `<img src="${detail.hinh_anh}" alt="${detail.ten_san_pham}" class="w-full h-full object-cover">` : 'No image'}
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="font-medium text-gray-900 dark:text-gray-100">${detail.ten_san_pham}</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Số lượng: ${detail.so_luong}</p>
-                                    </div>
-                                </div>
-                                <span class="font-semibold text-gray-900 dark:text-gray-100">${numberFormat(detail.gia)}</span>
-                            `;
+        <div class="flex items-center">
+            <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0">
+                ${detail.hinh_anh ? `<img src="${detail.hinh_anh}" alt="${detail.ten_san_pham}" class="w-full h-full object-cover">` : 'No image'}
+            </div>
+            <div class="ml-4">
+                <p class="font-medium text-gray-900 dark:text-gray-100">${detail.ten_san_pham}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Số lượng: ${detail.so_luong}</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <p class="font-semibold text-gray-900 dark:text-gray-100">${numberFormat(detail.gia)}</p>
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-400">x ${detail.so_luong}</p>
+        </div>
+    `;
                                 productsContainer.appendChild(productDiv);
                             });
 
                             // Cập nhật thông tin địa chỉ và thanh toán
                             document.getElementById('detail-address-name').textContent = data
                                 .ten_nguoi_nhan;
-                            document.getElementById('detail-address').textContent = data
-                                .dia_chi;
+                            document.getElementById('detail-full-address').textContent = [
+                                data.dia_chi,
+                                data.ward_name,
+                                data.district_name,
+                                data.province_name
+                            ].filter(Boolean).join(', ');
                             document.getElementById('detail-phone').textContent =
                                 `SĐT: ${data.so_dien_thoai}`;
                             document.getElementById('detail-payment-method').textContent =
@@ -431,9 +437,9 @@
                             document.getElementById('detail-payment-status').innerHTML =
                                 `Tình trạng: <span class="font-medium ${getPaymentStatusClass(data.tinh_trang_thanh_toan)}">${data.tinh_trang_thanh_toan}</span>`;
                             document.getElementById('detail-subtotal').textContent =
-                                numberFormat(data.tong_tien);
-                            document.getElementById('detail-shipping').textContent = data
-                                .phi_van_chuyen;
+                                numberFormat(data.tong_tien_hang);
+                            document.getElementById('detail-shipping').textContent =
+                                numberFormat(data.phi_van_chuyen);
                             document.getElementById('detail-discount').textContent =
                                 numberFormat(data.giam_gia);
                             document.getElementById('detail-total').textContent = numberFormat(
@@ -661,61 +667,62 @@
             }
 
             // Hàm cập nhật timeline trạng thái đơn hàng
-            function updateOrderStatusTimeline(status) {
-                const statuses = ['pending', 'processing', 'shipped', 'delivered'];
-                const statusLabels = {
-                    pending: 'Chờ xác nhận',
-                    processing: 'Đang xử lý',
-                    shipped: 'Đang giao',
-                    delivered: 'Thành công',
-                    cancelled: 'Đã hủy'
-                };
-                const statusIcons = {
-                    pending: 'fa-solid fa-file-alt',
-                    processing: 'fa-solid fa-cogs',
-                    shipped: 'fa-solid fa-truck',
-                    delivered: 'fa-solid fa-circle-check',
-                    cancelled: 'fa-solid fa-circle-xmark'
-                };
-                const timelineContainer = document.getElementById('order-status-timeline');
-                timelineContainer.innerHTML = '';
+           function updateOrderStatusTimeline(status) {
+    const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+    const statusLabels = {
+        pending: 'Chờ xác nhận',
+        processing: 'Đang xử lý',
+        shipped: 'Đang giao',
+        delivered: 'Thành công',
+        cancelled: 'Đã hủy'
+    };
+    const statusIcons = {
+        pending: 'fa-solid fa-file-alt',
+        processing: 'fa-solid fa-cogs',
+        shipped: 'fa-solid fa-truck',
+        delivered: 'fa-solid fa-circle-check',
+        cancelled: 'fa-solid fa-circle-xmark'
+    };
+    const timelineContainer = document.getElementById('order-status-timeline');
+    timelineContainer.innerHTML = '';
 
-                if (status === 'cancelled') {
-                    // Nếu trạng thái là 'cancelled', chỉ hiển thị trạng thái "Đã hủy" màu đỏ
-                    const statusDiv = document.createElement('div');
-                    statusDiv.className = 'flex flex-col items-center';
-                    statusDiv.innerHTML = `
-                <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white">
-                    <i class="${statusIcons['cancelled']}"></i>
+    if (status === 'cancelled') {
+        // Nếu trạng thái là 'cancelled', chỉ hiển thị trạng thái "Đã hủy" màu đỏ
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'flex flex-col items-center';
+        statusDiv.innerHTML = `
+            <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white">
+                <i class="${statusIcons['cancelled']}"></i>
+            </div>
+            <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels['cancelled']}</span>
+        `;
+        timelineContainer.appendChild(statusDiv);
+    } else {
+        // Hiển thị các trạng thái khác
+        const currentIndex = statuses.indexOf(status);
+        statuses.forEach((s, index) => {
+            // Ô được đánh dấu là active nếu nó là trạng thái hiện tại hoặc trước đó
+            const isActive = index <= currentIndex;
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'flex flex-col items-center';
+            statusDiv.innerHTML = `
+                <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
+                    <i class="${statusIcons[s]}"></i>
                 </div>
-                <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels['cancelled']}</span>
+                <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
             `;
-                    timelineContainer.appendChild(statusDiv);
-                } else {
-                    // Hiển thị đầy đủ các trạng thái cho các trạng thái khác
-                    statuses.forEach((s, index) => {
-                        const isActive = index <= statuses.indexOf(status);
-                        const statusDiv = document.createElement('div');
-                        statusDiv.className = 'flex flex-col items-center';
-                        statusDiv.innerHTML = `
-                    <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
-                        <i class="${statusIcons[s]}"></i>
-                    </div>
-                    <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
-                `;
-                        timelineContainer.appendChild(statusDiv);
+            timelineContainer.appendChild(statusDiv);
 
-                        // Chỉ thêm đường nối nếu không phải trạng thái cuối
-                        if (index < statuses.length - 1) {
-                            const connector = document.createElement('div');
-                            connector.className =
-                                `flex-1 border-t-2 ${isActive ? 'border-green-500' : 'border-gray-300'} mx-1`;
-                            timelineContainer.appendChild(connector);
-                        }
-                    });
-                }
+            // Luôn thêm đường nối nếu không phải trạng thái cuối
+            if (index < statuses.length - 1) {
+                const connector = document.createElement('div');
+                // Đường nối chỉ có màu xanh nếu trạng thái hiện tại vượt qua trạng thái hiện tại
+                connector.className = `flex-1 border-t-2 ${currentIndex > index ? 'border-green-500' : 'border-gray-300'} mx-1`;
+                timelineContainer.appendChild(connector);
             }
-
+        });
+    }
+}
 
             // Hàm định dạng số tiền
             function numberFormat(number) {

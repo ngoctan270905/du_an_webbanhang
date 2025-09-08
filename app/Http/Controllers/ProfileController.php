@@ -86,6 +86,7 @@ class ProfileController extends Controller
         ]);
     }
 
+
     public function showOrders(Request $request, $id = null)
     {
         $user = $request->user();
@@ -94,18 +95,24 @@ class ProfileController extends Controller
             // Lấy chi tiết đơn hàng dựa trên ma_don_hang
             $order = Order::where('ma_don_hang', $id)
                 ->where('id_nguoi_dung', $user->id)
-                ->with(['orderDetails.product', 'payment'])
+                ->with([
+                    'orderDetails.product',
+                    'payment',
+                    'province' => function ($query) {
+                        $query->select('code', 'name');
+                    },
+                    'district' => function ($query) {
+                        $query->select('code', 'name');
+                    },
+                    'ward' => function ($query) {
+                        $query->select('code', 'name');
+                    }
+                ])
                 ->first();
 
             if (!$order) {
                 return response()->json(['error' => 'Đơn hàng không tồn tại hoặc không thuộc về bạn'], 404);
             }
-
-            // Tách thông tin từ dia_chi_giao_hang
-            $addressParts = explode(' - ', $order->dia_chi_giao_hang);
-            $ten_nguoi_nhan = $addressParts[0] ?? 'Không xác định';
-            $so_dien_thoai = $addressParts[1] ?? 'Không xác định';
-            $dia_chi = $addressParts[2] ?? 'Không xác định';
 
             // Lấy trạng thái thanh toán từ bảng payments
             $tinh_trang_thanh_toan = $order->payment ? $this->getPaymentStatusText($order->payment->trang_thai) : 'Không xác định';
@@ -116,11 +123,15 @@ class ProfileController extends Controller
                 'trang_thai' => $order->trang_thai,
                 'ngay_huy' => $order->ngay_huy,
                 'tong_tien' => $order->tong_tien,
-                'phi_van_chuyen' => 'Không xác định', // Phí vận chuyển không xác định vì đã gộp vào tong_tien
+                'tong_tien_hang' => $order->tong_tien_hang,
+                'phi_van_chuyen' => $order->phi_ship,
                 'giam_gia' => 0, // Giá trị mặc định vì không có cột trong DB
-                'ten_nguoi_nhan' => $ten_nguoi_nhan,
-                'dia_chi' => $dia_chi,
-                'so_dien_thoai' => $so_dien_thoai,
+                'ten_nguoi_nhan' => $order->ho_ten_khach_hang ?? 'Không xác định',
+                'dia_chi' => $order->dia_chi_giao_hang ?? 'Không xác định',
+                'so_dien_thoai' => $order->so_dien_thoai ?? 'Không xác định',
+                'province_name' => $order->province ? $order->province->name : 'Không xác định',
+                'district_name' => $order->district ? $order->district->name : 'Không xác định',
+                'ward_name' => $order->ward ? $order->ward->name : 'Không xác định',
                 'phuong_thuc_thanh_toan' => $order->phuong_thuc_thanh_toan,
                 'tinh_trang_thanh_toan' => $tinh_trang_thanh_toan,
                 'orderDetails' => $order->orderDetails->map(function ($detail) {

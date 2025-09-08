@@ -295,7 +295,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Phí vận chuyển:</span>
-                            <span class="text-gray-800 font-medium">0đ</span>
+                            <span class="text-gray-800 font-medium">Chưa có thông tin</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Giảm giá:</span>
