@@ -253,7 +253,7 @@
                                         ★
                                     @endfor
                                 </span>
-                                <span class="ml-1 text-lg text-gray-500">({{ $reviews->count() }} đánh giá)</span>
+                                <span class="ml-1 text-lg text-gray-500">({{ $allReviews->count() }} đánh giá)</span>
                                 <span class="mx-2 text-gray-300">|</span>
                                 <span class="text-lg text-gray-500">Đã bán {{ rand(100, 1500) }}</span>
                             </div>
@@ -334,7 +334,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md" id="reviews-section">
                 <div class="flex justify-between items-center mb-6">
                     <div class="text-xl font-semibold text-gray-800">Đánh giá & Nhận xét</div>
                     <button id="open-review-modal"
@@ -348,8 +348,8 @@
                     <div class="flex flex-col items-center flex-shrink-0 md:mr-10 mb-6 md:mb-0 w-full md:w-4/12">
                         <div class="text-5xl font-bold text-gray-800">
                             @php
-                                $averageRating = $reviews->avg('rating');
-                                $totalReviews = $reviews->count();
+                                $averageRating = $allReviews->avg('rating');
+                                $totalReviews = $allReviews->count();
                                 echo $averageRating ? number_format($averageRating, 1) : '0.0';
                             @endphp / 5
                         </div>
@@ -368,7 +368,7 @@
                     <div class="flex-grow w-full md:w-6/12">
                         @for ($i = 5; $i >= 1; $i--)
                             @php
-                                $ratingCount = $reviews->where('rating', $i)->count();
+                                $ratingCount = $allReviews->where('rating', $i)->count();
                                 $percentage = $totalReviews > 0 ? ($ratingCount / $totalReviews) * 100 : 0;
                             @endphp
                             <div class="flex items-center mb-2">
@@ -388,73 +388,90 @@
                 <div class="border-t border-gray-200 mt-6 pt-4 flex justify-between items-center">
                     <span class="text-sm font-semibold text-gray-700">{{ $totalReviews }} Đánh giá</span>
                     <div class="flex items-center space-x-2">
-                        <span class="text-gray-500 text-sm">Tất cả</span>
-                        <div
-                            class="bg-blue-100 text-blue-600 font-medium py-1 px-3 rounded-full flex items-center space-x-1 text-sm">
+                        <a href="{{ route('product.detail', $product->id) }}?filter=all"
+                            class="px-3 py-1.5 rounded-lg border text-sm font-medium transition
+                  {{ $filter === 'all'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
+                            Tất cả
+                        </a>
+
+                        <a href="{{ route('product.detail', $product->id) }}?filter=5"
+                            class="px-3 py-1.5 rounded-lg border text-sm font-medium flex items-center space-x-1 transition
+                  {{ $filter === '5'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
                             <span>5</span>
                             <svg class="w-3.5 h-3.5 fill-current text-yellow-400" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21z" />
+                                <path d="M12 17.27L18.18 21 16.54 13.97 22 9.24
+                             14.81 8.63 12 2 9.19 8.63
+                             2 9.24 7.46 13.97 5.82 21z" />
                             </svg>
-                        </div>
+                        </a>
                     </div>
                 </div>
+
 
                 <div class="my-6 border-t border-gray-200"></div>
 
                 <!-- Danh sách đánh giá -->
-                <div class="space-y-8">
-                    @foreach ($reviews as $review)
-                        <div class="flex items-start space-x-3">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-base font-semibold">
-                                {{ substr($review->user->name ?? 'N', 0, 1) }}
-                            </div>
-                            <div class="flex-grow">
-                                <div class="flex items-center mb-1">
-                                    <span
-                                        class="font-semibold text-gray-800 mr-2">{{ $review->user->name ?? 'Ẩn danh' }}</span>
-                                    <div class="flex text-yellow-400 text-sm">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <svg class="w-4 h-4 fill-current {{ $i <= $review->rating ? '' : 'text-gray-300' }}"
-                                                viewBox="0 0 24 24">
+                @if ($reviews->isEmpty())
+                    <p class="text-gray-500 text-center">Chưa có đánh giá nào cho sản phẩm này.</p>
+                @else
+                    <div class="space-y-8">
+                        @foreach ($reviews as $review)
+                            <div class="flex items-start space-x-3">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-base font-semibold">
+                                    {{ substr($review->user->name ?? 'N', 0, 1) }}
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex items-center mb-1">
+                                        <span
+                                            class="font-semibold text-gray-800 mr-2">{{ $review->user->name ?? 'Ẩn danh' }}</span>
+                                        <div class="flex text-yellow-400 text-sm">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <svg class="w-4 h-4 fill-current {{ $i <= $review->rating ? '' : 'text-gray-300' }}"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21z" />
+                                                </svg>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700 mb-3">{{ $review->noi_dung }}</p>
+                                    <div class="flex space-x-2 mb-3">
+                                        @if ($review->image)
+                                            <img src="{{ asset('storage/' . $review->image) }}" alt="Review Image"
+                                                class="w-20 h-20 rounded-md object-cover">
+                                        @endif
+                                    </div>
+
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span>{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->diffForHumans() }}</span>
+                                        <span class="mx-2">•</span>
+                                        <button class="flex items-center text-blue-600 hover:underline">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                                fill="currentColor">
                                                 <path
-                                                    d="M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21z" />
+                                                    d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z">
+                                                </path>
                                             </svg>
-                                        @endfor
+                                        </button>
                                     </div>
                                 </div>
-                                <p class="text-gray-700 mb-3">{{ $review->noi_dung }}</p>
-                                <div class="flex space-x-2 mb-3">
-                                    @if ($review->image)
-                                        <img src="{{ asset('storage/' . $review->image) }}" alt="Review Image"
-                                            class="w-20 h-20 rounded-md object-cover">
-                                    @else
-                                        <div
-                                            class="w-20 h-20 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 text-xs">
-                                            Ảnh thật
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="flex items-center text-sm text-gray-500">
-                                    <span>{{ \Carbon\Carbon::parse($review->created_at)->diffForHumans() }}</span>
-                                    <span class="mx-2">•</span>
-                                    <button class="flex items-center text-blue-600 hover:underline">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path
-                                                d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z">
-                                            </path>
-                                        </svg>
-                                    </button>
-                                </div>
                             </div>
-                        </div>
-                        @if (!$loop->last)
-                            <div class="border-t border-gray-100"></div>
-                        @endif
-                    @endforeach
-                </div>
+                            @if (!$loop->last)
+                                <div class="border-t border-gray-100"></div>
+                            @endif
+                        @endforeach
+                    </div>
+
+                    <!-- Phân trang -->
+                    <div class="pagination mt-12">
+                        {{ $reviews->links() }}
+                    </div>
+                @endif
             </div>
 
             <!-- Phần sản phẩm liên quan -->
@@ -1053,4 +1070,21 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Nếu URL có tham số page hoặc filter thì cuộn xuống reviews
+            if (urlParams.has('page') || urlParams.has('filter')) {
+                const reviewsSection = document.getElementById('reviews-section');
+                if (reviewsSection) {
+                    reviewsSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    </script>
+
 @endsection

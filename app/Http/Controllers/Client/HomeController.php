@@ -83,8 +83,24 @@ class HomeController extends Controller
         // Lấy thông tin sản phẩm
         $product = Product::findOrFail($id);
 
-        // Lấy toàn bộ đánh giá của sản phẩm
-        $reviews = Review::where('id_san_pham', $product->id)->get();
+        // Lấy tất cả đánh giá để tính thống kê
+        $allReviews = Review::where('id_san_pham', $product->id)
+            ->where('trang_thai', 1) // Chỉ lấy đánh giá có trạng thái hoạt động (nếu có)
+            ->get();
+
+        // Lấy tham số filter từ request
+        $filter = request()->input('filter', 'all');
+
+        // Lấy 4 đánh giá mỗi trang để hiển thị danh sách, áp dụng lọc nếu có
+        $reviewsQuery = Review::where('id_san_pham', $product->id)
+            ->where('trang_thai', 1) // Chỉ lấy đánh giá có trạng thái hoạt động (nếu có)
+            ->orderBy('created_at', 'desc'); // Sắp xếp đánh giá mới nhất trước
+
+        if ($filter === '5') {
+            $reviewsQuery->where('rating', 5);
+        }
+
+        $reviews = $reviewsQuery->paginate(4)->appends(['filter' => $filter]);
 
         // Lấy 5 sản phẩm liên quan cùng danh mục (ngẫu nhiên, trừ sản phẩm hiện tại)
         $relatedProducts = Product::where('category_id', $product->category_id)
@@ -94,10 +110,10 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        return view('clients.products.product_detail', compact('product', 'reviews', 'relatedProducts'));
+        return view('clients.products.product_detail', compact('product', 'allReviews', 'reviews', 'relatedProducts', 'filter'));
     }
 
-   
+
     public function submitReview(Request $request, $id)
     {
         if (!auth()->check()) {
