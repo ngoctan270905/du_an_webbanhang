@@ -27,7 +27,15 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        return view('clients.home', compact('featuredBooks', 'latestBooks'));
+        // Lấy 3 bài viết mới nhất, đang hoạt động và chưa bị xóa mềm
+        $posts = Post::query()
+            ->where('trang_thai', 1)
+            ->whereNull('deleted_at')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return view('clients.home', compact('featuredBooks', 'latestBooks', 'posts'));
     }
 
     public function productList(Request $request)
@@ -89,31 +97,7 @@ class HomeController extends Controller
         return view('clients.products.product_detail', compact('product', 'reviews', 'relatedProducts'));
     }
 
-    public function postList(Request $request)
-    {
-        // Tạo query để lấy bài viết
-        $query = Post::query();
-
-        // Bộ lọc tìm kiếm theo tiêu đề bài viết
-        if ($request->has('search') && $request->search) {
-            $query->where('tieu_de', 'like', '%' . $request->search . '%');
-        }
-
-        // Sắp xếp theo ngày tạo
-        if ($request->has('sort_by') && $request->sort_by == 'newest') {
-            $query->orderBy('created_at', 'desc');
-        } elseif ($request->has('sort_by') && $request->sort_by == 'oldest') {
-            $query->orderBy('created_at', 'asc');
-        } else {
-            $query->orderBy('created_at', 'desc'); // Mặc định sắp xếp mới nhất trước
-        }
-
-        // Phân trang bài viết (10 bài mỗi trang)
-        $posts = $query->paginate(10);
-
-        return view('clients.posts.post_list', compact('posts'));
-    }
-
+   
     public function submitReview(Request $request, $id)
     {
         if (!auth()->check()) {

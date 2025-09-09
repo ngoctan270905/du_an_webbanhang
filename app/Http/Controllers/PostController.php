@@ -33,7 +33,7 @@ class PostController extends Controller
     {
         $dataValidate = $request->validate([
             'tieu_de' => 'required|string|max:255',
-            'noi_dung' => 'nullable|string|max:255',
+            'noi_dung' => 'nullable|string|max:2555',
             'trang_thai' => 'required|boolean',
             'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048' // max 2MB
         ]);

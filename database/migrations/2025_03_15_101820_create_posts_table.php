@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('tieu_de', 255);
-            $table->string('noi_dung', 255)->nullable();
+            $table->text('noi_dung')->nullable();
             $table->boolean('trang_thai')->default(true); // Set giá trị mặc định
             $table->timestamps();
         });

@@ -111,47 +111,20 @@
                     <h2>Tin tức nổi bật</h2>
                     <p class="subtitle">Cập nhật các sự kiện, tin tức mới nhất từ cộng đồng sách.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <a href="#" class="news-card">
-                            <img src="https://images.unsplash.com/photo-1507919914441-2a1d2f2d9e03?q=80&w=2835&auto=format&fit=crop"
-                                alt="Tin tức 1">
-                            <div class="news-card-content">
-                                <h3>TOP 10 cuốn sách quản lý tài chính cá nhân bán chạy nhất 2024</h3>
-                                <p>Khám phá danh sách các cuốn sách giúp bạn làm chủ tài chính, từ việc tiết kiệm đến đầu tư
-                                    hiệu
-                                    quả.</p>
-                                <div class="news-meta">
-                                    <span>Thứ Hai, 1 tháng 9, 2025</span>
-                                    <span class="read-more">Đọc thêm</span>
+                        @foreach ($posts as $post)
+                            <a href="#" class="news-card">
+                                <img src="{{ Storage::url($post->hinh_anh) }}" alt="{{ $post->tieu_de }}">
+
+                                <div class="news-card-content">
+                                    <h3>{{ $post->tieu_de }}</h3>
+                                    <p>{{ \Str::limit(strip_tags($post->noi_dung), 100) }}</p>
+                                    <div class="news-meta">
+                                        <span>{{ $post->created_at->format('l, d \t\h\á\n\g m, Y') }}</span>
+                                        <span class="read-more">Đọc thêm</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
-                        <a href="#" class="news-card">
-                            <img src="https://images.unsplash.com/photo-1582049191062-81c002167d5e?q=80&w=2670&auto=format&fit=crop"
-                                alt="Tin tức 2">
-                            <div class="news-card-content">
-                                <h3>Diễn đàn sách online: \'Văn học Việt Nam đương đại và những hướng đi mới\'</h3>
-                                <p>Tổng hợp những chia sẻ từ các nhà văn, nhà phê bình hàng đầu về tương lai của văn học
-                                    nước
-                                    nhà.
-                                </p>
-                                <div class="news-meta">
-                                    <span>Thứ Sáu, 29 tháng 8, 2025</span>
-                                    <span class="read-more">Đọc thêm</span>
-                                </div>
-                            </div>
-                        </a>
-                        <a href="#" class="news-card">
-                            <img src="https://images.unsplash.com/photo-1627916962058-00507202b8d9?q=80&w=2670&auto=format&fit=crop"
-                                alt="Tin tức 3">
-                            <div class="news-card-content">
-                                <h3>Sự kiện ra mắt sách \'Thành phố không ngủ\' của tác giả Nguyễn Nhật Ánh</h3>
-                                <p>Thông tin chi tiết về buổi ký tặng sách và giao lưu với tác giả nổi tiếng tại Hà Nội.</p>
-                                <div class="news-meta">
-                                    <span>Chủ Nhật, 24 tháng 8, 2025</span>
-                                    <span class="read-more">Đọc thêm</span>
-                                </div>
-                            </div>
-                        </a>
+                            </a>
+                        @endforeach
                     </div>
                 </div>
             </section>
