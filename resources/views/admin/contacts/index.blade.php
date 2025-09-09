@@ -28,6 +28,7 @@
                                 <tr>
                                     <th class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Họ tên</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Số điện thoại</th>
+                                    <th class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nội dung</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Thao tác</th>
                                 </tr>
@@ -37,6 +38,7 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">{{ $contact->ho_ten }}</td>
                                         <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">{{ $contact->so_dien_thoai }}</td>
+                                        <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">{{ $contact->email }}</td>
                                         <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-500">{{ Str::limit($contact->noi_dung, 50) }}</td>
                                         <td class="whitespace-nowrap px-3 py-2 text-sm font-medium">
                                             <div class="flex items-center space-x-2">

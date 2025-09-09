@@ -16,7 +16,9 @@ class Contact extends Model
         'ho_ten',
         'so_dien_thoai',
         'noi_dung',
-        'trang_thai'
+        'trang_thai',
+        'email'
+
     ];
 
     protected $casts = [
