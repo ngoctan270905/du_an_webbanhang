@@ -134,8 +134,10 @@ class ProfileController extends Controller
                 'ward_name' => $order->ward ? $order->ward->name : 'Không xác định',
                 'phuong_thuc_thanh_toan' => $order->phuong_thuc_thanh_toan,
                 'tinh_trang_thanh_toan' => $tinh_trang_thanh_toan,
+                'da_nhan_hang' => $order->da_nhan_hang,
                 'orderDetails' => $order->orderDetails->map(function ($detail) {
                     return [
+                        'product_id' => $detail->id_san_pham,
                         'ten_san_pham' => $detail->product ? $detail->product->ten_san_pham : 'Sản phẩm không tồn tại',
                         'so_luong' => $detail->so_luong,
                         'gia' => $detail->gia,

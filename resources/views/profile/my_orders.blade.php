@@ -143,10 +143,11 @@
 
                         <div class="flex justify-end items-center p-4 bg-gray-50 dark:bg-gray-700 border-t">
                             <div class="flex space-x-2">
-                                @if ($order->trang_thai == 'delivered')
+                                @if ($order->trang_thai == 'delivered' && $order->da_nhan_hang == 0)
                                     <button
-                                        class="px-4 py-2 text-sm font-semibold rounded-lg text-red-500 border border-red-500 hover:bg-red-50">
-                                        Mua lại
+                                        class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-green-500 hover:bg-green-600 confirm-received"
+                                        data-order-id="{{ $order->ma_don_hang }}">
+                                        Đã nhận được hàng
                                     </button>
                                 @endif
                                 <button
@@ -154,6 +155,13 @@
                                     data-order-id="{{ $order->ma_don_hang }}">
                                     Xem chi tiết
                                 </button>
+                                @if ($order->trang_thai == 'delivered' && $order->da_nhan_hang == 1)
+                                    <button
+                                        class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-500 hover:bg-blue-600 write-review"
+                                        data-order-id="{{ $order->ma_don_hang }}">
+                                        Viết đánh giá
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -312,6 +320,28 @@
                 </form>
             </div>
         </div>
+
+        <!-- Modal chọn sản phẩm để đánh giá -->
+        <div id="select-product-modal"
+            class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                <div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Chọn sản phẩm để đánh giá</div>
+                <div id="product-list" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Danh sách sản phẩm sẽ được thêm động bằng JavaScript -->
+                </div>
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button id="close-select-product-modal"
+                        class="px-4 py-2 text-sm font-semibold rounded-lg text-gray-600 border border-gray-300 hover:bg-gray-300 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                        Đóng
+                    </button>
+                    <button id="confirm-select-product"
+                        class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        disabled>
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -327,6 +357,137 @@
             const cancelReasonSelect = document.getElementById('cancel-reason');
             const otherReasonContainer = document.getElementById('other-reason-container');
             const errorContainer = document.getElementById('cancel-error') || document.createElement('div');
+            const selectProductModal = document.getElementById('select-product-modal');
+            const closeSelectProductModal = document.getElementById('close-select-product-modal');
+            const confirmSelectProduct = document.getElementById('confirm-select-product');
+            const productList = document.getElementById('product-list');
+
+            // Xử lý sự kiện bấm nút "Đã nhận được hàng"
+            document.querySelectorAll('.confirm-received').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-order-id');
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                    loadingSpinner.classList.remove('hidden');
+
+                    fetch(`/my-orders/${orderId}/confirm-received`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        })
+                        .then(response => {
+                            loadingSpinner.classList.add('hidden');
+                            if (!response.ok) {
+                                return response.json().then(error => {
+                                    throw new Error(error.error ||
+                                        'Có lỗi khi xác nhận nhận hàng.');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            alert(data.message);
+                            window.location.reload(); // Tải lại trang để cập nhật giao diện
+                        })
+                        .catch(error => {
+                            loadingSpinner.classList.add('hidden');
+                            alert(`Lỗi: ${error.message}`);
+                        });
+                });
+            });
+
+            // Xử lý sự kiện bấm nút "Viết đánh giá"
+            document.querySelectorAll('.write-review').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-order-id');
+                    loadingSpinner.classList.remove('hidden');
+
+                    // Gọi API để lấy danh sách sản phẩm trong đơn hàng
+                    fetch(`/my-orders/${orderId}`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => {
+                            loadingSpinner.classList.add('hidden');
+                            if (!response.ok) {
+                                return response.json().then(error => {
+                                    throw new Error(error.error ||
+                                        'Không thể tải danh sách sản phẩm.');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            productList.innerHTML = ''; // Xóa danh sách cũ
+                            data.orderDetails.forEach(detail => {
+                                const productDiv = document.createElement('div');
+                                productDiv.className =
+                                    'flex items-center space-x-4 p-2 border rounded-lg cursor-pointer hover:bg-gray-100';
+
+                                // Xử lý URL ảnh
+                                let imageUrl = detail.hinh_anh ?
+                                    (detail.hinh_anh.startsWith('http') ? detail
+                                        .hinh_anh : '/storage/' + detail.hinh_anh) :
+                                    '/images/no-image.png';
+
+                                productDiv.innerHTML = `
+        <input type="radio" name="selected_product" value="${detail.product_id}" class="product-radio">
+        <img src="${imageUrl}" alt="${detail.ten_san_pham}" class="w-12 h-12 rounded object-cover">
+        <span class="text-sm">${detail.ten_san_pham}</span>
+    `;
+
+                                productList.appendChild(productDiv);
+                            });
+
+
+                            // Hiển thị modal
+                            selectProductModal.classList.remove('hidden');
+
+                            // Kích hoạt nút "Xác nhận" khi chọn sản phẩm
+                            const radios = productList.querySelectorAll('.product-radio');
+                            radios.forEach(radio => {
+                                radio.addEventListener('change', () => {
+                                    confirmSelectProduct.disabled = false;
+                                    confirmSelectProduct.setAttribute(
+                                        'data-product-id', radio.value);
+                                });
+                            });
+                        })
+                        .catch(error => {
+                            loadingSpinner.classList.add('hidden');
+                            alert(`Lỗi: ${error.message}`);
+                        });
+                });
+            });
+
+            // Đóng modal chọn sản phẩm
+            closeSelectProductModal.addEventListener('click', () => {
+                selectProductModal.classList.add('hidden');
+                productList.innerHTML = '';
+                confirmSelectProduct.disabled = true;
+            });
+
+            // Xử lý xác nhận chọn sản phẩm
+            confirmSelectProduct.addEventListener('click', () => {
+                const productId = confirmSelectProduct.getAttribute('data-product-id');
+                if (productId) {
+                    // Chuyển hướng đến trang chi tiết sản phẩm với tham số để mở modal đánh giá
+                    window.location.href = `/san-pham/${productId}?openReview=true`;
+                }
+            });
+
+            // Đóng modal khi click bên ngoài
+            selectProductModal.addEventListener('click', (e) => {
+                if (e.target === selectProductModal) {
+                    selectProductModal.classList.add('hidden');
+                    productList.innerHTML = '';
+                    confirmSelectProduct.disabled = true;
+                }
+            });
 
             // Thêm errorContainer nếu chưa có
             if (!document.getElementById('cancel-error')) {
@@ -667,62 +828,63 @@
             }
 
             // Hàm cập nhật timeline trạng thái đơn hàng
-           function updateOrderStatusTimeline(status) {
-    const statuses = ['pending', 'processing', 'shipped', 'delivered'];
-    const statusLabels = {
-        pending: 'Chờ xác nhận',
-        processing: 'Đang xử lý',
-        shipped: 'Đang giao',
-        delivered: 'Thành công',
-        cancelled: 'Đã hủy'
-    };
-    const statusIcons = {
-        pending: 'fa-solid fa-file-alt',
-        processing: 'fa-solid fa-cogs',
-        shipped: 'fa-solid fa-truck',
-        delivered: 'fa-solid fa-circle-check',
-        cancelled: 'fa-solid fa-circle-xmark'
-    };
-    const timelineContainer = document.getElementById('order-status-timeline');
-    timelineContainer.innerHTML = '';
+            function updateOrderStatusTimeline(status) {
+                const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+                const statusLabels = {
+                    pending: 'Chờ xác nhận',
+                    processing: 'Đang xử lý',
+                    shipped: 'Đang giao',
+                    delivered: 'Thành công',
+                    cancelled: 'Đã hủy'
+                };
+                const statusIcons = {
+                    pending: 'fa-solid fa-file-alt',
+                    processing: 'fa-solid fa-cogs',
+                    shipped: 'fa-solid fa-truck',
+                    delivered: 'fa-solid fa-circle-check',
+                    cancelled: 'fa-solid fa-circle-xmark'
+                };
+                const timelineContainer = document.getElementById('order-status-timeline');
+                timelineContainer.innerHTML = '';
 
-    if (status === 'cancelled') {
-        // Nếu trạng thái là 'cancelled', chỉ hiển thị trạng thái "Đã hủy" màu đỏ
-        const statusDiv = document.createElement('div');
-        statusDiv.className = 'flex flex-col items-center';
-        statusDiv.innerHTML = `
+                if (status === 'cancelled') {
+                    // Nếu trạng thái là 'cancelled', chỉ hiển thị trạng thái "Đã hủy" màu đỏ
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'flex flex-col items-center';
+                    statusDiv.innerHTML = `
             <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white">
                 <i class="${statusIcons['cancelled']}"></i>
             </div>
             <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels['cancelled']}</span>
         `;
-        timelineContainer.appendChild(statusDiv);
-    } else {
-        // Hiển thị các trạng thái khác
-        const currentIndex = statuses.indexOf(status);
-        statuses.forEach((s, index) => {
-            // Ô được đánh dấu là active nếu nó là trạng thái hiện tại hoặc trước đó
-            const isActive = index <= currentIndex;
-            const statusDiv = document.createElement('div');
-            statusDiv.className = 'flex flex-col items-center';
-            statusDiv.innerHTML = `
+                    timelineContainer.appendChild(statusDiv);
+                } else {
+                    // Hiển thị các trạng thái khác
+                    const currentIndex = statuses.indexOf(status);
+                    statuses.forEach((s, index) => {
+                        // Ô được đánh dấu là active nếu nó là trạng thái hiện tại hoặc trước đó
+                        const isActive = index <= currentIndex;
+                        const statusDiv = document.createElement('div');
+                        statusDiv.className = 'flex flex-col items-center';
+                        statusDiv.innerHTML = `
                 <div class="w-8 h-8 flex items-center justify-center rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}">
                     <i class="${statusIcons[s]}"></i>
                 </div>
                 <span class="mt-2 text-xs text-center text-gray-600 dark:text-gray-300">${statusLabels[s]}</span>
             `;
-            timelineContainer.appendChild(statusDiv);
+                        timelineContainer.appendChild(statusDiv);
 
-            // Luôn thêm đường nối nếu không phải trạng thái cuối
-            if (index < statuses.length - 1) {
-                const connector = document.createElement('div');
-                // Đường nối chỉ có màu xanh nếu trạng thái hiện tại vượt qua trạng thái hiện tại
-                connector.className = `flex-1 border-t-2 ${currentIndex > index ? 'border-green-500' : 'border-gray-300'} mx-1`;
-                timelineContainer.appendChild(connector);
+                        // Luôn thêm đường nối nếu không phải trạng thái cuối
+                        if (index < statuses.length - 1) {
+                            const connector = document.createElement('div');
+                            // Đường nối chỉ có màu xanh nếu trạng thái hiện tại vượt qua trạng thái hiện tại
+                            connector.className =
+                                `flex-1 border-t-2 ${currentIndex > index ? 'border-green-500' : 'border-gray-300'} mx-1`;
+                            timelineContainer.appendChild(connector);
+                        }
+                    });
+                }
             }
-        });
-    }
-}
 
             // Hàm định dạng số tiền
             function numberFormat(number) {

@@ -246,4 +246,24 @@ class OrderController extends Controller
             ]);
         }, 5); // Retry transaction tối đa 5 lần nếu gặp deadlock
     }
+
+    public function confirmReceived($orderId)
+    {
+        try {
+            $order = Order::where('ma_don_hang', $orderId)->firstOrFail();
+            if ($order->trang_thai !== 'delivered') {
+                return response()->json(['error' => 'Đơn hàng chưa được giao thành công.'], 400);
+            }
+            if ($order->da_nhan_hang) {
+                return response()->json(['error' => 'Đơn hàng đã được xác nhận nhận.'], 400);
+            }
+
+            $order->da_nhan_hang = 1;
+            $order->save();
+
+            return response()->json(['message' => 'Xác nhận nhận hàng thành công!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Có lỗi xảy ra khi xác nhận nhận hàng.'], 500);
+        }
+    }
 }

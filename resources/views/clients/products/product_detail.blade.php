@@ -404,8 +404,8 @@
                             <span>5</span>
                             <svg class="w-3.5 h-3.5 fill-current text-yellow-400" viewBox="0 0 24 24">
                                 <path d="M12 17.27L18.18 21 16.54 13.97 22 9.24
-                             14.81 8.63 12 2 9.19 8.63
-                             2 9.24 7.46 13.97 5.82 21z" />
+                                 14.81 8.63 12 2 9.19 8.63
+                                 2 9.24 7.46 13.97 5.82 21z" />
                             </svg>
                         </a>
                     </div>
@@ -601,7 +601,7 @@
             </div>
 
             <div class="pt-3">
-                <form action="{{ route('client.reviews.store', $product->id) }}" method="POST"
+                <form action="{{ route('client.reviews.store', $product->id) }}" data-product-id="{{ $product->id }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="mb-4">
@@ -785,64 +785,65 @@
             const imagePreview = document.getElementById('image-preview');
             let timeoutId;
 
-            if (reviewForm) {
-                reviewForm.addEventListener('submit', function(e) {
-                    e.preventDefault(); // Ngăn chặn làm mới trang
-                    const submitButton = reviewForm.querySelector('button[type="submit"]');
-                    submitButton.disabled = true;
-                    submitButton.classList.add('loading', 'disabled-button');
-                    submitButton.innerHTML = ''; // Hiển thị icon xoay tròn
+           if (reviewForm) {
+    reviewForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Ngăn chặn làm mới trang
+        const submitButton = reviewForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.classList.add('loading', 'disabled-button');
+        submitButton.innerHTML = ''; // Hiển thị icon xoay tròn
 
-                    // Xóa các thông báo lỗi cũ
-                    reviewForm.querySelectorAll('.text-red-500').forEach(error => error.remove());
+        // Xóa các thông báo lỗi cũ
+        reviewForm.querySelectorAll('.text-red-500').forEach(error => error.remove());
 
-                    fetch(reviewForm.action, {
-                            method: 'POST',
-                            body: new FormData(reviewForm),
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            submitButton.disabled = false;
-                            submitButton.classList.remove('loading', 'disabled-button');
-                            submitButton.innerHTML = 'Gửi đánh giá';
-
-                            if (data.success) {
-                                // Đóng modal và hiển thị thông báo thành công
-                                reviewModal.classList.add('hidden');
-                                showReviewSuccessModal('Đánh giá của bạn đã được gửi thành công!',
-                                    true);
-                                setTimeout(() => {
-                                    location.reload(); // Tải lại trang sau 1 giây
-                                }, 1000);
-                            } else {
-                                // Hiển thị lỗi validate trong modal
-                                if (data.errors) {
-                                    for (const [field, messages] of Object.entries(data.errors)) {
-                                        const inputField = reviewForm.querySelector(
-                                            `[name="${field}"]`);
-                                        if (inputField) {
-                                            const errorSpan = document.createElement('span');
-                                            errorSpan.className = 'text-red-500 text-xs';
-                                            errorSpan.textContent = messages[0];
-                                            inputField.parentElement.appendChild(errorSpan);
-                                        }
-                                    }
-                                }
-                                reviewModal.classList.remove('hidden');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Lỗi khi gửi đánh giá:', error);
-                            submitButton.disabled = false;
-                            submitButton.classList.remove('loading', 'disabled-button');
-                            submitButton.innerHTML = 'Gửi đánh giá';
-                            showReviewSuccessModal('Có lỗi xảy ra, vui lòng thử lại!', false);
-                        });
-                });
+        fetch(reviewForm.action, {
+            method: 'POST',
+            body: new FormData(reviewForm),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
             }
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitButton.disabled = false;
+            submitButton.classList.remove('loading', 'disabled-button');
+            submitButton.innerHTML = 'Gửi đánh giá';
+
+            if (data.success) {
+                // Đóng modal và hiển thị thông báo thành công
+                reviewModal.classList.add('hidden');
+                showReviewSuccessModal('Đánh giá của bạn đã được gửi thành công!', true);
+                
+                // Xóa tham số openReview và chuyển hướng
+                const productId = reviewForm.getAttribute('data-product-id');
+                setTimeout(() => {
+                    window.location.href = `/san-pham/${productId}`; // Chuyển hướng đến URL sạch
+                }, 1000);
+            } else {
+                // Hiển thị lỗi validate trong modal
+                if (data.errors) {
+                    for (const [field, messages] of Object.entries(data.errors)) {
+                        const inputField = reviewForm.querySelector(`[name="${field}"]`);
+                        if (inputField) {
+                            const errorSpan = document.createElement('span');
+                            errorSpan.className = 'text-red-500 text-xs';
+                            errorSpan.textContent = messages[0];
+                            inputField.parentElement.appendChild(errorSpan);
+                        }
+                    }
+                }
+                reviewModal.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi khi gửi đánh giá:', error);
+            submitButton.disabled = false;
+            submitButton.classList.remove('loading', 'disabled-button');
+            submitButton.innerHTML = 'Gửi đánh giá';
+            showReviewSuccessModal('Có lỗi xảy ra, vui lòng thử lại!', false);
+        });
+    });
+}
 
             if (openReviewModalBtn) {
                 openReviewModalBtn.addEventListener('click', () => {
@@ -1068,6 +1069,15 @@
                     hideAuthModal();
                 }
             });
+            // Kiểm tra tham số openReview trong URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openReview') === 'true') {
+                const reviewModal = document.getElementById('review-modal');
+                if (reviewModal) {
+                    reviewModal.classList.remove('hidden');
+                    resetReviewForm(); // Reset form khi mở modal
+                }
+            }
         });
     </script>
     <script>
