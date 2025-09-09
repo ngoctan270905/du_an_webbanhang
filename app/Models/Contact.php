@@ -24,4 +24,9 @@ class Contact extends Model
     protected $casts = [
         'trang_thai' => 'boolean'
     ];
-} 
+
+    public function replies()
+    {
+        return $this->hasMany(ContactReply::class);
+    }
+}

@@ -26,7 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-orders', [ProfileController::class, 'index'])->name('my-orders.index');
     Route::get('/my-orders/{id}', [ProfileController::class, 'showOrders'])->name('my-orders.show');
     Route::post('/my-orders/{ma_don_hang}/cancel', [OrderController::class, 'cancel'])->name('my-orders.cancel');
-   Route::post('/my-orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('my-orders.confirm-received');
+    Route::post('/my-orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('my-orders.confirm-received');
 });
 
 require __DIR__ . '/auth.php';
@@ -137,6 +137,7 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
     Route::prefix('contacts')->name('contacts.')->group(function () {
         Route::get('/', [ContactController::class, 'index'])->name('index');
         Route::get('/{id}/show', [ContactController::class, 'show'])->name('show');
+        Route::post('/{id}/reply', [ContactController::class, 'reply'])->name('reply');
     });
 
     // Quản lý Reviews
