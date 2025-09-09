@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Banner;
 use App\Models\Review;
@@ -10,8 +9,10 @@ use App\Models\Contact;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -176,32 +177,55 @@ class HomeController extends Controller
 
     public function showContactForm()
     {
-        return view('clients.contacts.contact');
+        // Get the authenticated user's name and email if logged in, otherwise null
+        $userData = Auth::check() ? [
+            'ho_ten' => Auth::user()->name,
+            'email' => Auth::user()->email
+        ] : [
+            'ho_ten' => null,
+            'email' => null
+        ];
+
+        return view('clients.contacts.contact', $userData);
     }
 
     public function submitContactForm(Request $request)
     {
-        $request->validate([
-            'ho_ten' => 'required|string|max:255',
-            'so_dien_thoai' => 'nullable|string|max:20',
-            'noi_dung' => 'required|string|max:255',
-        ]);
+        $request->validate(
+            [
+                'ho_ten' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'so_dien_thoai' => 'nullable|string|max:20',
+                'noi_dung' => 'required|string|max:255',
+            ],
+            [
+                'ho_ten.required' => 'Vui lòng nhập họ tên.',
+                'ho_ten.string' => 'Họ tên phải là chuỗi ký tự.',
+                'ho_ten.max' => 'Họ tên không được vượt quá 255 ký tự.',
+
+                'email.required' => 'Vui lòng nhập email.',
+                'email.email' => 'Email không hợp lệ.',
+                'email.max' => 'Email không được vượt quá 255 ký tự.',
+
+                'so_dien_thoai.string' => 'Số điện thoại phải là chuỗi ký tự.',
+                'so_dien_thoai.max' => 'Số điện thoại không được vượt quá 20 ký tự.',
+
+                'noi_dung.required' => 'Vui lòng nhập nội dung.',
+                'noi_dung.string' => 'Nội dung phải là chuỗi ký tự.',
+                'noi_dung.max' => 'Nội dung không được vượt quá 255 ký tự.',
+            ]
+        );
 
         // Lưu vào CSDL
         Contact::create([
             'ho_ten' => $request->ho_ten,
+            'email' => $request->email,
             'so_dien_thoai' => $request->so_dien_thoai,
             'noi_dung' => $request->noi_dung,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // Gửi email cảm ơn
-        Mail::raw('Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi sớm nhất có thể!', function ($message) use ($request) {
-            $message->to('admin@example.com') // Thay bằng email admin
-                ->subject('Liên hệ mới từ: ' . $request->ho_ten);
-        });
-
-        return redirect()->back()->with('success', 'Liên hệ của bạn đã được gửi. Cảm ơn bạn!');
+        return redirect()->back()->with('success', 'Liên hệ của bạn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất có thể!');
     }
 }

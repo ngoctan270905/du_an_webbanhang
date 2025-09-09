@@ -34,6 +34,12 @@
 
     @include('partials.script')
 
+     <!-- Nút Contact nổi góc phải dưới -->
+    <a href="/lien-he"
+       class="fixed bottom-6 right-6 bg-red-500 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-red-600 transition">
+       <i class="fa-solid fa-headset text-2xl"></i>
+    </a>
+
 
 
 
