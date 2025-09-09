@@ -6,7 +6,7 @@
         <div class="rounded-2xl bg-white p-6 shadow-xl transition-all duration-300 hover:shadow-2xl">
             <div class="mb-6 flex items-center justify-between">
                 <h3 class="text-2xl font-bold text-gray-800">Chi tiết đánh giá</h3>
-                <a href="{{ route('admin.reviews.index') }}"
+                <a href="{{ url()->previous() }}"
                     class="rounded-lg bg-gray-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
                     <i class="fas fa-arrow-left mr-2"></i> Quay lại
                 </a>

@@ -149,5 +149,6 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
         Route::get('/{id}/edit', [ReviewController::class, 'edit'])->name('edit');
         Route::put('/{id}/update', [ReviewController::class, 'update'])->name('update');
         Route::delete('/{id}/destroy', [ReviewController::class, 'destroy'])->name('destroy');
+        Route::get('/{product}/reviews', [ReviewController::class, 'showReviews'])->name('showReviews');
     });
 });

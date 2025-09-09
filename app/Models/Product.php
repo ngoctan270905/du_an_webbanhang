@@ -27,11 +27,16 @@ class Product extends Model
         'mo_ta',
         'trang_thai',
     ];
-    
+
     protected $dates = ['deleted_at'];
     // Tạo mối liên hệ với danh mục
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'id_san_pham', 'id');
     }
 }

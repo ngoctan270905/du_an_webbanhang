@@ -11,18 +11,16 @@ class ReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Review::with(['user', 'product']);
+        $query = Product::has('reviews')
+            ->withCount('reviews')
+            ->with(['reviews']);
 
         if ($request->filled('noi_dung')) {
-            $query->where('noi_dung', 'LIKE', '%' . $request->noi_dung . '%');
+            $query->where('ten_san_pham', 'LIKE', '%' . $request->noi_dung . '%');
         }
 
-        if ($request->filled('trang_thai')) {
-            $query->where('trang_thai', $request->trang_thai);
-        }
-
-        $reviews = $query->paginate(10);
-        return view('admin.reviews.index', compact('reviews'));
+        $products = $query->paginate(10);
+        return view('admin.reviews.index', compact('products'));
     }
 
     public function create()
@@ -87,5 +85,18 @@ class ReviewController extends Controller
 
         return redirect()->route('admin.reviews.index')
             ->with('success', 'Xóa đánh giá thành công!');
+    }
+
+    public function showReviews(Product $product, Request $request)
+    {
+        $query = Review::where('id_san_pham', $product->id)
+            ->with(['user', 'product']);
+
+        if ($request->filled('noi_dung')) {
+            $query->where('noi_dung', 'LIKE', '%' . $request->noi_dung . '%');
+        }
+
+        $reviews = $query->paginate(10);
+        return view('admin.reviews.showReviews', compact('product', 'reviews'));
     }
 }
