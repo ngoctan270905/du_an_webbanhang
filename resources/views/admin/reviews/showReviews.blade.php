@@ -115,12 +115,12 @@
                                                     <circle cx="12" cy="12" r="3"></circle>
                                                 </svg>
                                             </a>
-                                            <a href="{{ route('admin.reviews.edit', $review->id) }}"
+                                            {{-- <a href="{{ route('admin.reviews.edit', $review->id) }}"
                                                 class="rounded-lg bg-yellow-500 p-1.5 text-white transition-colors duration-200 hover:bg-yellow-600">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
                                                 </svg>
-                                            </a>
+                                            </a> --}}
                                         </div>
                                     </td>
                                 </tr>

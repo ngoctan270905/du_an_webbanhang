@@ -414,64 +414,75 @@
 
                 <div class="my-6 border-t border-gray-200"></div>
 
-                <!-- Danh sách đánh giá -->
-                @if ($reviews->isEmpty())
-                    <p class="text-gray-500 text-center">Chưa có đánh giá nào cho sản phẩm này.</p>
-                @else
-                    <div class="space-y-8">
-                        @foreach ($reviews as $review)
-                            <div class="flex items-start space-x-3">
-                                <div
-                                    class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-base font-semibold">
-                                    {{ substr($review->user->name ?? 'N', 0, 1) }}
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="flex items-center mb-1">
-                                        <span
-                                            class="font-semibold text-gray-800 mr-2">{{ $review->user->name ?? 'Ẩn danh' }}</span>
-                                        <div class="flex text-yellow-400 text-sm">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <svg class="w-4 h-4 fill-current {{ $i <= $review->rating ? '' : 'text-gray-300' }}"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21z" />
-                                                </svg>
-                                            @endfor
-                                        </div>
-                                    </div>
-                                    <p class="text-gray-700 mb-3">{{ $review->noi_dung }}</p>
-                                    <div class="flex space-x-2 mb-3">
-                                        @if ($review->image)
-                                            <img src="{{ asset('storage/' . $review->image) }}" alt="Review Image"
-                                                class="w-20 h-20 rounded-md object-cover">
-                                        @endif
-                                    </div>
-
-                                    <div class="flex items-center text-sm text-gray-500">
-                                        <span>{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->diffForHumans() }}</span>
-                                        <span class="mx-2">•</span>
-                                        <button class="flex items-center text-blue-600 hover:underline">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path
-                                                    d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z">
-                                                </path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            @if (!$loop->last)
-                                <div class="border-t border-gray-100"></div>
-                            @endif
-                        @endforeach
+               <!-- Danh sách đánh giá -->
+@if ($reviews->isEmpty())
+    <p class="text-gray-500 text-center">Chưa có đánh giá nào cho sản phẩm này.</p>
+@else
+    <div class="space-y-8">
+        @foreach ($reviews as $review)
+            <div class="flex items-start space-x-3">
+                <div
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-base font-semibold">
+                    {{ substr($review->user->name ?? 'N', 0, 1) }}
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center mb-1">
+                        <span
+                            class="font-semibold text-gray-800 mr-2">{{ $review->user->name ?? 'Ẩn danh' }}</span>
+                        <div class="flex text-yellow-400 text-sm">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <svg class="w-4 h-4 fill-current {{ $i <= $review->rating ? '' : 'text-gray-300' }}"
+                                    viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21z" />
+                                </svg>
+                            @endfor
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-3">{{ $review->noi_dung }}</p>
+                    <div class="flex space-x-2 mb-3">
+                        @if ($review->image)
+                            <img src="{{ asset('storage/' . $review->image) }}" alt="Review Image"
+                                class="w-20 h-20 rounded-md object-cover">
+                        @endif
                     </div>
 
-                    <!-- Phân trang -->
-                    <div class="pagination mt-12">
-                        {{ $reviews->links() }}
+                    <!-- Hiển thị phản hồi của admin -->
+                    @if ($review->reviewReply)
+                        <div class="mt-3 pl-4 border-l-2 border-blue-200 bg-gray-50 p-3 rounded-md">
+                            <p class="text-sm font-semibold text-blue-600">Phản hồi từ cửa hàng:</p>
+                            <p class="text-gray-700 text-sm mt-1">{{ $review->reviewReply->content }}</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ \Carbon\Carbon::parse($review->reviewReply->created_at)->locale('vi')->diffForHumans() }}
+                            </p>
+                        </div>
+                    @endif
+
+                    <div class="flex items-center text-sm text-gray-500 mt-2">
+                        <span>{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->diffForHumans() }}</span>
+                        <span class="mx-2">•</span>
+                        <button class="flex items-center text-blue-600 hover:underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                    d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z">
+                                </path>
+                            </svg>
+                        </button>
                     </div>
-                @endif
+                </div>
+            </div>
+            @if (!$loop->last)
+                <div class="border-t border-gray-100"></div>
+            @endif
+        @endforeach
+    </div>
+
+    <!-- Phân trang -->
+    <div class="pagination mt-12">
+        {{ $reviews->links() }}
+    </div>
+@endif
             </div>
 
             <!-- Phần sản phẩm liên quan -->

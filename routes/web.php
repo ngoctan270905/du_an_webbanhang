@@ -150,5 +150,8 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
         Route::put('/{id}/update', [ReviewController::class, 'update'])->name('update');
         Route::delete('/{id}/destroy', [ReviewController::class, 'destroy'])->name('destroy');
         Route::get('/{product}/reviews', [ReviewController::class, 'showReviews'])->name('showReviews');
+        // Routes cho phản hồi đánh giá
+        Route::post('/{id}/reply', [ReviewController::class, 'storeReply'])->name('reply.store');
+        Route::delete('/{id}/reply', [ReviewController::class, 'deleteReply'])->name('reply.delete');
     });
 });

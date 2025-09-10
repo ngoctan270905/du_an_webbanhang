@@ -86,7 +86,7 @@ class HomeController extends Controller
 
         // Lấy tất cả đánh giá để tính thống kê
         $allReviews = Review::where('id_san_pham', $product->id)
-            ->where('trang_thai', 1) // Chỉ lấy đánh giá có trạng thái hoạt động (nếu có)
+            ->where('trang_thai', 1) // Chỉ lấy đánh giá có trạng thái hoạt động
             ->get();
 
         // Lấy tham số filter từ request
@@ -94,7 +94,8 @@ class HomeController extends Controller
 
         // Lấy 4 đánh giá mỗi trang để hiển thị danh sách, áp dụng lọc nếu có
         $reviewsQuery = Review::where('id_san_pham', $product->id)
-            ->where('trang_thai', 1) // Chỉ lấy đánh giá có trạng thái hoạt động (nếu có)
+            ->where('trang_thai', 1) // Chỉ lấy đánh giá có trạng thái hoạt động
+            ->with(['user', 'reviewReply']) // Tải quan hệ user và reviewReply
             ->orderBy('created_at', 'desc'); // Sắp xếp đánh giá mới nhất trước
 
         if ($filter === '5') {

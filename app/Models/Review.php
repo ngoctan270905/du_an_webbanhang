@@ -34,4 +34,9 @@ class Review extends Model
     {
         return $this->belongsTo(Product::class, 'id_san_pham');
     }
-} 
+
+    public function reviewReply()
+    {
+        return $this->hasOne(ReviewReply::class, 'review_id');
+    }
+}
