@@ -1,96 +1,102 @@
 @extends('layouts.master')
 
-@section('title', 'Danh Sách Sản Phẩm')
+@section('title', 'Danh Mục Sách')
 
 @section('content')
-<style>
-    @media (min-width: 1400px) {
-        .col-xxl-2-4 {
-            flex: 0 0 auto;
-            width: 20%;
-        }
-    }
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-4xl font-extrabold text-center mb-6">Tất Cả Sách</h1>
+            <p class="text-center text-lg mb-8 text-gray-600">Khám phá toàn bộ bộ sưu tập sách của chúng tôi.</p>
 
-    .product-image-wrapper {
-        height: 250px;
-        overflow: hidden;
-        border-radius: 0.75rem 0.75rem 0 0;
-    }
-
-    .product-image-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .card:hover .product-image-wrapper img {
-        transform: scale(1.05);
-    }
-</style>
-
-<div class="container my-5">
-    <h2 class="text-center mb-5 fw-bold text-uppercase" style="color: #2c3e50;">Danh Sách Sản Phẩm</h2>
-
-    <!-- Bộ lọc tìm kiếm -->
-    <form method="GET" action="{{ route('product.index') }}">
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <input type="text" name="search" class="form-control" placeholder="Tìm sản phẩm..." value="{{ request()->search }}">
-            </div>
-            <div class="col-md-3">
-                <select name="category" class="form-control">
-                    <option value="">Chọn danh mục</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}" {{ request()->category == $category->id ? 'selected' : '' }}>{{ $category->ten_danh_muc }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <input type="number" name="min_price" class="form-control" placeholder="Giá tối thiểu" value="{{ request()->min_price }}">
-            </div>
-            <div class="col-md-2">
-                <input type="number" name="max_price" class="form-control" placeholder="Giá tối đa" value="{{ request()->max_price }}">
-            </div>
-            <div class="col-md-2">
-                <select name="sort_by" class="form-control">
-                    <option value="asc" {{ request()->sort_by == 'asc' ? 'selected' : '' }}>Giá từ thấp đến cao</option>
-                    <option value="desc" {{ request()->sort_by == 'desc' ? 'selected' : '' }}>Giá từ cao đến thấp</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="text-center mb-4">
-            <button type="submit" class="btn btn-primary">Áp Dụng Bộ Lọc</button>
-        </div>
-    </form>
-
-    <!-- Danh sách sản phẩm -->
-    <div class="row g-4 justify-content-center">
-        @foreach ($products as $product)
-            <div class="col-xxl-2-4 col-lg-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0 rounded-3 overflow-hidden transition-hover">
-                    <div class="product-image-wrapper">
-                        <img src="{{ asset('storage/' . $product->hinh_anh) }}" class="card-img-top" alt="{{ $product->ten_san_pham }}">
-                    </div>
-                    <div class="card-body d-flex flex-column p-3">
-                        <h5 class="card-title text-center text-truncate fw-semibold mb-2" style="color: #34495e; font-size: 1.1rem;">
-                            {{ $product->ten_san_pham }}
-                        </h5>
-                        <p class="card-text text-center text-success fw-bold mb-3" style="font-size: 1rem;">
-                            {{ number_format($product->gia, 0, ',', '.') }} VNĐ
-                        </p>
-                        <a href="{{ route('product.detail', $product->id) }}" class="btn btn-primary btn-sm w-100 mt-auto rounded-pill">Xem Chi Tiết</a>
-
-                    </div>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <label for="category-filter" class="text-gray-700 font-medium">Danh mục:</label>
+                    <select id="category-filter" name="category_id"
+                        class="border rounded-lg px-4 py-2.5 focus:ring-red-500 focus:border-red-500">
+                        <option value="all"
+                            {{ request('category_id') === 'all' || !request('category_id') ? 'selected' : '' }}>Tất cả
+                        </option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}"
+                                {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->ten_danh_muc }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label for="sort-by" class="text-gray-700 font-medium">Sắp xếp theo:</label>
+                    <select id="sort-by" name="sort_by"
+                        class="border rounded-lg px-4 py-2.5 focus:ring-red-500 focus:border-red-500">
+                        <option value="newest" {{ $sortBy === 'newest' ? 'selected' : '' }}>Mới nhất</option>
+                        <option value="price_asc" {{ $sortBy === 'price_asc' ? 'selected' : '' }}>Giá: Thấp đến Cao</option>
+                        <option value="price_desc" {{ $sortBy === 'price_desc' ? 'selected' : '' }}>Giá: Cao đến Thấp
+                        </option>
+                        <option value="best_selling" {{ $sortBy === 'best_selling' ? 'selected' : '' }}>Bán chạy nhất
+                        </option>
+                    </select>
                 </div>
             </div>
-        @endforeach
-    </div>
 
-    <!-- Phân trang -->
-    <div class="d-flex justify-content-end mt-3">
-        {{ $products->links('pagination::bootstrap-5') }}
+            @if ($products->isEmpty())
+                <p class="text-gray-500 text-center">Không tìm thấy sách nào phù hợp.</p>
+            @else
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    @foreach ($products as $product)
+                        <a href="{{ route('product.detail', $product->id) }}"
+                            class="product-card flex flex-col bg-white shadow-lg rounded-lg p-4 hover:shadow-xl transition-shadow">
+                            <div class="w-full h-64 flex items-center justify-center">
+                                <img src="{{ $product->hinh_anh ? asset('storage/' . $product->hinh_anh) : 'https://via.placeholder.com/300x450' }}"
+                                    alt="{{ $product->ten_san_pham }}" class="max-h-64 object-contain">
+                            </div>
+                            <div class="card-content flex flex-col flex-grow justify-between text-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold line-clamp-2 min-h-[3.5rem]">
+                                        {{ $product->ten_san_pham }}</h3>
+                                    <p class="author text-gray-900 min-h-[1.5rem]">{{ $product->author ?? 'Không rõ' }}</p>
+                                </div>
+                                <div class="price">
+                                    @if ($product->gia_khuyen_mai)
+                                        <span class="text-red-500 font-bold">
+                                            {{ number_format($product->gia_khuyen_mai, 0, ',', '.') }}đ
+                                        </span>
+                                        <span class="text-gray-500 line-through ml-2">
+                                            {{ number_format($product->gia, 0, ',', '.') }}đ
+                                        </span>
+                                    @else
+                                        <span class="text-red-500 font-bold">
+                                            {{ number_format($product->gia, 0, ',', '.') }}đ
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+
+                <!-- Phân trang -->
+                <div class="flex justify-center mt-10">
+                    {{ $products->links() }}
+                </div>
+            @endif
+        </div>
     </div>
-</div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryFilter = document.getElementById('category-filter');
+            const sortByFilter = document.getElementById('sort-by');
+
+            function updateFilters() {
+                const params = new URLSearchParams(window.location.search);
+                params.set('category_id', categoryFilter.value);
+                params.set('sort_by', sortByFilter.value);
+                window.location.href = '{{ route('products.list') }}?' + params.toString();
+            }
+
+            categoryFilter.addEventListener('change', updateFilters);
+            sortByFilter.addEventListener('change', updateFilters);
+        });
+    </script>
 @endsection
+

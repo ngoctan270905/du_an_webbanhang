@@ -38,7 +38,7 @@
                 <ul class="space-y-3">
                     <li><a href="{{ route('home') }}" class="hover:text-yellow-400 transition-colors">Trang
                             chủ của chúng tôi</a></li>
-                    <li><a href="{{ route('product.index') }}" class="hover:text-yellow-400 transition-colors">Sản
+                    <li><a href="{{ route('products.list') }}" class="hover:text-yellow-400 transition-colors">Sản
                             phẩm mới & hot nhất</a></li>
                     <li><a href="{{ route('posts.list') }}" class="hover:text-yellow-400 transition-colors">Bài
                             viết trending</a></li>

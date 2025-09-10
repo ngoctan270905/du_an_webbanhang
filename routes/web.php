@@ -35,7 +35,7 @@ require __DIR__ . '/auth.php';
 // Routes client / public
 // =====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/danh-sach-san-pham', [HomeController::class, 'productList'])->name('product.index');
+Route::get('/danh-sach-san-pham', [HomeController::class, 'productList'])->name('products.list');
 Route::get('/san-pham/{id}', [HomeController::class, 'showProductDetail'])->name('product.detail');
 
 // Gửi đánh giá sản phẩm (Client)

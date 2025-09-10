@@ -9,6 +9,7 @@ use App\Models\Contact;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -41,43 +42,51 @@ class HomeController extends Controller
 
     public function productList(Request $request)
     {
-        // Tìm kiếm sản phẩm
-        $query = Product::query();
-
-        // Bộ lọc tìm kiếm theo tên sản phẩm
-        if ($request->has('search') && $request->search) {
-            $query->where('ten_san_pham', 'like', '%' . $request->search . '%');
-        }
-
-        // Bộ lọc theo danh mục
-        if ($request->has('category') && $request->category) {
-            $query->where('category_id', $request->category);
-        }
-
-        // Kiểm tra và áp dụng bộ lọc khoảng giá
-        if ($request->has('min_price') && is_numeric($request->min_price)) {
-            $query->where('gia', '>=', $request->min_price);
-        }
-
-        if ($request->has('max_price') && is_numeric($request->max_price)) {
-            $query->where('gia', '<=', $request->max_price);
-        }
-
-        // Sắp xếp theo giá
-        if ($request->has('sort_by') && $request->sort_by == 'asc') {
-            $query->orderBy('gia', 'asc');
-        } elseif ($request->has('sort_by') && $request->sort_by == 'desc') {
-            $query->orderBy('gia', 'desc');
-        }
-
-        // Phân trang sản phẩm
-        $products = $query->paginate(10); // Phân trang 10 sản phẩm mỗi trang
-
-        // Lấy tất cả danh mục (có thể cần cho phần lọc danh mục)
+        // Lấy tất cả danh mục
         $categories = Category::all();
 
-        return view('products.dssanpham', compact('products', 'categories'));
+        // Xây dựng truy vấn sản phẩm (chỉ lấy sản phẩm đang hoạt động)
+        $query = Product::query()
+            ->where('products.trang_thai', 1)
+            ->leftJoin('order_details', 'products.id', '=', 'order_details.id_san_pham')
+            ->select('products.*', DB::raw('COALESCE(SUM(order_details.so_luong), 0) as so_luong_ban'))
+            ->groupBy('products.id');
+
+        // Lọc theo danh mục
+        if ($request->has('category_id') && $request->category_id !== 'all') {
+            $query->where('products.category_id', $request->category_id);
+        }
+
+        // Sắp xếp theo yêu cầu
+        $sortBy = $request->input('sort_by', 'newest');
+
+        switch ($sortBy) {
+            case 'price_asc':
+                $query->orderBy(DB::raw('COALESCE(products.gia_khuyen_mai, products.gia)'), 'asc');
+                break;
+
+            case 'price_desc':
+                $query->orderBy(DB::raw('COALESCE(products.gia_khuyen_mai, products.gia)'), 'desc');
+                break;
+
+            case 'best_selling':
+                $query->orderBy('so_luong_ban', 'desc');
+                break;
+
+            default:
+                $query->orderBy('products.created_at', 'desc'); // Mới nhất
+                break;
+        }
+
+        // Phân trang (10 sản phẩm mỗi trang)
+        $products = $query->paginate(10)->appends([
+            'category_id' => $request->category_id,
+            'sort_by' => $sortBy,
+        ]);
+
+        return view('clients.products.dssanpham', compact('products', 'categories', 'sortBy'));
     }
+
 
     public function showProductDetail($id)
     {
