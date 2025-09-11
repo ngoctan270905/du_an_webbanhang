@@ -381,13 +381,15 @@
  </style>
  <header class="fixed top-0 left-0 right-0 z-50 py-2 px-8 flex items-center justify-between">
      <a href="{{ route('home') }}" class="logo">BOOKSTORE</a>
-     <nav class="hidden md:flex flex-1 justify-center space-x-8">
-         <a href="#" class="transition-colors">VĂN HỌC</a>
-         <a href="#" class="transition-colors">KINH TẾ</a>
-         <a href="#" class="transition-colors">THIẾU NHI</a>
-         <a href="#" class="transition-colors">KHOA HỌC</a>
-         <a href="#" class="transition-colors">SÁCH MỚI</a>
-     </nav>
+    <nav class="hidden md:flex flex-1 justify-center space-x-8">
+    @foreach($topCategories as $category)
+        <a href="{{ route('products.list', ['category_id' => $category->id, 'sort_by' => 'newest']) }}"
+           class="transition-colors hover:text-blue-600">
+            {{ strtoupper($category->ten_danh_muc) }}
+        </a>
+    @endforeach
+</nav>
+
      <div class="flex items-center space-x-4">
          <div class="relative">
              <button id="notification-button"
