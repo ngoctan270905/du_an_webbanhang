@@ -560,6 +560,8 @@
                             // Cập nhật danh sách sản phẩm
                             const productsContainer = document.getElementById(
                                 'detail-products');
+                            productsContainer.innerHTML =
+                            ''; // Xóa nội dung cũ trước khi render lại
                             data.orderDetails.forEach(detail => {
                                 const productDiv = document.createElement('div');
                                 productDiv.className =
