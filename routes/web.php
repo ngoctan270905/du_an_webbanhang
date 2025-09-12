@@ -18,8 +18,25 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\OrderController;
 
-
+// =====================
+// Routes client - cần đăng nhập
+// =====================
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Route của giỏ hàng
+    Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::post('/cart/validate', [CartController::class, 'validateCart'])->name('cart.validate');
+    Route::post('/cart/apply-changes', [CartController::class, 'applyChanges'])->name('cart.apply_changes');
+
+    // Route của thanh toán đơn hàng
+    Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('order.checkout');
+    Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
+    Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('order.success');
+
+    // Route của thông tin cá nhân người dùng
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -32,13 +49,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 require __DIR__ . '/auth.php';
 
 // =====================
-// Routes client / public
+// Routes client - KHông cần đăng nhập
 // =====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/danh-sach-san-pham', [HomeController::class, 'productList'])->name('products.list');
 Route::get('/san-pham/{id}', [HomeController::class, 'showProductDetail'])->name('product.detail');
 
-// Gửi đánh giá sản phẩm (Client)
+// Gửi đánh giá sản phẩm (Client) - Yêu cầu đăng nhập
 Route::post('/san-pham/{id}/danh-gia', [HomeController::class, 'submitReview'])
     ->middleware('auth')
     ->name('client.reviews.store');
@@ -46,23 +63,8 @@ Route::post('/san-pham/{id}/danh-gia', [HomeController::class, 'submitReview'])
 Route::get('/posts', [HomeController::class, 'postList'])->name('posts.list');
 Route::get('/lien-he', [HomeController::class, 'showContactForm'])->name('contact.form');
 Route::post('/lien-he', [HomeController::class, 'submitContactForm'])->name('contact.submit');
-Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
-// ...existing code...
-Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
-Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
-Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
-// Route::get('/cart/clear', function () {
-//     session()->forget('cart');
-//     return redirect()->route('cart.show')->with('success', 'Giỏ hàng đã được làm mới!');
-// })->name('cart.clear');
-Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-Route::post('/cart/validate', [CartController::class, 'validateCart'])->name('cart.validate');
-Route::post('/cart/apply-changes', [CartController::class, 'applyChanges'])->name('cart.apply_changes');
-Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('order.checkout');
-Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
-Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('order.success');
 
-// ...existing code...
+
 // =====================
 // Routes admin
 // =====================
@@ -109,9 +111,11 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
         Route::delete('/{id}/forceDelete', [CategoryController::class, 'forceDelete'])->name('forceDelete');
     });
 
+    // Quản lí đơn hàng
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    
     // Quản lý Banners
     Route::prefix('banners')->name('banners.')->group(function () {
         Route::get('/', [BannerController::class, 'index'])->name('index');

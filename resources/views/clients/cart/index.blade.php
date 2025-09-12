@@ -329,7 +329,7 @@
         @else
             <div class="text-center py-8">
                 <p class="text-gray-600 mb-10">Giỏ hàng của bạn đang trống</p>
-                <a href="{{ route('product.index') }}" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600">
+                <a href="{{ route('products.list') }}" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600">
                     Tiếp tục mua sắm
                 </a>
             </div>
