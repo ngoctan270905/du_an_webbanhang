@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-orders/{id}', [ProfileController::class, 'showOrders'])->name('my-orders.show');
     Route::post('/my-orders/{ma_don_hang}/cancel', [OrderController::class, 'cancel'])->name('my-orders.cancel');
     Route::post('/my-orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('my-orders.confirm-received');
+    Route::post('/my-orders/{ma_don_hang}/return', [OrderController::class, 'requestReturn'])->name('my-orders.return');
 });
 
 require __DIR__ . '/auth.php';
@@ -115,7 +116,7 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
-    
+
     // Quản lý Banners
     Route::prefix('banners')->name('banners.')->group(function () {
         Route::get('/', [BannerController::class, 'index'])->name('index');

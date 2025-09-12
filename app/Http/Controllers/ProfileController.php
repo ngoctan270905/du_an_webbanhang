@@ -87,82 +87,88 @@ class ProfileController extends Controller
     }
 
 
-    public function showOrders(Request $request, $id = null)
-    {
-        $user = $request->user();
+   public function showOrders(Request $request, $id = null)
+{
+    $user = $request->user();
 
-        if ($id) {
-            // Lấy chi tiết đơn hàng dựa trên ma_don_hang
-            $order = Order::where('ma_don_hang', $id)
-                ->where('id_nguoi_dung', $user->id)
-                ->with([
-                    'orderDetails.product',
-                    'payment',
-                    'province' => function ($query) {
-                        $query->select('code', 'name');
-                    },
-                    'district' => function ($query) {
-                        $query->select('code', 'name');
-                    },
-                    'ward' => function ($query) {
-                        $query->select('code', 'name');
-                    }
-                ])
-                ->first();
+    if ($id) {
+        // Lấy chi tiết đơn hàng dựa trên ma_don_hang
+        $order = Order::where('ma_don_hang', $id)
+            ->where('id_nguoi_dung', $user->id)
+            ->with([
+                'orderDetails.product',
+                'payment',
+                'province' => function ($query) {
+                    $query->select('code', 'name');
+                },
+                'district' => function ($query) {
+                    $query->select('code', 'name');
+                },
+                'ward' => function ($query) {
+                    $query->select('code', 'name');
+                },
+                'returns' // Eager load bảng returns
+            ])
+            ->first();
 
-            if (!$order) {
-                return response()->json(['error' => 'Đơn hàng không tồn tại hoặc không thuộc về bạn'], 404);
-            }
-
-            // Lấy trạng thái thanh toán từ bảng payments
-            $tinh_trang_thanh_toan = $order->payment ? $this->getPaymentStatusText($order->payment->trang_thai) : 'Không xác định';
-
-            return response()->json([
-                'ma_don_hang' => $order->ma_don_hang,
-                'ngay_dat_hang' => $order->ngay_dat_hang,
-                'trang_thai' => $order->trang_thai,
-                'ngay_huy' => $order->ngay_huy,
-                'tong_tien' => $order->tong_tien,
-                'tong_tien_hang' => $order->tong_tien_hang,
-                'phi_van_chuyen' => $order->phi_ship,
-                'giam_gia' => 0, // Giá trị mặc định vì không có cột trong DB
-                'ten_nguoi_nhan' => $order->ho_ten_khach_hang ?? 'Không xác định',
-                'dia_chi' => $order->dia_chi_giao_hang ?? 'Không xác định',
-                'so_dien_thoai' => $order->so_dien_thoai ?? 'Không xác định',
-                'province_name' => $order->province ? $order->province->name : 'Không xác định',
-                'district_name' => $order->district ? $order->district->name : 'Không xác định',
-                'ward_name' => $order->ward ? $order->ward->name : 'Không xác định',
-                'phuong_thuc_thanh_toan' => $order->phuong_thuc_thanh_toan,
-                'tinh_trang_thanh_toan' => $tinh_trang_thanh_toan,
-                'da_nhan_hang' => $order->da_nhan_hang,
-                'orderDetails' => $order->orderDetails->map(function ($detail) {
-                    return [
-                        'product_id' => $detail->id_san_pham,
-                        'ten_san_pham' => $detail->product ? $detail->product->ten_san_pham : 'Sản phẩm không tồn tại',
-                        'so_luong' => $detail->so_luong,
-                        'gia' => $detail->gia,
-                        'hinh_anh' => $detail->product && $detail->product->hinh_anh ? asset('storage/' . $detail->product->hinh_anh) : null,
-                    ];
-                }),
-            ]);
+        if (!$order) {
+            return response()->json(['error' => 'Đơn hàng không tồn tại hoặc không thuộc về bạn'], 404);
         }
 
-        // Lấy danh sách đơn hàng nếu không có id
-        $trang_thai = $request->query('trang_thai', 'all');
-        $query = Order::where('id_nguoi_dung', $user->id)->with('orderDetails.product');
+        // Lấy trạng thái thanh toán từ bảng payments
+        $tinh_trang_thanh_toan = $order->payment ? $this->getPaymentStatusText($order->payment->trang_thai) : 'Không xác định';
 
-        if ($trang_thai !== 'all') {
-            $query->where('trang_thai', $trang_thai);
-        }
-
-        $orders = $query->paginate(10);
-
-        return view('profile.show_orders', [
-            'user' => $user,
-            'orders' => $orders,
-            'selected_status' => $trang_thai,
+        return response()->json([
+            'ma_don_hang' => $order->ma_don_hang,
+            'ngay_dat_hang' => $order->ngay_dat_hang,
+            'trang_thai' => $order->trang_thai,
+            'ngay_huy' => $order->ngay_huy,
+            'tong_tien' => $order->tong_tien,
+            'tong_tien_hang' => $order->tong_tien_hang,
+            'phi_van_chuyen' => $order->phi_ship,
+            'giam_gia' => 0,
+            'ten_nguoi_nhan' => $order->ho_ten_khach_hang ?? 'Không xác định',
+            'dia_chi' => $order->dia_chi_giao_hang ?? 'Không xác định',
+            'so_dien_thoai' => $order->so_dien_thoai ?? 'Không xác định',
+            'province_name' => $order->province ? $order->province->name : 'Không xác định',
+            'district_name' => $order->district ? $order->district->name : 'Không xác định',
+            'ward_name' => $order->ward ? $order->ward->name : 'Không xác định',
+            'phuong_thuc_thanh_toan' => $order->phuong_thuc_thanh_toan,
+            'tinh_trang_thanh_toan' => $tinh_trang_thanh_toan,
+            'da_nhan_hang' => $order->da_nhan_hang,
+            'orderDetails' => $order->orderDetails->map(function ($detail) {
+                return [
+                    'id' => $detail->id,
+                    'product_id' => $detail->id_san_pham,
+                    'ten_san_pham' => $detail->product ? $detail->product->ten_san_pham : 'Sản phẩm không tồn tại',
+                    'so_luong' => $detail->so_luong,
+                    'gia' => $detail->gia,
+                    'hinh_anh' => $detail->product && $detail->product->hinh_anh ? asset('storage/' . $detail->product->hinh_anh) : null,
+                ];
+            }),
         ]);
     }
+
+    // Lấy danh sách đơn hàng nếu không có id
+    $trang_thai = $request->query('trang_thai', 'all');
+    $query = Order::where('id_nguoi_dung', $user->id)
+        ->with([
+            'orderDetails.product',
+            'returns' // Eager load bảng returns
+        ]);
+
+    if ($trang_thai !== 'all') {
+        $query->where('trang_thai', $trang_thai);
+    }
+
+    $orders = $query->paginate(10);
+
+    return view('profile.show_orders', [
+        'user' => $user,
+        'orders' => $orders,
+        'selected_status' => $trang_thai,
+    ]);
+}
 
     /**
      * Hàm chuyển đổi trạng thái thanh toán sang text hiển thị

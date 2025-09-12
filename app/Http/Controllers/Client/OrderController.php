@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Models\Ward;
 use App\Models\Order;
 use App\Models\Coupon;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\CartItem;
-use App\Models\OrderDetail;
-use App\Models\Province;
 use App\Models\District;
-use App\Models\Ward;
+use App\Models\Province;
+use App\Models\OrderDetail;
+use App\Models\ReturnModel;
 use Illuminate\Support\Str;
+use App\Models\ReturnDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -264,6 +267,93 @@ class OrderController extends Controller
             return response()->json(['message' => 'Xác nhận nhận hàng thành công!']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Có lỗi xảy ra khi xác nhận nhận hàng.'], 500);
+        }
+    }
+
+    public function requestReturn(Request $request, $ma_don_hang)
+    {
+        Log::info('Request data for return:', $request->all());
+
+        // Validate dữ liệu đầu vào
+        $request->validate([
+            'order_detail_id' => 'required|numeric|exists:order_details,id',
+            'quantity' => 'required|integer|min:1',
+            'return_reason' => 'required|string',
+            'other_return_reason' => 'nullable|string|required_if:return_reason,Khác',
+            'refund_method' => 'required|in:bank_transfer',
+            'bank_details' => 'nullable|string|required_if:refund_method,bank_transfer'
+        ]);
+
+        // Tìm đơn hàng
+        $order = Order::where('ma_don_hang', $ma_don_hang)
+            ->where('id_nguoi_dung', Auth::id())
+            ->where('trang_thai', 'delivered')
+            ->firstOrFail();
+
+        // Tìm chi tiết đơn hàng
+        $orderDetail = OrderDetail::where('id', $request->order_detail_id)
+            ->where('id_don_hang', $order->id)
+            ->firstOrFail();
+
+        // Kiểm tra số lượng trả hợp lệ
+        if ($request->quantity > $orderDetail->so_luong) {
+            Log::warning('Invalid quantity for return:', [
+                'order_detail_id' => $request->order_detail_id,
+                'requested_quantity' => $request->quantity,
+                'available_quantity' => $orderDetail->so_luong,
+            ]);
+            return response()->json(['error' => 'Số lượng trả vượt quá số lượng trong đơn hàng.'], 422);
+        }
+
+        // Kiểm tra xem sản phẩm cụ thể đã có yêu cầu trả hàng chưa
+        $hasReturnRequestForProduct = ReturnDetail::where('order_detail_id', $request->order_detail_id)->exists();
+        if ($hasReturnRequestForProduct) {
+            Log::warning('Product already has a return request:', [
+                'order_id' => $order->id,
+                'order_detail_id' => $request->order_detail_id,
+            ]);
+            return response()->json(['error' => 'Sản phẩm này đã có yêu cầu trả hàng.'], 422);
+        }
+
+        $count = ReturnModel::whereDate('ngay_yeu_cau', today())->count() + 1;
+        $ma_tra_hang = 'TH-' . date('Ymd') . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+        // Bắt đầu transaction
+        DB::beginTransaction();
+        try {
+            // Lưu vào bảng returns
+            $return = ReturnModel::create([
+                'ma_tra_hang' => $ma_tra_hang,
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'ngay_yeu_cau' => now(),
+                'ly_do_tra_hang' => $request->return_reason === 'Khác' ? $request->other_return_reason : $request->return_reason,
+                'trang_thai' => 'pending',
+                'phuong_thuc_hoan_tien' => $request->refund_method,
+                'bank_details' => $request->refund_method === 'bank_transfer' ? $request->bank_details : null,
+                'tong_tien_hoan' => $orderDetail->gia * $request->quantity
+            ]);
+
+            // Lưu vào bảng return_details
+            ReturnDetail::create([
+                'return_id' => $return->id,
+                'order_detail_id' => $orderDetail->id,
+                'so_luong' => $request->quantity,
+                'gia_tra' => $orderDetail->gia,
+                'ly_do_chi_tiet' => $request->return_reason === 'Khác' ? $request->other_return_reason : $request->return_reason
+            ]);
+
+            DB::commit();
+            Log::info('Return request processed successfully:', ['return_id' => $return->id]);
+
+            return response()->json(['message' => 'Yêu cầu trả hàng đã được gửi thành công.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing return request:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Có lỗi xảy ra khi xử lý yêu cầu trả hàng: ' . $e->getMessage()], 500);
         }
     }
 }

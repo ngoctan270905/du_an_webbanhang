@@ -79,4 +79,9 @@ class Order extends Model
     {
         return $this->belongsTo(Ward::class, 'ward_code', 'code');
     }
+
+    public function returns()
+    {
+        return $this->hasMany(ReturnModel::class, 'order_id');
+    }
 }
