@@ -342,6 +342,125 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal chọn sản phẩm để trả hàng -->
+        <div id="select-return-product-modal"
+            class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                <div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Chọn sản phẩm để trả hàng</div>
+                <div id="return-product-list" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Danh sách sản phẩm sẽ được thêm động bằng JavaScript -->
+                </div>
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button id="close-select-return-product-modal"
+                        class="px-4 py-2 text-sm font-semibold rounded-lg text-gray-600 border border-gray-300 hover:bg-gray-300 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                        Đóng
+                    </button>
+                    <button id="confirm-select-return-product"
+                        class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        disabled>
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal yêu cầu trả hàng -->
+        <div id="return-request-modal"
+            class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-lg">
+                <div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Yêu cầu trả hàng</div>
+                <form id="return-request-form" data-order-id="">
+                    <!-- Phần hiển thị sản phẩm đã chọn -->
+                    <div id="selected-product" class="mb-4 flex items-center space-x-4 hidden">
+                        <img id="selected-product-image" src="" alt=""
+                            class="w-16 h-16 rounded object-cover">
+                        <span id="selected-product-name"
+                            class="text-sm font-medium text-gray-900 dark:text-gray-200"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="return-reason"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Lý do trả hàng
+                        </label>
+                        <div class="relative">
+                            <select id="return-reason" name="return_reason"
+                                class="block w-full px-4 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-200 appearance-none">
+                                <option value="">Chọn lý do</option>
+                                <option value="Sản phẩm lỗi hoặc hư hỏng">Sản phẩm lỗi hoặc hư hỏng</option>
+                                <option value="Sản phẩm không đúng như mô tả">Sản phẩm không đúng như mô tả</option>
+                                <option value="Đặt nhầm sản phẩm">Đặt nhầm sản phẩm</option>
+                                <option value="Không còn nhu cầu">Không còn nhu cầu</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="return-error" class="hidden text-red-500 text-sm mt-2"></div>
+                    </div>
+
+                    <div id="other-return-reason-container" class="mb-4 hidden">
+                        <label for="other-return-reason"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Vui lòng nhập lý do khác
+                        </label>
+                        <textarea id="other-return-reason" name="other_return_reason" rows="4"
+                            class="block w-full px-4 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-200"
+                            placeholder="Nhập lý do cụ thể..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="refund-method"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Phương thức hoàn tiền
+                        </label>
+                        <div class="relative">
+                            <select id="refund-method" name="refund_method"
+                                class="block w-full px-4 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-200 appearance-none">
+                                <option value="">Chọn phương thức</option>
+                                <option value="bank_transfer">Hoàn tiền về tài khoản ngân hàng</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="bank-details-container" class="mb-4 mt-4 hidden">
+                            <label for="bank-details"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Thông tin tài khoản ngân hàng
+                            </label>
+                            <input type="text" id="bank-details" name="bank_details"
+                                class="block w-full px-4 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-200"
+                                placeholder="VD: MBBANK: STK 0123456">
+                        </div>
+                        <div id="refund-method-error" class="hidden text-red-500 text-sm mt-2"></div>
+                    </div>
+
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="close-return-modal"
+                            class="px-4 py-2 text-sm font-semibold rounded-lg text-gray-600 border border-gray-300 hover:bg-gray-300 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                            Đóng
+                        </button>
+                        <button type="submit" id="submit-return-request"
+                            class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-500 hover:bg-blue-600">
+                            Gửi yêu cầu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -361,6 +480,152 @@
             const closeSelectProductModal = document.getElementById('close-select-product-modal');
             const confirmSelectProduct = document.getElementById('confirm-select-product');
             const productList = document.getElementById('product-list');
+            const selectReturnProductModal = document.getElementById('select-return-product-modal');
+            const closeSelectReturnProductModal = document.getElementById('close-select-return-product-modal');
+            const confirmSelectReturnProduct = document.getElementById('confirm-select-return-product');
+            const returnProductList = document.getElementById('return-product-list');
+            const returnRequestModal = document.getElementById('return-request-modal');
+            const closeReturnModal = document.getElementById('close-return-modal');
+            const returnRequestForm = document.getElementById('return-request-form');
+            const returnReasonSelect = document.getElementById('return-reason');
+            const otherReturnReasonContainer = document.getElementById('other-return-reason-container');
+            const returnError = document.getElementById('return-error');
+            const refundMethodError = document.getElementById('refund-method-error');
+            const refundMethodSelect = document.getElementById('refund-method');
+            const bankDetailsContainer = document.getElementById('bank-details-container');
+
+            // Xử lý hiển thị textarea khi chọn "Khác" trong dropdown lý do trả hàng
+            returnReasonSelect.addEventListener('change', function() {
+                if (this.value === 'Khác') {
+                    otherReturnReasonContainer.classList.remove('hidden');
+                } else {
+                    otherReturnReasonContainer.classList.add('hidden');
+                }
+                returnError.classList.add('hidden');
+            });
+
+            // Xử lý hiển thị ô nhập thông tin ngân hàng
+            refundMethodSelect.addEventListener('change', function() {
+                if (this.value === 'bank_transfer') {
+                    bankDetailsContainer.classList.remove('hidden');
+                } else {
+                    bankDetailsContainer.classList.add('hidden');
+                }
+                refundMethodError.classList.add('hidden');
+            });
+
+            // Xử lý đóng modal trả hàng
+            closeReturnModal.addEventListener('click', function() {
+                returnRequestModal.classList.add('hidden');
+                returnRequestForm.reset();
+                otherReturnReasonContainer.classList.add('hidden');
+                returnError.classList.add('hidden');
+                refundMethodError.classList.add('hidden');
+                bankDetailsContainer.classList.add('hidden');
+                document.getElementById('selected-product').classList.add('hidden');
+            });
+
+            // Đóng modal trả hàng khi click bên ngoài
+            returnRequestModal.addEventListener('click', function(e) {
+                if (e.target === returnRequestModal) {
+                    returnRequestModal.classList.add('hidden');
+                    returnRequestForm.reset();
+                    otherReturnReasonContainer.classList.add('hidden');
+                    returnError.classList.add('hidden');
+                    refundMethodError.classList.add('hidden');
+                    bankDetailsContainer.classList.add('hidden');
+                    document.getElementById('selected-product').classList.add('hidden');
+                }
+            });
+
+            // Xử lý đóng modal chọn sản phẩm trả hàng
+            closeSelectReturnProductModal.addEventListener('click', function() {
+                selectReturnProductModal.classList.add('hidden');
+                returnProductList.innerHTML = '';
+                confirmSelectReturnProduct.disabled = true;
+            });
+
+            // Đóng modal chọn sản phẩm trả hàng khi click bên ngoài
+            selectReturnProductModal.addEventListener('click', function(e) {
+                if (e.target === selectReturnProductModal) {
+                    selectReturnProductModal.classList.add('hidden');
+                    returnProductList.innerHTML = '';
+                    confirmSelectReturnProduct.disabled = true;
+                }
+            });
+
+            // Xử lý sự kiện bấm nút "Yêu cầu trả hàng"
+            orderActions.addEventListener('click', function(e) {
+                if (e.target.classList.contains('return-request')) {
+                    const orderId = e.target.getAttribute('data-order-id');
+                    selectReturnProductModal.classList.remove('hidden');
+                    returnProductList.innerHTML = ''; // Xóa danh sách cũ
+
+                    // Dữ liệu giả để test
+                    const mockProducts = [{
+                            product_id: 1,
+                            ten_san_pham: 'Sản phẩm mẫu 1',
+                            hinh_anh: '/images/sample-product1.jpg'
+                        },
+                        {
+                            product_id: 2,
+                            ten_san_pham: 'Sản phẩm mẫu 2',
+                            hinh_anh: '/images/sample-product2.jpg'
+                        }
+                    ];
+
+                    mockProducts.forEach(detail => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className =
+                            'flex items-center space-x-4 p-2 border rounded-lg cursor-pointer hover:bg-gray-100';
+                        productDiv.innerHTML = `
+                    <input type="radio" name="selected_return_product" value="${detail.product_id}" class="product-radio" data-name="${detail.ten_san_pham}" data-image="${detail.hinh_anh}">
+                    <img src="${detail.hinh_anh}" alt="${detail.ten_san_pham}" class="w-12 h-12 rounded object-cover">
+                    <span class="text-sm">${detail.ten_san_pham}</span>
+                `;
+                        returnProductList.appendChild(productDiv);
+                    });
+
+                    // Kích hoạt nút "Xác nhận" khi chọn sản phẩm
+                    const radios = returnProductList.querySelectorAll('.product-radio');
+                    radios.forEach(radio => {
+                        radio.addEventListener('change', () => {
+                            confirmSelectReturnProduct.disabled = false;
+                            confirmSelectReturnProduct.setAttribute('data-product-id', radio
+                                .value);
+                            confirmSelectReturnProduct.setAttribute('data-product-name',
+                                radio.getAttribute('data-name'));
+                            confirmSelectReturnProduct.setAttribute('data-product-image',
+                                radio.getAttribute('data-image'));
+                            confirmSelectReturnProduct.setAttribute('data-order-id',
+                                orderId);
+                        });
+                    });
+                }
+            });
+
+            // Xử lý xác nhận chọn sản phẩm trả hàng
+            confirmSelectReturnProduct.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const productName = this.getAttribute('data-product-name');
+                const productImage = this.getAttribute('data-product-image');
+                const orderId = this.getAttribute('data-order-id');
+
+                if (productId) {
+                    // Đóng modal chọn sản phẩm
+                    selectReturnProductModal.classList.add('hidden');
+                    returnProductList.innerHTML = '';
+                    confirmSelectReturnProduct.disabled = true;
+
+                    // Mở modal yêu cầu trả hàng và hiển thị thông tin sản phẩm
+                    returnRequestModal.classList.remove('hidden');
+                    returnRequestForm.setAttribute('data-order-id', orderId);
+                    document.getElementById('selected-product').classList.remove('hidden');
+                    document.getElementById('selected-product-name').textContent = productName;
+                    document.getElementById('selected-product-image').src = productImage;
+                    document.getElementById('selected-product-image').alt = productName;
+                }
+            });
 
             // Xử lý sự kiện bấm nút "Đã nhận được hàng"
             document.querySelectorAll('.confirm-received').forEach(button => {
@@ -561,7 +826,7 @@
                             const productsContainer = document.getElementById(
                                 'detail-products');
                             productsContainer.innerHTML =
-                            ''; // Xóa nội dung cũ trước khi render lại
+                                ''; // Xóa nội dung cũ trước khi render lại
                             data.orderDetails.forEach(detail => {
                                 const productDiv = document.createElement('div');
                                 productDiv.className =
@@ -629,15 +894,7 @@
                                 returnButton.setAttribute('data-order-id', data.ma_don_hang);
                                 returnButton.textContent = 'Yêu cầu trả hàng';
                                 orderActions.appendChild(returnButton);
-
-                                const reviewButton = document.createElement('button');
-                                reviewButton.className =
-                                    'px-4 py-2 text-sm font-semibold rounded-lg text-white bg-red-500 hover:bg-red-600 write-review';
-                                reviewButton.setAttribute('data-order-id', data.ma_don_hang);
-                                reviewButton.textContent = 'Viết đánh giá';
-                                orderActions.appendChild(reviewButton);
                             }
-
                             // Ẩn danh sách đơn hàng và hiển thị chi tiết đơn hàng
                             orderList.classList.add('hidden');
                             orderDetail.classList.remove('hidden');
