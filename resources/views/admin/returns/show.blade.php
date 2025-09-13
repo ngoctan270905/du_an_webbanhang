@@ -159,7 +159,7 @@
                                             break;
                                         case 'cancelled':
                                             $statusClass = 'text-gray-800';
-                                            $statusText = 'Đã hủy';
+                                            $statusText = 'Đã hủy bởi người dùng';
                                             break;
                                         default:
                                             $statusClass = 'text-gray-800';

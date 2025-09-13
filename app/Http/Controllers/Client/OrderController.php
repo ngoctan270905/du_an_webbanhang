@@ -356,4 +356,105 @@ class OrderController extends Controller
             return response()->json(['error' => 'Có lỗi xảy ra khi xử lý yêu cầu trả hàng: ' . $e->getMessage()], 500);
         }
     }
+
+    public function returns(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để xem danh sách yêu cầu trả hàng.');
+        }
+
+        $selected_status = $request->query('trang_thai', 'all');
+
+        $query = ReturnModel::where('user_id', $user->id)
+            ->with(['order', 'returnDetails.orderDetail.product'])
+            ->latest('ngay_yeu_cau');
+
+        // Lọc theo trạng thái nếu không phải "all"
+        if ($selected_status !== 'all') {
+            $query->where('trang_thai', $selected_status);
+        }
+
+        $returns = $query->paginate(3)->appends(['trang_thai' => $selected_status]);
+
+        return view('profile.my_returns', [
+            'user' => $user,
+            'returns' => $returns,
+            'selected_status' => $selected_status,
+        ]);
+    }
+
+    public function returnDetail(Request $request, $returnId)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Vui lòng đăng nhập'], 401);
+        }
+
+        $return = ReturnModel::where('id', $returnId)
+            ->where('user_id', $user->id)
+            ->with(['order', 'returnDetails.orderDetail.product'])
+            ->first();
+
+        if (!$return) {
+            return response()->json(['error' => 'Yêu cầu trả hàng không tồn tại'], 404);
+        }
+
+        return response()->json([
+            'id' => $return->id,
+            'ma_tra_hang' => $return->ma_tra_hang,
+            'ngay_yeu_cau' => $return->ngay_yeu_cau,
+            'ly_do_tra_hang' => $return->ly_do_tra_hang,
+            'trang_thai' => $return->trang_thai,
+            'ghi_chu_admin' => $return->ghi_chu_admin,
+            'tong_tien_hoan' => $return->tong_tien_hoan,
+            'phuong_thuc_hoan_tien' => $return->phuong_thuc_hoan_tien,
+            'thong_tin_ngan_hang' => $return->bank_details,
+            'ngay_hoan_tien' => $return->ngay_hoan_tien,
+            'order' => [
+                'ma_don_hang' => $return->order->ma_don_hang,
+            ],
+            'returnDetails' => $return->returnDetails->map(function ($detail) {
+                return [
+                    'so_luong' => $detail->so_luong,
+                    'gia_tra' => $detail->gia_tra,
+                    'ly_do_chi_tiet' => $detail->ly_do_chi_tiet,
+                    'orderDetail' => [
+                        'product' => [
+                            'ten_san_pham' => $detail->orderDetail->product->ten_san_pham,
+                            'hinh_anh' => $detail->orderDetail->product->hinh_anh,
+                        ],
+                    ],
+                ];
+            }),
+        ]);
+    }
+
+    public function cancelReturn(Request $request, $returnId)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Vui lòng đăng nhập'], 401);
+        }
+
+        $return = ReturnModel::where('id', $returnId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$return) {
+            return response()->json(['error' => 'Yêu cầu trả hàng không tồn tại'], 404);
+        }
+
+        if ($return->trang_thai !== 'pending') {
+            return response()->json(['error' => 'Chỉ có thể hủy yêu cầu trả hàng ở trạng thái chờ xử lý'], 403);
+        }
+
+        $return->trang_thai = 'cancelled';
+        $return->save();
+
+        return response()->json(['message' => 'Yêu cầu trả hàng đã được hủy thành công']);
+    }
 }

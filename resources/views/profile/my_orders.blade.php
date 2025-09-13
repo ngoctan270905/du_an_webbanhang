@@ -35,7 +35,7 @@
                         class="nav-item flex-1 py-2 text-center {{ $selected_status == 'cancelled' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
                         Đã hủy
                     </a>
-                    <a href="{{ route('my-orders.index', ['trang_thai' => 'returns']) }}"
+                    <a href="{{ route('my-returns') }}"
                         class="nav-item flex-1 py-2 text-center {{ $selected_status == 'returns' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-500 hover:text-red-500 hover:border-b-2 hover:border-red-500' }}">
                         Trả hàng
                     </a>

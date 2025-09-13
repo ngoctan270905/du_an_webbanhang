@@ -11,7 +11,7 @@
 
     <nav class="space-y-1">
         <a href="{{ route('my-orders.index') }}"
-            class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 rounded-lg transition {{ request()->routeIs('my-orders.index') ? 'bg-indigo-50 dark:bg-indigo-900' : '' }}">
+            class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 rounded-lg transition {{ request()->routeIs('my-orders.index', 'my-returns') ? 'bg-indigo-50 dark:bg-indigo-900' : '' }}">
             <i class="ci-shopping-bag mr-3 text-indigo-500"></i> Đơn hàng của tôi
             </a>
         <a href="#"

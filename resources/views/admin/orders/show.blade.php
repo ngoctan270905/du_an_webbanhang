@@ -14,7 +14,10 @@
                     </p>
                     @if ($order->trang_thai === 'cancelled' && $order->ngay_huy)
                         <p class="text-sm text-red-600 font-medium mt-1">
-                            Đơn này bị hủy vào lúc: {{ $order->ngay_huy->format('d/m/Y, H:i') }}
+                            Khách hàng <span class="text-gray-600 font-semibold">{{ $order->user->name }}</span> đã hủy đơn
+                            vào lúc
+                            {{ optional($order->ngay_huy)->format('d/m/Y, H:i') }}
+
                         </p>
                     @endif
                 </div>

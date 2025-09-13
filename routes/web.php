@@ -18,6 +18,7 @@ use App\Http\Controllers\RecycleBinController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\OrderController;
+use App\Models\Order;
 
 // =====================
 // Routes client - cần đăng nhập
@@ -46,6 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/my-orders/{ma_don_hang}/cancel', [OrderController::class, 'cancel'])->name('my-orders.cancel');
     Route::post('/my-orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('my-orders.confirm-received');
     Route::post('/my-orders/{ma_don_hang}/return', [OrderController::class, 'requestReturn'])->name('my-orders.return');
+    Route::get('/my-returns', [OrderController::class, 'returns'])->name('my-returns');
+    Route::get('/my-returns/{returnId}', [OrderController::class, 'returnDetail'])->name('my-returns.detail');
+    Route::post('/my-returns/{returnId}/cancel', [OrderController::class, 'cancelReturn'])->name('my-returns.cancel');
 });
 
 require __DIR__ . '/auth.php';
