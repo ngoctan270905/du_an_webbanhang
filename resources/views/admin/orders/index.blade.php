@@ -8,6 +8,13 @@
             <div class="rounded-xl bg-white p-6 shadow-md transition-all duration-300 hover:shadow-lg">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-xl font-semibold text-gray-800">Danh sách đơn hàng</h3>
+            
+                        <a href="{{ route('admin.returns.index') }}"
+                            class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-colors duration-200">
+                            <i class="fa-solid fa-bell"></i>
+                            Danh sách yêu cầu trả hàng
+                        </a>
+        
                 </div>
 
                 <div class="space-y-4">
@@ -240,7 +247,7 @@
         <div id="modalContent"
             class="rounded-2xl bg-white p-8 w-full max-w-md mx-4 drop-shadow-2xl transition-all duration-300 transform opacity-0 scale-95 border border-gray-200">
             <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
-                <h3 class="text-2xl font-bold text-gray-900">Cập nhật trạng thái đơn hàng</h3>
+                <h3 class="text-2xl font-bold text-gray-900">Cập nhật trạng thái</h3>
                 <button id="closeModalButton"
                     class="text-gray-500 hover:text-gray-900 transition-colors duration-200 focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -257,14 +264,22 @@
                 <div class="mb-6">
                     <label for="order_status" class="block text-sm font-semibold text-gray-700 mb-2">Trạng thái
                         mới</label>
-                    <select id="order_status" name="trang_thai" required
-                        class="mt-1 block w-full rounded-xl border border-gray-300 py-2.5 px-4 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base transition-colors duration-200">
-                        <option value="pending">Chờ xác nhận</option>
-                        <option value="processing">Đang xử lý</option>
-                        <option value="shipped">Đang giao hàng</option>
-                        <option value="delivered">Giao thành công</option>
-                        <option value="cancelled">Đã hủy</option>
-                    </select>
+                    <div class="relative">
+                        <select id="order_status" name="trang_thai" required
+                            class="block w-full rounded-xl border border-gray-300 py-2.5 px-4 pr-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base bg-white text-gray-900 appearance-none transition-colors duration-200">
+                            <option value="pending">Chờ xác nhận</option>
+                            <option value="processing">Đang xử lý</option>
+                            <option value="shipped">Đang giao hàng</option>
+                            <option value="delivered">Giao thành công</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end space-x-3">
@@ -280,6 +295,7 @@
             </form>
         </div>
     </div>
+
 @endsection
 
 <script>

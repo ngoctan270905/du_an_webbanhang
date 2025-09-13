@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\ReturnModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +27,11 @@ class AdminOrderController extends Controller
 
         $orders = $query->paginate(10);
 
-        return view('admin.orders.index', compact('orders'));
+        // Đếm 
+        // Đếm số lượng yêu cầu trả hàng đang chờ xử lý
+        $pendingReturnsCount = ReturnModel::where('trang_thai', 'pending')->count();
+
+        return view('admin.orders.index', compact('orders', 'pendingReturnsCount'));
     }
 
     public function show($id)

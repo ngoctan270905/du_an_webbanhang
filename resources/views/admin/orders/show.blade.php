@@ -209,78 +209,83 @@
                     </div>
 
                     {{-- Khung 2: Sản phẩm trong đơn --}}
-                   <div class="rounded-lg border border-gray-200 p-6 shadow-sm">
-    <h3 class="mb-4 text-xl font-semibold text-gray-800">Sản phẩm trong đơn</h3>
-    <div class="overflow-x-auto">
-        <table class="w-full min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                        Sản phẩm
-                    </th>
-                    <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
-                        Số lượng
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                        Đơn giá
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                        Thành tiền
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-                @foreach ($order->orderDetails as $detail)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    <img class="h-10 w-10 rounded object-cover"
-                                         src="{{ Storage::url($detail->product->hinh_anh) }}"
-                                         alt="{{ $detail->product->ten_san_pham }}">
-                                </div>
-                                <div class="flex flex-col">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        {{ $detail->product->ten_san_pham }}
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1">SKU:
-                                        {{ $detail->product->ma_san_pham }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                                {{ $detail->so_luong }}
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                                {{ number_format($detail->gia, 0, ',', '.') }}đ
-                            </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold text-gray-900">
-                                {{ number_format($detail->gia * $detail->so_luong, 0, ',', '.') }}đ
-                            </td>
-                        </tr>
-                @endforeach
-            </tbody>
-            <tfoot class="bg-gray-50">
-                <tr>
-                    <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
-                        Phí vận chuyển:
-                    </td>
-                    <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                        {{ number_format($order->phi_ship, 0, ',', '.') }}đ
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
-                        Tổng tiền:
-                    </td>
-                    <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                        {{ number_format($order->tong_tien, 0, ',', '.') }}đ
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-</div>
+                    <div class="rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <h3 class="mb-4 text-xl font-semibold text-gray-800">Sản phẩm trong đơn</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                            Sản phẩm
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+                                            Số lượng
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                                            Đơn giá
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                                            Thành tiền
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    @foreach ($order->orderDetails as $detail)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="flex-shrink-0 h-10 w-10">
+                                                        <img class="h-10 w-10 rounded object-cover"
+                                                            src="{{ Storage::url($detail->product->hinh_anh) }}"
+                                                            alt="{{ $detail->product->ten_san_pham }}">
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <div class="text-sm font-medium text-gray-900">
+                                                            {{ $detail->product->ten_san_pham }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500 mt-1">SKU:
+                                                            {{ $detail->product->ma_san_pham }}
+                                                        </div>
+                                                    </div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
+                                                {{ $detail->so_luong }}
+                                            </td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                                                {{ number_format($detail->gia, 0, ',', '.') }}đ
+                                            </td>
+                                            <td
+                                                class="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold text-gray-900">
+                                                {{ number_format($detail->gia * $detail->so_luong, 0, ',', '.') }}đ
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="bg-gray-50">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
+                                            Phí vận chuyển:
+                                        </td>
+                                        <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">
+                                            {{ number_format($order->phi_ship, 0, ',', '.') }}đ
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
+                                            Tổng tiền:
+                                        </td>
+                                        <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">
+                                            {{ number_format($order->tong_tien, 0, ',', '.') }}đ
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 

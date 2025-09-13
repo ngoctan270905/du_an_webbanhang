@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
@@ -116,6 +117,9 @@ Route::prefix('admin')->middleware('auth', 'verified', 'admin')->name('admin.')-
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/returns', [ReturnController::class, 'index'])->name('returns.index');
+    Route::get('/returns/{id}', [ReturnController::class, 'show'])->name('returns.show');
+    Route::put('/returns/{id}/update-status', [ReturnController::class, 'updateStatus'])->name('returns.update-status');
 
     // Quản lý Banners
     Route::prefix('banners')->name('banners.')->group(function () {
